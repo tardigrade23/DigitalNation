@@ -16,7 +16,8 @@ const BOOST_COOLDOWN = 300e3;
 const ATTACK_WINDOW = 12e3;
 const DEBUFF_DURATION = 30e3;
 const SEC_MAX = 7;
-const DEFAULT_NATION = 'Digital Republic';
+const DEFAULT_NATION = 'Digital Nation';
+const DEFAULT_PLAYER = { name: 'Leader', avatar: 'ai', tone: 'gold', flag: 0 };
 
 // c1/c2: icon tile gradient
 const SECTORS = [
@@ -83,6 +84,7 @@ function defaultState() {
     boostUntil: 0, boostReadyAt: 0, debuffUntil: 0,
     attack: null, nextAttack: now + 90e3,
     startedAt: now, lastSave: now,
+    player: { ...DEFAULT_PLAYER }, achievements: {},
   };
 }
 
@@ -255,7 +257,7 @@ function performPrestige() {
     nation: state.nation, lifeEarned: state.lifeEarned,
     influence: state.influence + gain, prestiges: state.prestiges + 1,
     clicks: state.clicks, attacksRepelled: state.attacksRepelled, attacksLost: state.attacksLost,
-    startedAt: state.startedAt,
+    startedAt: state.startedAt, player: state.player, achievements: state.achievements,
   };
   state = Object.assign(defaultState(), keep);
   sectorSig = ''; upgSig = '';
@@ -324,7 +326,9 @@ function loadGame() {
   let saved = null;
   try { saved = JSON.parse(localStorage.getItem(SAVE_KEY)); } catch (e) { saved = null; }
   const s = saved && typeof saved === 'object' ? Object.assign(defaultState(), saved) : defaultState();
-  if (s.nation === 'Rəqəmsal Respublika') s.nation = DEFAULT_NATION; // older Azerbaijani default
+  if (s.nation === 'Rəqəmsal Respublika' || s.nation === 'Digital Republic') s.nation = DEFAULT_NATION; // older defaults
+  s.player = Object.assign({ ...DEFAULT_PLAYER }, saved && saved.player);
+  if (!s.achievements || typeof s.achievements !== 'object') s.achievements = {};
   return s;
 }
 
@@ -624,6 +628,9 @@ function renderGlobal(now) {
   $('inflBonus').textContent = `+${Math.round(state.influence * INFLUENCE_BONUS * 100)}%`;
   $('countries').textContent = Math.min(194, state.influence);
   $('prestige').disabled = claim < 1;
+}
+
+function renderStats(now) {
   const rows = [
     ['Lifetime GDP', money(state.lifeEarned)],
     ['Facilities built', totalOwned()],
@@ -644,6 +651,7 @@ function render() {
   const r = techRank();
   $('rank').textContent = `#${r}`;
   $('title').textContent = rankTitle(r);
+  renderIdentity();
 
   // effects + attack (visible on every screen)
   const fx = [];
@@ -689,23 +697,156 @@ function render() {
     renderSecurity(now);
   } else if (screen === 'global') {
     renderGlobal(now);
+  } else if (screen === 'profile') {
+    renderProfile(now, r);
   }
 }
 
+let lastTab = 'nation';
 function showScreen(name) {
   screen = name;
+  if (name !== 'profile') lastTab = name;
   for (const b of document.querySelectorAll('.tabbar button')) b.classList.toggle('on', b.dataset.screen === name);
   for (const s of document.querySelectorAll('.screen')) s.hidden = s.id !== `screen-${name}`;
-  sectorSig = ''; upgSig = '';
+  sectorSig = ''; upgSig = ''; achSig = '';
   window.scrollTo(0, 0);
   render();
   drawSkyline();
+}
+
+/* ---------------- Profile, flags, achievements ---------------- */
+
+const AVATARS = ['ai', 'quantum', 'space', 'globe', 'shield', 'bolt', 'trophy', 'smart'];
+const TONE_COLORS = {
+  gold: ['#F7C75B', '#D98E1C'], cyan: ['#4CC9F0', '#1F7FB8'], violet: ['#A99BFF', '#5B47D6'],
+  rose: ['#FF8FAB', '#D2456B'], green: ['#5EE29A', '#1E9A5A'],
+};
+// [top band, middle band, bottom band, emblem]
+const FLAGS = [
+  ['#0F6E8C', '#F5B841', '#1B2839', '#F5B841'],
+  ['#1D3A6E', '#E8EEF6', '#C8283E', '#1D3A6E'],
+  ['#2A9BD8', '#E2483D', '#3BA55C', '#E8EEF6'],
+  ['#5B47D6', '#4CC9F0', '#1B2839', '#4CC9F0'],
+  ['#1E9A5A', '#E8EEF6', '#1E9A5A', '#1E9A5A'],
+  ['#1B2839', '#F5B841', '#0C1420', '#F5B841'],
+];
+
+function flagSvg(i) {
+  const [a, b, c, e] = FLAGS[i] || FLAGS[0];
+  return `<svg viewBox="0 0 30 20" aria-hidden="true">
+    <rect width="30" height="6.67" fill="${a}"/><rect y="6.67" width="30" height="6.66" fill="${b}"/><rect y="13.33" width="30" height="6.67" fill="${c}"/>
+    <circle cx="15" cy="10" r="4.4" fill="#0C1420" stroke="#E8EEF6" stroke-width="1"/>
+    <path d="M12.8 10h4.4M15 7.8v4.4" stroke="${e}" stroke-width="1.2" stroke-linecap="round"/></svg>`;
+}
+
+function avatarTile(iconId, tone) {
+  const [c1, c2] = TONE_COLORS[tone] || TONE_COLORS.gold;
+  return tile(iconId, { c1, c2 });
+}
+
+const ACHIEVEMENTS = [
+  { id: 'first',   icon: 'isp',          name: 'First Steps',          desc: 'Build your first facility',      prog: () => [totalOwned(), 1] },
+  { id: 'isp25',   icon: 'isp',          name: 'Connected Nation',     desc: 'Own 25 Internet Providers',      prog: () => [owned('isp'), 25] },
+  { id: 'million', icon: 'coin',         name: 'Millionaire State',    desc: 'Earn $1M GDP in total',          prog: () => [state.lifeEarned, 1e6] },
+  { id: 'smart',   icon: 'smart',        name: 'Smart Citizens',       desc: 'Build a Smart City',             prog: () => [owned('smart'), 1] },
+  { id: 'cyber10', icon: 'shield-check', name: 'Cyber Guardian',       desc: 'Stop 10 cyber attacks',          prog: () => [state.attacksRepelled, 10] },
+  { id: 'billion', icon: 'coins',        name: 'Billion-Dollar Nation', desc: 'Earn $1B GDP in total',         prog: () => [state.lifeEarned, 1e9] },
+  { id: 'ai',      icon: 'ai',           name: 'AI Pioneer',           desc: 'Open an AI Lab',                 prog: () => [owned('ai'), 1] },
+  { id: 'export',  icon: 'globe',        name: 'Tech Exporter',        desc: 'Export technology once',         prog: () => [state.prestiges, 1] },
+  { id: 'top50',   icon: 'trophy',       name: 'Top 50',               desc: 'Reach #50 in the tech ranking',  prog: () => [196 - techRank(), 146] },
+  { id: 'orbit',   icon: 'space',        name: 'Orbit Reached',        desc: 'Launch Satellite Internet',      prog: () => [owned('space'), 1] },
+];
+
+function checkAchievements(silent) {
+  for (const a of ACHIEVEMENTS) {
+    if (state.achievements[a.id]) continue;
+    const [cur, target] = a.prog();
+    if (cur >= target) {
+      state.achievements[a.id] = Date.now();
+      if (!silent) toast(`Achievement: ${a.name}`, 'star', 'gold');
+    }
+  }
+}
+
+function buildPickers() {
+  const tone = state.player.tone;
+  $('avatarIcons').innerHTML = AVATARS.map(id =>
+    `<button data-avatar="${id}" aria-label="Avatar ${id}">${avatarTile(id, tone)}</button>`).join('');
+  $('avatarTones').innerHTML = Object.entries(TONE_COLORS).map(([k, [c1, c2]]) =>
+    `<button data-tone="${k}" aria-label="${k} color" style="--c1:${c1};--c2:${c2}"></button>`).join('');
+  $('flagPicker').innerHTML = FLAGS.map((_, i) => `<button data-flag="${i}" aria-label="Flag ${i + 1}">${flagSvg(i)}</button>`).join('');
+}
+
+let identitySig = '';
+function renderIdentity() {
+  const p = state.player;
+  const sig = `${p.avatar}|${p.tone}|${p.flag}|${p.name}|${state.nation}`;
+  if (sig === identitySig) return;
+  identitySig = sig;
+  $('headerFlag').innerHTML = flagSvg(p.flag);
+  $('headerAvatar').innerHTML = avatarTile(p.avatar, p.tone);
+  $('profileAvatar').innerHTML = avatarTile(p.avatar, p.tone);
+  $('profileName').textContent = p.name;
+  $('profileNation').textContent = `Leader of ${state.nation}`;
+  $('kvPlayer').textContent = p.name;
+  $('kvNation').textContent = state.nation;
+  for (const b of $('avatarIcons').children) b.classList.toggle('on', b.dataset.avatar === p.avatar);
+  for (const b of $('avatarTones').children) b.classList.toggle('on', b.dataset.tone === p.tone);
+  for (const b of $('flagPicker').children) b.classList.toggle('on', Number(b.dataset.flag) === p.flag);
+}
+
+let achSig = '';
+function renderProfile(now, rank) {
+  const done = ACHIEVEMENTS.filter(a => state.achievements[a.id]).length;
+  $('profileRank').textContent = `#${rank}`;
+  $('profileAch').textContent = `${done} / ${ACHIEVEMENTS.length}`;
+  const rows = ACHIEVEMENTS.map(a => {
+    const got = !!state.achievements[a.id];
+    const [cur, target] = a.prog();
+    const pct = got ? 100 : Math.floor(Math.min(1, Math.max(0, cur) / target) * 100);
+    return { a, got, pct };
+  });
+  const sig = rows.map(r => `${r.a.id}:${r.got ? 'y' : r.pct}`).join(',');
+  if (sig !== achSig) {
+    achSig = sig;
+    $('achList').innerHTML = rows.map(({ a, got, pct }) => `<div class="row ach ${got ? '' : 'todo'}">
+      ${tile(a.icon, 'gold')}
+      <div class="row-title"><span class="nm">${a.name}</span></div>
+      ${got ? `<span class="ach-state">${icon('check')}</span>` : `<span class="ach-state todo">${pct}%</span>`}
+      <div class="row-sub"><span>${a.desc}</span>${got ? '' : `<span class="meter"><i style="width:${pct}%"></i></span>`}</div>
+    </div>`).join('');
+  }
+  renderStats(now);
+}
+
+/* ---------------- PWA: install + offline ---------------- */
+
+let deferredInstall = null;
+const isPwaBuild = () => !!document.querySelector('link[rel="manifest"]');
+const isStandalone = () => (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+
+function renderInstall() {
+  const btn = $('installBtn'), txt = $('installText');
+  btn.hidden = true;
+  if (isStandalone()) txt.textContent = 'Installed. Digital Nation runs full screen and works offline.';
+  else if (!isPwaBuild()) txt.textContent = 'You can install the game from its hosted web address.';
+  else if (deferredInstall) { txt.textContent = 'Add it to your home screen. It opens full screen and works offline.'; btn.hidden = false; }
+  else if (/iphone|ipad|ipod/i.test(navigator.userAgent)) txt.textContent = 'In Safari, tap Share, then "Add to Home Screen".';
+  else txt.textContent = 'Open your browser menu and choose "Install app" or "Add to Home screen".';
+}
+
+function registerServiceWorker() {
+  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; renderInstall(); });
+  window.addEventListener('appinstalled', () => { deferredInstall = null; toast('Digital Nation installed', 'check', 'green'); renderInstall(); });
+  if (!isPwaBuild() || !('serviceWorker' in navigator) || !/^https?:$/.test(location.protocol)) return;
+  window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => { /* unsupported host */ }); });
 }
 
 /* ---------------- Loop ---------------- */
 
 let lastTick = Date.now();
 let skyTimer = 0;
+let achTimer = 0;
 function tick() {
   const now = Date.now();
   const dt = Math.min(1, (now - lastTick) / 1000); // long gaps are handled by applyOffline
@@ -713,6 +854,7 @@ function tick() {
   earn(incomePerSec() * dt);
   state.pop += (popTarget() - state.pop) * Math.min(1, dt * 0.05);
   updateAttack(now);
+  if (now - achTimer > 1000) { achTimer = now; checkAchievements(false); }
   render();
   if (now - skyTimer > (reduceMotion ? 3000 : 150)) { skyTimer = now; drawSkyline(); }
 }
@@ -762,16 +904,44 @@ function bindUI() {
     const b = e.target.closest('button');
     if (b) showScreen(b.dataset.screen);
   });
-  $('nationBtn').addEventListener('click', () => {
+  $('nationBtn').addEventListener('click', () => showScreen('profile'));
+  $('profileBtn').addEventListener('click', () => showScreen('profile'));
+  $('profileBack').addEventListener('click', () => showScreen(lastTab));
+  $('editNation').addEventListener('click', () => {
     showModal('Name your nation', 'Choose a name for your digital state.', {
       icon: 'pencil', tone: 'cyan', input: state.nation, okText: 'Save',
       onOk: n => { if (n && n.trim()) { state.nation = n.trim().slice(0, 32); saveGame(); render(); } },
     });
   });
+  $('editPlayer').addEventListener('click', () => {
+    showModal('Your name', 'How should your citizens address you?', {
+      icon: 'users', tone: 'gold', input: state.player.name, okText: 'Save',
+      onOk: n => { if (n && n.trim()) { state.player.name = n.trim().slice(0, 24); saveGame(); render(); } },
+    });
+  });
+  $('avatarIcons').addEventListener('click', e => {
+    const b = e.target.closest('[data-avatar]');
+    if (b) { state.player.avatar = b.dataset.avatar; saveGame(); render(); }
+  });
+  $('avatarTones').addEventListener('click', e => {
+    const b = e.target.closest('[data-tone]');
+    if (b) { state.player.tone = b.dataset.tone; saveGame(); buildPickers(); render(); }
+  });
+  $('flagPicker').addEventListener('click', e => {
+    const b = e.target.closest('[data-flag]');
+    if (b) { state.player.flag = Number(b.dataset.flag); saveGame(); render(); }
+  });
+  $('installBtn').addEventListener('click', async () => {
+    if (!deferredInstall) return;
+    deferredInstall.prompt();
+    try { await deferredInstall.userChoice; } catch (e) { /* ignore */ }
+    deferredInstall = null;
+    renderInstall();
+  });
   $('reset').addEventListener('click', () => {
     showModal('Reset everything?', 'All progress, including Influence, will be deleted. This cannot be undone.', {
       icon: 'trash', tone: 'bad', okText: 'Reset',
-      onOk: () => { state = defaultState(); sectorSig = ''; upgSig = ''; saveGame(); showScreen('nation'); },
+      onOk: () => { state = defaultState(); sectorSig = ''; upgSig = ''; achSig = ''; saveGame(); buildPickers(); showScreen('nation'); },
     });
   });
 
@@ -784,6 +954,10 @@ function bindUI() {
 }
 
 bindUI();
+buildPickers();
+checkAchievements(true);
+renderInstall();
+registerServiceWorker();
 applyOffline();
 render();
 drawSkyline();

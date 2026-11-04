@@ -6,6 +6,14 @@
   <title>Digital Nation</title>
   <meta name="claude:viewport-fit-sides" content="cover">
   <meta name="theme-color" content="#0C1420">
+  <meta name="description" content="Grow a small digital state into the world's leading tech nation.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Digital Nation">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap">
@@ -46,28 +54,28 @@
       <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></symbol>
       <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></symbol>
       <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+      <symbol id="i-back" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></symbol>
+      <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></symbol>
+      <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></symbol>
     </defs>
   </svg>
 
   <div class="app">
     <header class="appbar">
       <div class="appbar-row">
-        <button id="nationBtn" class="nation" aria-label="Rename your nation">
-          <svg class="flag" viewBox="0 0 30 20" aria-hidden="true">
-            <rect width="30" height="20" rx="2.5" fill="#0F6E8C"/>
-            <rect y="6.67" width="30" height="6.66" fill="#F5B841"/>
-            <rect y="13.33" width="30" height="6.67" fill="#1B2839"/>
-            <circle cx="15" cy="10" r="4.4" fill="#0C1420" stroke="#E8EEF6" stroke-width="1"/>
-            <path d="M12.8 10h4.4M15 7.8v4.4" stroke="#F5B841" stroke-width="1.2" stroke-linecap="round"/>
-          </svg>
+        <button id="nationBtn" class="nation" aria-label="Open profile">
+          <span id="headerFlag" class="flag"></span>
           <span class="nation-text">
-            <span id="nationName" class="nation-name">Digital Republic</span>
-            <span id="title" class="nation-title">Analog State</span>
+            <span id="nationName" class="nation-name">Digital Nation</span>
+            <span id="title" class="nation-title">Analog state</span>
           </span>
-          <svg class="ic ic-sm muted-ic"><use href="#i-pencil"/></svg>
         </button>
-        <div class="rank-pill" title="Global tech ranking">
-          <svg class="ic ic-sm"><use href="#i-trophy"/></svg><span id="rank">#195</span>
+        <div class="appbar-right">
+          <div class="rank-pill" title="Global tech ranking">
+            <svg class="ic ic-sm"><use href="#i-trophy"/></svg><span id="rank">#195</span>
+          </div>
+          <button id="profileBtn" class="avatar-btn" aria-label="Open profile"><span id="headerAvatar"></span></button>
         </div>
       </div>
 
@@ -202,9 +210,57 @@
           <button id="prestige" class="btn btn-violet wide">Export technology</button>
           <p class="muted small center">Earn $10M GDP in one era to gain your first point.</p>
         </div>
+      </section>
+
+      <!-- PROFILE -->
+      <section class="screen" id="screen-profile" hidden>
+        <div class="screen-head">
+          <button id="profileBack" class="icon-btn" aria-label="Back"><svg class="ic"><use href="#i-back"/></svg></button>
+          <h2 class="grow">Profile</h2>
+        </div>
+
+        <div class="card profile-card">
+          <span id="profileAvatar"></span>
+          <div class="profile-id">
+            <span id="profileName" class="profile-name">Leader</span>
+            <span id="profileNation" class="muted small">Leader of Digital Nation</span>
+            <span class="profile-tags">
+              <span class="chip"><svg class="ic ic-xs"><use href="#i-trophy"/></svg><span id="profileRank">#195</span></span>
+              <span class="chip"><svg class="ic ic-xs"><use href="#i-star"/></svg><span id="profileAch">0 / 10</span></span>
+            </span>
+          </div>
+        </div>
+
+        <div class="info-list">
+          <button id="editPlayer" class="kv kv-btn"><span>Leader name</span><b id="kvPlayer">Leader</b><svg class="ic ic-sm muted-ic"><use href="#i-chevron"/></svg></button>
+          <button id="editNation" class="kv kv-btn"><span>Nation name</span><b id="kvNation">Digital Nation</b><svg class="ic ic-sm muted-ic"><use href="#i-chevron"/></svg></button>
+        </div>
+
+        <h3 class="sub-head">Avatar</h3>
+        <div class="card picker">
+          <div id="avatarIcons" class="pick-grid" role="group" aria-label="Avatar symbol"></div>
+          <div id="avatarTones" class="tone-row" role="group" aria-label="Avatar color"></div>
+        </div>
+
+        <h3 class="sub-head">National flag</h3>
+        <div id="flagPicker" class="card flag-grid" role="group" aria-label="National flag"></div>
+
+        <h3 class="sub-head">Achievements</h3>
+        <div id="achList" class="list"></div>
 
         <h3 class="sub-head">Statistics</h3>
         <div id="statsList" class="info-list"></div>
+
+        <h3 class="sub-head">App</h3>
+        <div class="card install">
+          <span class="tile tile-cyan"><svg class="ic"><use href="#i-download"/></svg></span>
+          <span class="install-body">
+            <span class="card-title">Install Digital Nation</span>
+            <span id="installText" class="muted small">Add the game to your home screen.</span>
+          </span>
+          <button id="installBtn" class="btn btn-primary" hidden>Install</button>
+        </div>
+
         <button id="reset" class="btn btn-ghost wide"><svg class="ic ic-sm"><use href="#i-trash"/></svg> Reset progress</button>
       </section>
     </main>

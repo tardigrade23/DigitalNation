@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0A1626"/>
+      <stop offset="1" stop-color="#16314A"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F8C95E"/>
+      <stop offset="1" stop-color="#E59A22"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <circle cx="256" cy="262" r="168" fill="none" stroke="#4CC9F0" stroke-width="10" opacity=".35"/>
+  <circle cx="256" cy="262" r="132" fill="none" stroke="#4CC9F0" stroke-width="4" opacity=".18"/>
+  <g fill="url(#gold)">
+    <rect x="150" y="262" width="40" height="86" rx="4"/>
+    <rect x="198" y="212" width="44" height="136" rx="4"/>
+    <rect x="250" y="160" width="48" height="188" rx="4"/>
+    <rect x="306" y="226" width="44" height="122" rx="4"/>
+    <rect x="358" y="276" width="34" height="72" rx="4"/>
+  </g>
+  <g fill="#0C1420" opacity=".55">
+    <rect x="262" y="184" width="8" height="8"/><rect x="278" y="184" width="8" height="8"/>
+    <rect x="262" y="206" width="8" height="8"/><rect x="278" y="206" width="8" height="8"/>
+    <rect x="262" y="228" width="8" height="8"/><rect x="278" y="228" width="8" height="8"/>
+    <rect x="210" y="236" width="8" height="8"/><rect x="224" y="236" width="8" height="8"/>
+    <rect x="210" y="258" width="8" height="8"/><rect x="224" y="258" width="8" height="8"/>
+    <rect x="318" y="250" width="8" height="8"/><rect x="332" y="250" width="8" height="8"/>
+  </g>
+  <path d="M274 160V112" stroke="#B9C6D8" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="274" cy="104" r="9" fill="#FF5D6E"/>
+  <rect x="130" y="348" width="252" height="10" rx="5" fill="#4CC9F0"/>
+</svg>

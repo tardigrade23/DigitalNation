@@ -13,6 +13,28 @@ python3 -m http.server 8000
 
 The game saves itself to the browser's `localStorage` every 5 seconds.
 
+## Install as an app (PWA)
+
+Digital Nation is a Progressive Web App. Once it is hosted over HTTPS, players can install it to their home screen. It then opens full screen with its own icon and works offline.
+
+- **Android / Chrome:** Profile → App → **Install**, or use the browser menu → *Install app*
+- **iPhone / Safari:** Share → *Add to Home Screen*
+
+### Hosting on GitHub Pages
+
+`.github/workflows/deploy-pages.yml` publishes the game every time the repository's default branch changes. You only need to set it up once:
+
+1. Open the repository on GitHub → **Settings → Pages**.
+2. Under **Build and deployment → Source**, choose **GitHub Actions**.
+3. Push to the default branch, or run the workflow by hand from the **Actions** tab.
+
+The game will be live at `https://<user>.github.io/<repo>/`. GitHub Pages is free for public repositories. Private repositories need a paid GitHub plan.
+
+PWA files:
+- `manifest.webmanifest`: app name, colors, and icons
+- `sw.js`: service worker. It loads app files from the network first, so updates arrive quickly, and falls back to the cache when offline
+- `icons/`: app icon (`icon.svg` is the source) and its rendered PNG sizes
+
 To make a single self-contained HTML file, for example to publish or share as one page:
 
 ```bash
@@ -29,7 +51,8 @@ The bottom tab bar has five screens:
 | **Sectors** | 10 sectors, from Internet Provider to Satellite Internet. Buy ×1 / ×10 / ×100 / Max. Income doubles at 25, 50, 100, 200… owned |
 | **Upgrades** | Sector boosts, AI upgrades that multiply all income, and tax (tap power) upgrades |
 | **Security** | Defense level, auto-defense chance, and attack history |
-| **Global** | Technology export (prestige) and statistics |
+| **Global** | Technology export (prestige) |
+| **Profile** | Opened from the avatar or flag at the top. Leader and nation names, avatar, national flag, achievements, statistics, and app install |
 
 ## Core systems
 
@@ -46,7 +69,7 @@ The bottom tab bar has five screens:
 - `index.html`: app shell, the SVG icon sprite, and the screens
 - `style.css`: visual design, built phone-first and safe-area aware
 - `game.js`: game logic, rendering, and the canvas skyline. The balance constants are at the top (`SECTORS`, `COST_GROWTH`, `PRESTIGE_DIVISOR` and others)
-- `tools/build_single_file.py`: bundles the three files into one HTML page
+- `tools/build_single_file.py`: bundles the three files into one HTML page. PWA tags are left out
 
 ## Next steps
 
@@ -54,4 +77,4 @@ The bottom tab bar has five screens:
 - Daily rewards and VIP membership
 - A gem shop with time skips, a permanent 2× multiplier, and cosmetic flags
 - Sound effects and haptics
-- Packaging as a PWA, or as a native app through Capacitor
+- Native Android / iOS builds through Capacitor, for real rewarded ads and in-app purchases
