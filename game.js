@@ -240,7 +240,14 @@ function claimableInfluence() { return Math.floor(Math.sqrt(state.runEarned / PR
 function doPrestige() {
   const gain = claimableInfluence();
   if (gain < 1) return;
-  if (!confirm(`Texnologiyanı ixrac edib ${gain} nüfuz xalı qazanırsan.\nÜDM, sektorlar, təkmilləşdirmələr və müdafiə sıfırlanacaq. Davam edək?`)) return;
+  showModal('🌍 Texnologiya ixracı',
+    `${gain} nüfuz xalı qazanacaqsan.\nÜDM, sektorlar, təkmilləşdirmələr və müdafiə sıfırlanacaq.`,
+    { okText: 'İxrac et', onOk: performPrestige });
+}
+
+function performPrestige() {
+  const gain = claimableInfluence();
+  if (gain < 1) return;
   const keep = {
     nation: state.nation, lifeEarned: state.lifeEarned,
     influence: state.influence + gain, prestiges: state.prestiges + 1,
@@ -328,10 +335,27 @@ function toast(text, type = '') {
   while ($('toasts').children.length > 4) $('toasts').firstChild.remove();
 }
 
-function showModal(title, text) {
+// opts: { okText, onOk(value), input: initialValue }. onOk olduqda "Ləğv et" düyməsi də görünür.
+let modalOnOk = null;
+function showModal(title, text, opts = {}) {
   $('modalTitle').textContent = title;
   $('modalText').textContent = text;
+  const input = $('modalInput');
+  input.hidden = opts.input === undefined;
+  if (!input.hidden) input.value = opts.input;
+  $('modalCancel').hidden = !opts.onOk;
+  $('modalOk').textContent = opts.okText || 'Davam et';
+  modalOnOk = opts.onOk || null;
   $('modal').classList.remove('hidden');
+  if (!input.hidden) input.focus();
+}
+
+function closeModal(confirmed) {
+  const fn = confirmed ? modalOnOk : null;
+  const value = $('modalInput').value;
+  modalOnOk = null;
+  $('modal').classList.add('hidden');
+  if (fn) fn(value);
 }
 
 let sectorSig = '';
@@ -498,7 +522,9 @@ function bindUI() {
   $('repel').addEventListener('click', () => { repelAttack(); render(); });
   $('buySec').addEventListener('click', () => { buySecurity(); render(); });
   $('prestige').addEventListener('click', doPrestige);
-  $('modalOk').addEventListener('click', () => $('modal').classList.add('hidden'));
+  $('modalOk').addEventListener('click', () => closeModal(true));
+  $('modalCancel').addEventListener('click', () => closeModal(false));
+  $('modalInput').addEventListener('keydown', e => { if (e.key === 'Enter') closeModal(true); });
 
   $('sectors').addEventListener('click', e => {
     const b = e.target.closest('[data-buy]');
@@ -522,15 +548,16 @@ function bindUI() {
     for (const p of document.querySelectorAll('.panel')) p.classList.toggle('hidden', p.id !== `tab-${b.dataset.tab}`);
   });
   $('nationName').addEventListener('click', () => {
-    const n = prompt('Dövlətinin adı:', state.nation);
-    if (n && n.trim()) { state.nation = n.trim().slice(0, 32); saveGame(); render(); }
+    showModal('🏳️ Dövlətin adı', 'Rəqəmsal dövlətinə ad ver:', {
+      input: state.nation, okText: 'Yadda saxla',
+      onOk: n => { if (n && n.trim()) { state.nation = n.trim().slice(0, 32); saveGame(); render(); } },
+    });
   });
   $('reset').addEventListener('click', () => {
-    if (!confirm('Bütün irəliləyiş silinəcək. Əminsən?')) return;
-    state = defaultState();
-    sectorSig = ''; upgSig = '';
-    saveGame();
-    render();
+    showModal('🗑️ Oyunu sıfırla', 'Bütün irəliləyiş, nüfuz da daxil, silinəcək. Bunu geri qaytarmaq olmur.', {
+      okText: 'Sıfırla',
+      onOk: () => { state = defaultState(); sectorSig = ''; upgSig = ''; saveGame(); render(); },
+    });
   });
 
   document.addEventListener('visibilitychange', () => {
