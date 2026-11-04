@@ -4,7 +4,7 @@
  * - Google Fonts: cache-first.
  * Bump CACHE_VERSION when the list of precached files changes.
  */
-const CACHE_VERSION = 'dn-v2';
+const CACHE_VERSION = 'dn-v3';
 const APP_CACHE = `${CACHE_VERSION}-app`;
 const FONT_CACHE = 'dn-fonts';
 
@@ -19,6 +19,7 @@ const PRECACHE = [
   'icons/icon-512.png',
   'icons/icon-maskable-512.png',
   'icons/apple-touch-icon.png',
+  'vendor/supabase.js',
 ];
 
 self.addEventListener('install', event => {

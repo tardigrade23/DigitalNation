@@ -539,6 +539,19 @@ main { padding-block: 16px; padding-left: var(--gutter-l); padding-right: var(--
 .ad-box .meter { width: 100%; }
 .ad-box .meter i { transition: none; }
 
+/* Account */
+.account-card { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.account-body { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+#accountTitle { overflow-wrap: anywhere; }
+.account-actions { display: flex; gap: 8px; width: 100%; }
+.account-actions .btn { flex: 1; }
+.auth-box { width: min(360px, 100%); }
+.auth-form { display: flex; flex-direction: column; gap: 10px; width: 100%; text-align: left; }
+.auth-form p { text-align: center; }
+.field-label { font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: -4px; }
+.code-input { text-align: center; font-family: var(--font-display); font-size: 26px; letter-spacing: .3em; }
+.auth-error { margin: 0; width: 100%; padding: 10px 12px; border-radius: 10px; background: rgba(255, 93, 110, .12); border: 1px solid rgba(255, 93, 110, .4); color: #FFB3BC; font-size: 13px; text-align: left; }
+
 /* Tab bar */
 .tabbar {
   position: fixed;

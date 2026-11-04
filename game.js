@@ -351,6 +351,11 @@ function saveGame() {
 function loadGame() {
   let saved = null;
   try { saved = JSON.parse(localStorage.getItem(SAVE_KEY)); } catch (e) { saved = null; }
+  return normalizeSave(saved);
+}
+
+// Fills in fields that older saves (local or cloud) do not have yet.
+function normalizeSave(saved) {
   const s = saved && typeof saved === 'object' ? Object.assign(defaultState(), saved) : defaultState();
   if (s.nation === 'Rəqəmsal Respublika' || s.nation === 'Digital Republic') s.nation = DEFAULT_NATION; // older defaults
   s.player = Object.assign({ ...DEFAULT_PLAYER }, saved && saved.player);
@@ -414,17 +419,21 @@ function showModal(title, text, opts = {}) {
   input.hidden = opts.input === undefined;
   if (!input.hidden) input.value = opts.input;
   $('modalCancel').hidden = !opts.onOk;
+  $('modalCancel').textContent = opts.cancelText || 'Cancel';
   $('modalOk').textContent = opts.okText || 'Continue';
   modalOnOk = opts.onOk || null;
+  modalOnCancel = opts.onCancel || null;
   $('modal').hidden = false;
   updateCoach();
   if (!input.hidden) input.focus();
 }
 
+let modalOnCancel = null;
 function closeModal(confirmed) {
-  const fn = confirmed ? modalOnOk : null;
+  const fn = confirmed ? modalOnOk : modalOnCancel;
   const value = $('modalInput').value;
   modalOnOk = null;
+  modalOnCancel = null;
   $('modal').hidden = true;
   if (fn) fn(value);
   if (!overlayOpen()) nextOverlay();
@@ -879,6 +888,7 @@ function renderProfile(now, rank) {
   $('profileRank').textContent = `#${rank}`;
   $('profileAch').textContent = `${done} / ${ACHIEVEMENTS.length}`;
   $('vipChip').hidden = !isVip();
+  renderAccount();
   const rows = ACHIEVEMENTS.map(a => {
     const got = !!state.achievements[a.id];
     const [cur, target] = a.prog();
@@ -897,6 +907,254 @@ function renderProfile(now, rank) {
   }
   renderStats(now);
   for (const [id, key] of [['setSound', 'sound'], ['setVibe', 'vibration']]) $(id).setAttribute('aria-checked', String(!!state.settings[key]));
+}
+
+/* ---------------- Accounts + cloud save (Supabase) ---------------- */
+
+// Public project settings. The anon key is meant to ship in client code:
+// row level security on public.saves limits every player to their own row.
+const SUPABASE_URL = 'https://dygrvzxnfsozjaxlbcoz.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR5Z3J2enhuZnNvempheGxiY296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM4MTUyNzUsImV4cCI6MjEwOTM5MTI3NX0.cvmRUhZeNg2jLoRQSaAZZKHQJ-Ilhba6LOL09YkSQ_w';
+const CLOUD_META_KEY = 'digitalnation_cloud_v1';
+const CLOUD_PUSH_EVERY = 30e3;
+
+// status: off | syncing | synced | error
+const cloud = { client: null, user: null, status: 'off', ready: false, busy: false, lastSync: 0, email: '' };
+
+function cloudAvailable() { return !!cloud.client; }
+function readCloudMeta() { try { return JSON.parse(localStorage.getItem(CLOUD_META_KEY)) || {}; } catch (e) { return {}; } }
+function writeCloudMeta(m) { try { localStorage.setItem(CLOUD_META_KEY, JSON.stringify(m)); } catch (e) { /* storage unavailable */ } }
+function deviceLabel() {
+  const ua = navigator.userAgent;
+  if (/iphone|ipad|ipod/i.test(ua)) return 'iPhone / iPad';
+  if (/android/i.test(ua)) return 'Android';
+  return 'Computer';
+}
+function ago(ts) { const s = Math.max(0, Math.round((Date.now() - ts) / 1000)); return s < 5 ? 'just now' : `${dur(s * 1000)} ago`; }
+
+function initCloud() {
+  if (!isPwaBuild() || !window.supabase || !/^https?:$/.test(location.protocol)) { renderAccount(); return; }
+  try {
+    cloud.client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storageKey: 'digitalnation_auth' },
+    });
+  } catch (e) { cloud.client = null; renderAccount(); return; }
+  cloud.client.auth.onAuthStateChange((event, session) => {
+    const user = session ? session.user : null;
+    const changed = (user && user.id) !== (cloud.user && cloud.user.id);
+    cloud.user = user;
+    if (!user) { cloud.ready = false; cloud.status = 'off'; }
+    // Supabase recommends not awaiting other calls inside this callback.
+    if (user && changed) setTimeout(onSignedIn, 0);
+    renderAccount();
+  });
+}
+
+async function pullSave() {
+  const { data, error } = await cloud.client.from('saves').select('data, progress, updated_at').eq('user_id', cloud.user.id).maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+async function pushSave() {
+  if (!cloud.user) return;
+  saveGame();
+  const row = { user_id: cloud.user.id, data: state, progress: state.lifeEarned, device: deviceLabel() };
+  const { data, error } = await cloud.client.from('saves').upsert(row).select('updated_at').single();
+  if (error) throw error;
+  markSynced(data.updated_at);
+}
+
+// Each device remembers the server timestamp of the last save it wrote or loaded.
+// If the server's timestamp differs, another device has saved since then.
+function markSynced(serverTs) {
+  writeCloudMeta({ uid: cloud.user.id, syncedAt: serverTs });
+  cloud.lastSync = Date.now();
+  cloud.status = 'synced';
+  cloud.ready = true;
+}
+const remoteChanged = remote => !!remote && remote.updated_at !== readCloudMeta().syncedAt;
+
+function adoptCloudSave(remote, message) {
+  state = normalizeSave(remote.data);
+  sectorSig = ''; upgSig = ''; achSig = ''; identitySig = ''; shopSig = ''; researchSig = ''; coachShown = '';
+  policiesBuilt = false;
+  markSynced(remote.updated_at);
+  buildPickers();
+  saveGame();
+  applyOffline();
+  render();
+  drawSkyline();
+  if (message) toast(message, 'cloud', 'cyan');
+}
+
+const isFreshSave = s => s.lifeEarned < 1000 && !s.prestiges && !s.vipUntil && !(s.owned && s.owned.golden);
+
+async function onSignedIn() {
+  if (!cloud.user || cloud.busy) return;
+  cloud.busy = true; cloud.ready = false; cloud.status = 'syncing'; renderAccount();
+  try {
+    const remote = await pullSave();
+    const sameAccount = readCloudMeta().uid === cloud.user.id;
+    if (!remote) {
+      await pushSave();
+      toast('Your progress is now saved to your account', 'cloud', 'cyan');
+    } else if (sameAccount) {
+      if (remoteChanged(remote)) adoptCloudSave(remote, 'Loaded your latest progress');
+      else await pushSave();
+    } else if (isFreshSave(state)) {
+      adoptCloudSave(remote, 'Welcome back! Your nation is loaded.');
+    } else {
+      cloud.busy = false;
+      askWhichSave(remote);
+      return;
+    }
+  } catch (e) {
+    cloud.status = 'error';
+  }
+  cloud.busy = false;
+  renderAccount();
+}
+
+function askWhichSave(remote) {
+  const local = `This device: ${money(state.lifeEarned)} lifetime GDP, ${totalOwned()} facilities.`;
+  const acct = `Your account: ${money(remote.progress)} lifetime GDP, saved ${ago(new Date(remote.updated_at).getTime())}.`;
+  queueOverlay(() => showModal('Which nation do you want to keep?', `${local}\n${acct}\n\nThe other one will be replaced.`, {
+    icon: 'cloud', tone: 'cyan', okText: 'Use account', cancelText: 'Use this device',
+    onOk: () => { adoptCloudSave(remote, 'Loaded your nation from your account'); renderAccount(); },
+    onCancel: async () => {
+      try { await pushSave(); toast('This device\'s nation is now saved to your account', 'cloud', 'cyan'); }
+      catch (e) { cloud.status = 'error'; }
+      renderAccount();
+    },
+  }));
+}
+
+// One sync step: load the server save if another device changed it, otherwise upload ours.
+async function syncCycle(message) {
+  const remote = await pullSave();
+  if (remoteChanged(remote)) adoptCloudSave(remote, 'Loaded newer progress from another device');
+  else { await pushSave(); if (message) toast(message, 'cloud', 'cyan'); }
+}
+
+async function runSync(message) {
+  if (!cloud.user || cloud.busy) return;
+  if (readCloudMeta().uid !== cloud.user.id) { onSignedIn(); return; }
+  cloud.busy = true; cloud.status = 'syncing'; renderAccount();
+  try { await syncCycle(message); } catch (e) { cloud.status = 'error'; cloud.ready = false; }
+  cloud.busy = false;
+  renderAccount();
+}
+
+// Every 30 s while the game is visible.
+function cloudTick() { if (cloud.user && !document.hidden) runSync(); }
+// Leaving the app: upload right away so another device can continue.
+function cloudPause() {
+  if (!cloud.user || !cloud.ready || cloud.busy) return;
+  pushSave().catch(() => { cloud.status = 'error'; });
+}
+// Coming back: check whether another device played meanwhile.
+function cloudResume() { return runSync(); }
+function syncNow() { return runSync('Synced'); }
+
+async function signOut() {
+  if (!cloud.client) return;
+  if (cloud.ready) { try { await pushSave(); } catch (e) { /* keep local copy */ } }
+  await cloud.client.auth.signOut().catch(() => {});
+  writeCloudMeta({});
+  cloud.user = null; cloud.ready = false; cloud.status = 'off'; cloud.lastSync = 0;
+  toast('Signed out. Your progress stays on this device.', 'logout', 'cyan');
+  renderAccount();
+}
+
+function renderAccount() {
+  const title = $('accountTitle'), text = $('accountText'), btn = $('accountBtn'), actions = $('accountActions');
+  if (!title) return;
+  if (!cloudAvailable()) {
+    title.textContent = 'Accounts';
+    text.textContent = 'Sign-in works in the web version at tardigrade23.github.io/DigitalNation.';
+    btn.hidden = true; actions.hidden = true;
+    return;
+  }
+  if (!cloud.user) {
+    title.textContent = 'Save your progress';
+    text.textContent = 'Sign in with your email to keep your nation safe and play on any device.';
+    btn.hidden = false; actions.hidden = true;
+    return;
+  }
+  title.textContent = cloud.user.email || 'Signed in';
+  text.textContent = {
+    syncing: 'Syncing…',
+    synced: `Synced ${ago(cloud.lastSync)} · ${deviceLabel()}`,
+    error: 'Sync paused. Check your connection, then tap Sync now.',
+    off: 'Signed in',
+  }[cloud.status] || 'Signed in';
+  btn.hidden = true; actions.hidden = false;
+  $('syncNow').disabled = cloud.busy;
+}
+
+/* Sign-in sheet: email -> 6-digit code (or the link in the same email). */
+function showAuthStep(step) {
+  $('authEmailForm').hidden = step !== 'email';
+  $('authCodeForm').hidden = step !== 'code';
+  $('authError').hidden = true;
+  if (step === 'email') { $('authEmail').value = cloud.email; setTimeout(() => $('authEmail').focus(), 50); }
+  if (step === 'code') { $('authCode').value = ''; setTimeout(() => $('authCode').focus(), 50); }
+}
+function openAuth() {
+  if (!cloudAvailable() || overlayOpen()) return;
+  $('auth').hidden = false;
+  showAuthStep('email');
+  updateCoach();
+}
+function closeAuth() { $('auth').hidden = true; if (!overlayOpen()) nextOverlay(); }
+function authError(msg) { $('authError').textContent = msg; $('authError').hidden = false; }
+function friendlyAuthError(e) {
+  const m = String((e && e.message) || e || '');
+  if (/rate|too many|security purposes/i.test(m)) return 'Too many emails were sent. Wait a minute, then try again.';
+  if (/expired|invalid|token/i.test(m)) return 'That code is wrong or has expired. Check the latest email, or send a new code.';
+  if (/fetch|network|failed/i.test(m)) return 'No connection to the server. Check your internet and try again.';
+  return m || 'Something went wrong. Please try again.';
+}
+
+async function submitEmail() {
+  const email = $('authEmail').value.trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { authError('Enter a valid email address, like name@example.com.'); return; }
+  const btn = $('authSend');
+  btn.disabled = true; btn.textContent = 'Sending…';
+  try {
+    const { error } = await cloud.client.auth.signInWithOtp({
+      email, options: { shouldCreateUser: true, emailRedirectTo: location.origin + location.pathname },
+    });
+    if (error) throw error;
+    cloud.email = email;
+    showAuthStep('code');
+    $('authSentText').textContent = `We sent an email to ${email}. Enter the code from it, or tap the sign-in link in the email.`;
+  } catch (e) {
+    authError(friendlyAuthError(e));
+  }
+  btn.disabled = false; btn.textContent = 'Send sign-in code';
+}
+
+let verifying = false;
+async function submitCode() {
+  const token = $('authCode').value.replace(/\D/g, '');
+  if (token.length < 6) { authError('Enter the code from the email.'); return; }
+  if (verifying) return;
+  verifying = true;
+  const btn = $('authVerify');
+  btn.disabled = true; btn.textContent = 'Signing in…';
+  try {
+    const { error } = await cloud.client.auth.verifyOtp({ email: cloud.email, token, type: 'email' });
+    if (error) throw error;
+    closeAuth();
+    Sound.play('reward');
+    toast(`Signed in as ${cloud.email}`, 'cloud', 'cyan');
+  } catch (e) {
+    authError(friendlyAuthError(e));
+  }
+  verifying = false;
+  btn.disabled = false; btn.textContent = 'Sign in';
 }
 
 /* ---------------- PWA: install + offline ---------------- */
@@ -1388,7 +1646,7 @@ function buzz(pattern) {
 /* ---------------- Overlays (modal + daily) queue ---------------- */
 
 const overlayQueue = [];
-function overlayOpen() { return !$('modal').hidden || !$('daily').hidden || !$('cyberGame').hidden || !$('adOverlay').hidden; }
+function overlayOpen() { return !$('modal').hidden || !$('daily').hidden || !$('cyberGame').hidden || !$('adOverlay').hidden || !$('auth').hidden; }
 function queueOverlay(fn) { if (overlayOpen()) overlayQueue.push(fn); else fn(); }
 function nextOverlay() { const fn = overlayQueue.shift(); if (fn) fn(); updateCoach(); }
 
@@ -1480,6 +1738,8 @@ const COACH = [
     text: 'Your first <b>research</b> project is ready. Research is permanent.', until: () => screen === 'global' && govTab === 'research' },
   { id: 'tipShop', when: () => state.gems >= 50, target: () => $('gemBtn'),
     text: 'You have <b>gems</b>! Spend them in the shop on time warps, boosts and premium flags.', until: () => screen === 'shop' },
+  { id: 'tipAccount', when: () => cloudAvailable() && !cloud.user && state.lifeEarned >= 1e5, target: () => $('profileBtn'),
+    text: 'Your nation is growing. <b>Sign in</b> from your profile to keep it safe and play on any device.', until: () => screen === 'profile' || !!cloud.user },
   { id: 'tipExport', when: () => claimableInfluence() >= 1, target: () => tabBtn('global'),
     text: 'You can now <b>export technology</b> for permanent Influence.', until: () => screen === 'global' },
 ];
@@ -1598,6 +1858,21 @@ function bindUI() {
   $('goal').addEventListener('click', () => showScreen('sectors'));
   $('modalOk').addEventListener('click', () => closeModal(true));
   $('modalCancel').addEventListener('click', () => closeModal(false));
+  $('accountBtn').addEventListener('click', openAuth);
+  $('syncNow').addEventListener('click', () => syncNow());
+  $('signOut').addEventListener('click', () => {
+    showModal('Sign out?', 'Your progress stays on this device and in your account. Sign in again any time to keep syncing.', {
+      icon: 'logout', tone: 'cyan', okText: 'Sign out', onOk: signOut,
+    });
+  });
+  $('authEmailForm').addEventListener('submit', e => { e.preventDefault(); submitEmail(); });
+  $('authCodeForm').addEventListener('submit', e => { e.preventDefault(); submitCode(); });
+  $('authCode').addEventListener('input', e => {
+    e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10);
+    if (e.target.value.length === 6) submitCode();
+  });
+  $('authBack').addEventListener('click', () => showAuthStep('email'));
+  $('authClose').addEventListener('click', closeAuth);
   $('modalInput').addEventListener('keydown', e => { if (e.key === 'Enter') closeModal(true); });
 
   $('sectors').addEventListener('click', e => {
@@ -1678,8 +1953,8 @@ function bindUI() {
 
   window.addEventListener('resize', drawSkyline);
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) saveGame();
-    else { applyOffline(); lastTick = Date.now(); render(); maybeAutoDaily(); }
+    if (document.hidden) { saveGame(); cloudPause(); }
+    else { applyOffline(); lastTick = Date.now(); render(); maybeAutoDaily(); cloudResume(); }
   });
   window.addEventListener('beforeunload', saveGame);
 }
@@ -1689,6 +1964,7 @@ buildPickers();
 checkAchievements(true);
 renderInstall();
 registerServiceWorker();
+initCloud();
 applyOffline();
 render();
 maybeAutoDaily();
@@ -1696,6 +1972,7 @@ drawSkyline();
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawSkyline);
 setInterval(tick, 100);
 setInterval(saveGame, 5000);
+setInterval(cloudTick, CLOUD_PUSH_EVERY);
 
 // Debug / test hook
-window.DN = { get state() { return state; }, isVip, addGems, incomePerSec, earn, render, showScreen, dailyStatus, mods, rpRate, currentEra, SECTORS, UPGRADES, RESEARCH };
+window.DN = { get state() { return state; }, cloud, cloudResume, syncNow, isVip, addGems, incomePerSec, earn, render, showScreen, dailyStatus, mods, rpRate, currentEra, SECTORS, UPGRADES, RESEARCH };

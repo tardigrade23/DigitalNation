@@ -28,7 +28,7 @@ jobs:
         run: |
           mkdir _site
           cp index.html style.css game.js sw.js manifest.webmanifest _site/
-          cp -r icons _site/
+          cp -r icons vendor _site/
 
       - uses: actions/configure-pages@v5
 

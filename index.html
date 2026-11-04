@@ -60,6 +60,10 @@
       <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></symbol>
       <symbol id="i-flask" viewBox="0 0 24 24"><path d="M9 3h6M10 3v6L4.5 19a1.5 1.5 0 0 0 1.3 2h12.4a1.5 1.5 0 0 0 1.3-2L14 9V3"/><path d="M7 15h10"/></symbol>
       <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 19V5a2 2 0 0 1 2-2h14v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 0 2 2h14"/><path d="M8 7h8"/></symbol>
+      <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M17.5 19H7a5 5 0 1 1 1.1-9.9A6 6 0 0 1 19.5 11a4 4 0 0 1-2 8z"/></symbol>
+      <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></symbol>
+      <symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/></symbol>
+      <symbol id="i-sync" viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 1-15.4 6.4L3 16"/><path d="M3 12a9 9 0 0 1 15.4-6.4L21 8"/><path d="M3 21v-5h5M21 3v5h-5"/></symbol>
       <symbol id="i-gem" viewBox="0 0 24 24"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20M10 3 8 9l4 12 4-12-2-6"/></symbol>
       <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
       <symbol id="i-crown" viewBox="0 0 24 24"><path d="M3 18 2 7l5 4 5-7 5 7 5-4-1 11z"/><path d="M4 21h16"/></symbol>
@@ -343,6 +347,19 @@
           </div>
         </div>
 
+        <div id="accountCard" class="card account-card">
+          <span id="accountTile" class="tile tile-cyan"><svg class="ic"><use href="#i-cloud"/></svg></span>
+          <span class="account-body">
+            <span id="accountTitle" class="card-title">Save your progress</span>
+            <span id="accountText" class="muted small">Sign in with your email to keep your nation safe and play on any device.</span>
+          </span>
+          <button id="accountBtn" class="btn btn-primary">Sign in</button>
+          <div id="accountActions" class="account-actions" hidden>
+            <button id="syncNow" class="btn"><svg class="ic ic-sm"><use href="#i-sync"/></svg>Sync now</button>
+            <button id="signOut" class="btn btn-ghost"><svg class="ic ic-sm"><use href="#i-logout"/></svg>Sign out</button>
+          </div>
+        </div>
+
         <div class="info-list">
           <button id="editPlayer" class="kv kv-btn"><span>Leader name</span><b id="kvPlayer">Leader</b><svg class="ic ic-sm muted-ic"><use href="#i-chevron"/></svg></button>
           <button id="editNation" class="kv kv-btn"><span>Nation name</span><b id="kvNation">Digital Nation</b><svg class="ic ic-sm muted-ic"><use href="#i-chevron"/></svg></button>
@@ -431,6 +448,28 @@
     </div>
   </div>
 
+  <div id="auth" class="modal" hidden>
+    <div class="modal-box auth-box" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+      <span class="tile tile-cyan tile-lg modal-icon"><svg class="ic"><use href="#i-cloud"/></svg></span>
+      <h3 id="authTitle">Save your nation</h3>
+      <form id="authEmailForm" class="auth-form" novalidate>
+        <p>Sign in with your email. Your nation, gems and purchases follow you to every device. No password needed.</p>
+        <label for="authEmail" class="field-label">Email</label>
+        <input id="authEmail" class="modal-input" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com">
+        <button id="authSend" class="btn btn-primary wide" type="submit">Send sign-in code</button>
+      </form>
+      <form id="authCodeForm" class="auth-form" novalidate hidden>
+        <p id="authSentText">We sent you an email.</p>
+        <label for="authCode" class="field-label">Code from the email</label>
+        <input id="authCode" class="modal-input code-input" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="••••••">
+        <button id="authVerify" class="btn btn-primary wide" type="submit">Sign in</button>
+        <button id="authBack" class="btn btn-ghost wide" type="button">Use a different email</button>
+      </form>
+      <p id="authError" class="auth-error" role="alert" hidden></p>
+      <button id="authClose" class="btn btn-ghost" type="button">Not now</button>
+    </div>
+  </div>
+
   <div id="adOverlay" class="modal" hidden>
     <div class="modal-box ad-box" role="dialog" aria-modal="true" aria-label="Advertisement">
       <span class="eyebrow">Advertisement · prototype</span>
@@ -445,6 +484,7 @@
 
   <div id="toasts" class="toasts" aria-live="polite"></div>
 
+  <script src="vendor/supabase.js"></script>
   <script src="game.js"></script>
 </body>
 </html>

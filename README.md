@@ -70,6 +70,24 @@ The bottom tab bar has five screens:
 - **Daily reward**: a 7-day streak. Rewards are minutes of current income with a minimum amount, and day 7 also gives 30 minutes of 2× income. Missing a day restarts the streak.
 - **Sound and vibration**: synthesized with Web Audio, so there are no audio files. Vibration works on Android only. Both can be turned off in Profile → Settings.
 
+## Accounts and cloud save
+
+Players can play without an account. From **Profile → Save your progress** they sign in with their email: they get a one-time code (or a sign-in link in the same email), and no password is needed. After that, their nation, gems, purchases and settings are the same on every device.
+
+- **Backend**: Supabase project *Digital Nation* (`dygrvzxnfsozjaxlbcoz`, eu-central-1). There is one row per player in `public.saves`, and row level security lets each player read and write only their own row. The schema is in `supabase/migrations/`.
+- **First sign-in on a device**:
+  - If the account has no save yet, this device's progress is uploaded.
+  - If this device is new (almost no progress), the account's nation is loaded.
+  - If both have real progress, the player chooses which one to keep.
+- **Sync**: every 30 seconds while the game is open, when it goes to the background, and when it comes back. Each device remembers the server timestamp of the last save it wrote or loaded. If the server has a different timestamp, another device saved in the meantime, so that newer save is loaded instead of being overwritten.
+- `vendor/supabase.js` is supabase-js 2.45.4, served locally so the game works offline and does not depend on a CDN.
+- The single-file claude.ai build leaves accounts out, because that host blocks requests to Supabase.
+
+**One-time Supabase dashboard settings** (Authentication section):
+1. **URL Configuration**: set *Site URL* to `https://tardigrade23.github.io/DigitalNation/` and add it under *Redirect URLs*.
+2. **Emails → Magic Link** template: add `{{ .Token }}` so the email shows the 6-digit code next to the link.
+3. Before launch, set up custom SMTP (for example Resend). The built-in email service only sends a few emails per hour.
+
 ## Monetization (prototype)
 
 Real-money purchases are **simulated** in the web build and clearly labeled. They will be connected to Google Play Billing and StoreKit (for example through RevenueCat) in the native build. Rewarded ads are a 3-second placeholder screen, to be replaced by AdMob.
@@ -90,7 +108,7 @@ Real-money purchases are **simulated** in the web build and clearly labeled. The
 
 - `index.html`: app shell, the SVG icon sprite, and the screens
 - `style.css`: visual design, built phone-first and safe-area aware
-- `game.js`: game logic, rendering, and the canvas skyline. The balance constants are at the top (`SECTORS`, `COST_GROWTH`, `PRESTIGE_DIVISOR` and others)
+- `game.js`: game logic, rendering, the canvas skyline, and cloud sync. The balance constants are at the top (`SECTORS`, `COST_GROWTH`, `PRESTIGE_DIVISOR` and others)
 - `tools/build_single_file.py`: bundles the three files into one HTML page. PWA tags are left out
 
 ## Next steps
