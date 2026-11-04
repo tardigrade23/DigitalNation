@@ -1,122 +1,237 @@
 <!doctype html>
-<html lang="az">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Digital Nation</title>
   <meta name="claude:viewport-fit-sides" content="cover">
+  <meta name="theme-color" content="#0C1420">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="top">
-    <div class="nation">
-      <span class="flag">🏳️</span>
-      <div>
-        <h1 id="nationName" title="Adı dəyişmək üçün klik et">Rəqəmsal Respublika</h1>
-        <span id="title" class="badge"></span>
-      </div>
-    </div>
+  <!-- Icon sprite: 24x24 stroke icons -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-isp" viewBox="0 0 24 24"><path d="M2 8.8a16 16 0 0 1 20 0"/><path d="M5 12.55a11 11 0 0 1 14 0"/><path d="M8.5 16.4a6 6 0 0 1 7 0"/><circle cx="12" cy="20" r="1"/></symbol>
+      <symbol id="i-egov" viewBox="0 0 24 24"><path d="M3 22h18"/><path d="M6 18v-7M10 18v-7M14 18v-7M18 18v-7"/><path d="M12 2 20 7H4z"/></symbol>
+      <symbol id="i-mbank" viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M10 18h4"/><rect x="9" y="7" width="6" height="5" rx="1"/></symbol>
+      <symbol id="i-fintech" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></symbol>
+      <symbol id="i-dc" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="7" rx="2"/><rect x="3" y="14" width="18" height="7" rx="2"/><path d="M7 6.5h.01M7 17.5h.01M11 6.5h6M11 17.5h6"/></symbol>
+      <symbol id="i-g5" viewBox="0 0 24 24"><path d="M12 12v10M8 22h8"/><path d="M9.5 9.5a3.5 3.5 0 0 1 5 0"/><path d="M7 7a7 7 0 0 1 10 0"/><path d="M4.5 4.5a10.5 10.5 0 0 1 15 0"/><circle cx="12" cy="12" r="1"/></symbol>
+      <symbol id="i-smart" viewBox="0 0 24 24"><path d="M3 22V9l6-3v16"/><path d="M9 22V3l8 4v15"/><path d="M17 22v-9l4 2v7"/><path d="M2 22h20"/><path d="M12 9h2M12 13h2M12 17h2"/></symbol>
+      <symbol id="i-ai" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/></symbol>
+      <symbol id="i-quantum" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1.5"/><ellipse cx="12" cy="12" rx="10" ry="4"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)"/></symbol>
+      <symbol id="i-space" viewBox="0 0 24 24"><path d="M13 7 9 3 5 7l4 4"/><path d="m17 11 4 4-4 4-4-4"/><path d="m8 12 4 4 6-6-4-4Z"/><path d="m16 8 3-3"/><path d="M9 21a6 6 0 0 0-6-6"/></symbol>
+      <symbol id="i-coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M14.5 9.5c-.5-1-1.5-1.5-2.5-1.5-1.5 0-2.5.8-2.5 2s1 1.7 2.5 2 2.5.8 2.5 2-1 2-2.5 2c-1 0-2-.5-2.5-1.5M12 6.5V8M12 16v1.5"/></symbol>
+      <symbol id="i-coins" viewBox="0 0 24 24"><circle cx="9" cy="9" r="6"/><path d="M18.1 10.4A6 6 0 1 1 10.4 18.1"/><path d="M8 7h2v4"/></symbol>
+      <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0"/><path d="M16 4a4 4 0 0 1 0 8"/><path d="M22 21a7 7 0 0 0-4-6.3"/></symbol>
+      <symbol id="i-heart" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21.2l8.8-8.8a5.5 5.5 0 0 0 0-7.8z"/></symbol>
+      <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></symbol>
+      <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20"/></symbol>
+      <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol>
+      <symbol id="i-shield-check" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></symbol>
+      <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></symbol>
+      <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></symbol>
+      <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 16v-4M12 16V8M17 16v-7"/></symbol>
+      <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+      <symbol id="i-play" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m10 9 5 3-5 3z"/></symbol>
+      <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></symbol>
+      <symbol id="i-home" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v11a1 1 0 0 1-1 1h-5v-7h-6v7H4a1 1 0 0 1-1-1z"/></symbol>
+      <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></symbol>
+      <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></symbol>
+      <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></symbol>
+      <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></symbol>
+      <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+    </defs>
+  </svg>
 
-    <div class="gdp">
-      <div class="label">ÜDM (GDP)</div>
-      <div id="gdp" class="big">$0</div>
-      <div id="ips" class="sub">+$0 / san</div>
-    </div>
-
-    <div class="stats">
-      <div class="stat"><span class="k">👥 Əhali</span><span id="pop" class="v">1M</span></div>
-      <div class="stat"><span class="k">😊 Rifah</span><span id="welfare" class="v">0%</span></div>
-      <div class="stat"><span class="k">🏆 Tex. reytinq</span><span id="rank" class="v">#195</span></div>
-      <div class="stat"><span class="k">🌍 Nüfuz</span><span id="influence" class="v">0</span></div>
-    </div>
-  </header>
-
-  <div id="effects" class="effects"></div>
-
-  <div id="attack" class="attack hidden">
-    <div class="attack-text">
-      <strong>⚠️ Kiberhücum!</strong>
-      <span>Hakerlər dövlət sistemlərinə hücum edir. Tez reaksiya ver!</span>
-    </div>
-    <button id="repel" class="btn danger">🛡️ Hücumu dəf et</button>
-    <div class="attack-bar"><i id="attackBar"></i></div>
-  </div>
-
-  <main>
-    <section class="col left">
-      <div class="tapzone">
-        <button id="tap" class="tap">💼 Vergi topla</button>
-        <div class="tap-info">Klik: <b id="tapValue">$1</b></div>
-        <button id="boost" class="btn boost">📺 x2 Bonus (2 dəq)</button>
-        <div class="hint">* Bonus düyməsi real oyunda "reklama bax" (rewarded ad) yerini tutur.</div>
-      </div>
-
-      <div class="section-head">
-        <h2>Sektorlar</h2>
-        <div id="buyAmt" class="seg">
-          <button data-amt="1" class="on">x1</button>
-          <button data-amt="10">x10</button>
-          <button data-amt="100">x100</button>
-          <button data-amt="max">Max</button>
+  <div class="app">
+    <header class="appbar">
+      <div class="appbar-row">
+        <button id="nationBtn" class="nation" aria-label="Rename your nation">
+          <svg class="flag" viewBox="0 0 30 20" aria-hidden="true">
+            <rect width="30" height="20" rx="2.5" fill="#0F6E8C"/>
+            <rect y="6.67" width="30" height="6.66" fill="#F5B841"/>
+            <rect y="13.33" width="30" height="6.67" fill="#1B2839"/>
+            <circle cx="15" cy="10" r="4.4" fill="#0C1420" stroke="#E8EEF6" stroke-width="1"/>
+            <path d="M12.8 10h4.4M15 7.8v4.4" stroke="#F5B841" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+          <span class="nation-text">
+            <span id="nationName" class="nation-name">Digital Republic</span>
+            <span id="title" class="nation-title">Analog State</span>
+          </span>
+          <svg class="ic ic-sm muted-ic"><use href="#i-pencil"/></svg>
+        </button>
+        <div class="rank-pill" title="Global tech ranking">
+          <svg class="ic ic-sm"><use href="#i-trophy"/></svg><span id="rank">#195</span>
         </div>
       </div>
-      <div id="sectors" class="sectors"></div>
-    </section>
 
-    <section class="col right">
-      <nav class="tabs">
-        <button data-tab="upgrades" class="on">⚙️ Təkmilləşdirmə</button>
-        <button data-tab="cyber">🛡️ Kiber</button>
-        <button data-tab="export">🌍 İxrac</button>
-        <button data-tab="stats">📊 Statistika</button>
-      </nav>
-
-      <div class="panel" id="tab-upgrades">
-        <div id="upgrades" class="upgrades"></div>
+      <div class="treasury">
+        <div>
+          <div class="eyebrow">National GDP</div>
+          <div id="gdp" class="gdp">$0</div>
+        </div>
+        <div class="ips-pill"><svg class="ic ic-sm"><use href="#i-bolt"/></svg><span id="ips">+$0/s</span></div>
       </div>
 
-      <div class="panel hidden" id="tab-cyber">
-        <h3>Kibertəhlükəsizlik</h3>
-        <p class="muted">Hər 1.5–2.5 dəqiqədən bir hakerlər hücum edir. Hücumu özün dəf etsən mükafat alırsan. Etməsən, müdafiə sistemin qərar verir: uğursuz olarsa ÜDM-in 10%-i oğurlanır və gəlir 30 saniyəlik 50% düşür.</p>
-        <div class="kv"><span>Müdafiə səviyyəsi</span><b id="secLevel">0</b></div>
-        <div class="kv"><span>Avtomatik müdafiə şansı</span><b id="secChance">25%</b></div>
-        <div class="kv"><span>Növbəti hücum</span><b id="nextAttack">—</b></div>
-        <div class="kv"><span>Dəf edilən / uğurlu hücumlar</span><b id="attackStats">0 / 0</b></div>
-        <button id="buySec" class="btn wide">Müdafiəni gücləndir</button>
-      </div>
+      <div id="effects" class="effects"></div>
 
-      <div class="panel hidden" id="tab-export">
-        <h3>Texnologiya ixracı (Prestij)</h3>
-        <p class="muted">Texnologiyalarını digər ölkələrə ixrac et. Dövlət yenidən qurulur (ÜDM, sektorlar, təkmilləşdirmələr sıfırlanır), amma <b>Beynəlxalq Nüfuz</b> qazanırsan. Hər nüfuz xalı bütün gəliri daimi olaraq <b>+10%</b> artırır.</p>
-        <div class="kv"><span>Bu dövrdə qazanılan ÜDM</span><b id="runEarned">$0</b></div>
-        <div class="kv"><span>İndi ixrac etsən alacağın nüfuz</span><b id="claimable">0</b></div>
-        <div class="kv"><span>Hazırkı nüfuz bonusu</span><b id="inflBonus">+0%</b></div>
-        <div class="kv"><span>Texnologiya ixrac edilən ölkələr</span><b id="countries">0</b></div>
-        <button id="prestige" class="btn wide gold">🌍 Texnologiyanı ixrac et</button>
-        <p class="muted small">İlk nüfuz xalı üçün bu dövrdə $10M ÜDM qazanmalısan.</p>
+      <div id="attack" class="attack" hidden>
+        <div class="tile tile-bad"><svg class="ic"><use href="#i-alert"/></svg></div>
+        <div class="attack-text">
+          <strong>Cyber attack in progress</strong>
+          <span>Hackers are targeting state systems.</span>
+        </div>
+        <button id="repel" class="btn btn-bad">Defend</button>
+        <div class="attack-bar"><i id="attackBar"></i></div>
       </div>
+    </header>
 
-      <div class="panel hidden" id="tab-stats">
-        <h3>Statistika</h3>
-        <div id="statsList"></div>
-        <button id="reset" class="btn wide ghost">🗑️ Oyunu sıfırla</button>
-      </div>
-    </section>
-  </main>
+    <main>
+      <!-- NATION -->
+      <section class="screen" id="screen-nation">
+        <div class="skyline-card">
+          <canvas id="skyline" aria-label="Your capital city skyline"></canvas>
+          <div class="skyline-meta">
+            <span class="chip"><svg class="ic ic-xs"><use href="#i-smart"/></svg><span id="buildingCount">0 facilities</span></span>
+          </div>
+        </div>
 
-  <div id="modal" class="modal hidden">
-    <div class="modal-box">
+        <button id="tap" class="tap">
+          <span class="tap-icon"><svg class="ic"><use href="#i-coins"/></svg></span>
+          <span class="tap-text">
+            <span class="tap-label">Collect Taxes</span>
+            <span id="tapValue" class="tap-value">+$1 per tap</span>
+          </span>
+        </button>
+
+        <div class="stat-grid">
+          <div class="stat"><span class="tile tile-cyan"><svg class="ic"><use href="#i-users"/></svg></span><span><span class="stat-k">Population</span><span id="pop" class="stat-v">1.00M</span></span></div>
+          <div class="stat"><span class="tile tile-rose"><svg class="ic"><use href="#i-heart"/></svg></span><span><span class="stat-k">Welfare</span><span id="welfare" class="stat-v">0%</span></span></div>
+          <div class="stat"><span class="tile tile-violet"><svg class="ic"><use href="#i-globe"/></svg></span><span><span class="stat-k">Influence</span><span id="influence" class="stat-v">0</span></span></div>
+          <div class="stat"><span class="tile tile-green"><svg class="ic"><use href="#i-shield"/></svg></span><span><span class="stat-k">Defense</span><span id="defStat" class="stat-v">Lv 0</span></span></div>
+        </div>
+
+        <button id="goal" class="card goal">
+          <span class="tile tile-gold"><svg class="ic"><use href="#i-target"/></svg></span>
+          <span class="goal-body">
+            <span class="eyebrow">Next goal</span>
+            <span id="goalText" class="card-title">Unlock Internet Provider</span>
+            <span class="meter"><i id="goalBar"></i></span>
+          </span>
+          <svg class="ic ic-sm muted-ic"><use href="#i-chevron"/></svg>
+        </button>
+
+        <div class="card boost">
+          <span class="tile tile-gold"><svg class="ic"><use href="#i-play"/></svg></span>
+          <span class="boost-body">
+            <span class="card-title">Double Income</span>
+            <span id="boostSub" class="muted small">Watch a short ad for 2× income (2 min)</span>
+          </span>
+          <button id="boost" class="btn btn-gold">Watch</button>
+        </div>
+        <p class="fineprint">Prototype build. The ad is simulated.</p>
+      </section>
+
+      <!-- SECTORS -->
+      <section class="screen" id="screen-sectors" hidden>
+        <div class="screen-head">
+          <h2>Sectors</h2>
+          <div id="buyAmt" class="seg" role="group" aria-label="Buy amount">
+            <button data-amt="1" class="on">×1</button>
+            <button data-amt="10">×10</button>
+            <button data-amt="100">×100</button>
+            <button data-amt="max">Max</button>
+          </div>
+        </div>
+        <div id="sectors" class="list"></div>
+      </section>
+
+      <!-- UPGRADES -->
+      <section class="screen" id="screen-upgrades" hidden>
+        <div class="screen-head"><h2>Upgrades</h2></div>
+        <div id="upgrades" class="list"></div>
+      </section>
+
+      <!-- SECURITY -->
+      <section class="screen" id="screen-security" hidden>
+        <div class="screen-head"><h2>Cybersecurity</h2></div>
+        <div class="card hero-card">
+          <div class="shield-badge">
+            <svg class="ic shield-big"><use href="#i-shield"/></svg>
+            <span id="secLevelBig" class="shield-num">0</span>
+          </div>
+          <div class="hero-body">
+            <span class="eyebrow">Auto-defense chance</span>
+            <span id="secChance" class="hero-value">25%</span>
+            <span class="meter meter-green"><i id="secBar"></i></span>
+          </div>
+        </div>
+        <div class="info-list">
+          <div class="kv"><span>Defense level</span><b id="secLevel">0 / 7</b></div>
+          <div class="kv"><span>Next attack</span><b id="nextAttack">—</b></div>
+          <div class="kv"><span>Attacks stopped</span><b id="attacksWon">0</b></div>
+          <div class="kv"><span>Breaches</span><b id="attacksLost">0</b></div>
+        </div>
+        <button id="buySec" class="btn btn-primary wide">Upgrade defense</button>
+        <p class="muted small explain">Hackers strike every 1.5–2.5 minutes. Tap <b>Defend</b> within 12 seconds to stop the attack and earn a reward. If you miss it, your defense level decides. A breach steals 10% of your GDP and halves income for 30 seconds.</p>
+      </section>
+
+      <!-- GLOBAL -->
+      <section class="screen" id="screen-global" hidden>
+        <div class="screen-head"><h2>Global Stage</h2></div>
+        <div class="card export">
+          <div class="export-head">
+            <span class="tile tile-violet tile-lg"><svg class="ic"><use href="#i-globe"/></svg></span>
+            <span>
+              <span class="card-title">Export Technology</span>
+              <span class="muted small">Sell your tech to other nations. Your country restarts, but you earn <b>Influence</b>. Each point permanently adds <b>+10%</b> to all income.</span>
+            </span>
+          </div>
+          <div class="info-list flat">
+            <div class="kv"><span>GDP earned this era</span><b id="runEarned">$0</b></div>
+            <div class="kv"><span>Influence you would gain</span><b id="claimable" class="gold-text">0</b></div>
+            <div class="kv"><span>Current influence bonus</span><b id="inflBonus">+0%</b></div>
+            <div class="kv"><span>Partner nations</span><b id="countries">0</b></div>
+          </div>
+          <button id="prestige" class="btn btn-violet wide">Export technology</button>
+          <p class="muted small center">Earn $10M GDP in one era to gain your first point.</p>
+        </div>
+
+        <h3 class="sub-head">Statistics</h3>
+        <div id="statsList" class="info-list"></div>
+        <button id="reset" class="btn btn-ghost wide"><svg class="ic ic-sm"><use href="#i-trash"/></svg> Reset progress</button>
+      </section>
+    </main>
+
+    <nav class="tabbar" aria-label="Main">
+      <button data-screen="nation" class="on"><svg class="ic"><use href="#i-home"/></svg><span>Nation</span></button>
+      <button data-screen="sectors"><svg class="ic"><use href="#i-grid"/></svg><span>Sectors</span></button>
+      <button data-screen="upgrades"><svg class="ic"><use href="#i-up"/></svg><span>Upgrades</span><b id="upgBadge" class="badge" hidden>0</b></button>
+      <button data-screen="security"><svg class="ic"><use href="#i-shield"/></svg><span>Security</span><b id="secBadge" class="badge dot" hidden></b></button>
+      <button data-screen="global"><svg class="ic"><use href="#i-globe"/></svg><span>Global</span></button>
+    </nav>
+  </div>
+
+  <div id="modal" class="modal" hidden>
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <span id="modalIcon" class="tile tile-gold tile-lg modal-icon"><svg class="ic"><use href="#i-globe"/></svg></span>
       <h3 id="modalTitle"></h3>
       <p id="modalText"></p>
       <input id="modalInput" class="modal-input" type="text" maxlength="32" hidden>
       <div class="modal-actions">
-        <button id="modalCancel" class="btn ghost" hidden>Ləğv et</button>
-        <button id="modalOk" class="btn">Davam et</button>
+        <button id="modalCancel" class="btn btn-ghost" hidden>Cancel</button>
+        <button id="modalOk" class="btn btn-primary">Continue</button>
       </div>
     </div>
   </div>
 
-  <div id="toasts" class="toasts"></div>
+  <div id="toasts" class="toasts" aria-live="polite"></div>
 
   <script src="game.js"></script>
 </body>
