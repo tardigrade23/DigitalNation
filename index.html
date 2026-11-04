@@ -58,6 +58,9 @@
       <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></symbol>
       <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></symbol>
       <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></symbol>
+      <symbol id="i-flask" viewBox="0 0 24 24"><path d="M9 3h6M10 3v6L4.5 19a1.5 1.5 0 0 0 1.3 2h12.4a1.5 1.5 0 0 0 1.3-2L14 9V3"/><path d="M7 15h10"/></symbol>
+      <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 19V5a2 2 0 0 1 2-2h14v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 0 2 2h14"/><path d="M8 7h8"/></symbol>
+      <symbol id="i-bug" viewBox="0 0 24 24"><rect x="8" y="6" width="8" height="14" rx="4"/><path d="M12 6V3M8 10H4M16 10h4M8 15H4M16 15h4M9 6 7 4M15 6l2-2"/></symbol>
       <symbol id="i-gift" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></symbol>
       <symbol id="i-volume" viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></symbol>
       <symbol id="i-vibrate" viewBox="0 0 24 24"><rect x="7" y="4" width="10" height="16" rx="2"/><path d="M3 8v8M21 8v8"/></symbol>
@@ -111,6 +114,7 @@
           <canvas id="skyline" aria-label="Your capital city skyline"></canvas>
           <div class="skyline-meta">
             <span class="chip"><svg class="ic ic-xs"><use href="#i-smart"/></svg><span id="buildingCount">0 facilities</span></span>
+            <span class="chip era-chip"><svg class="ic ic-xs"><use href="#i-flask"/></svg><span id="eraChip">Connected Era</span></span>
           </div>
         </div>
 
@@ -201,28 +205,72 @@
           <div class="kv"><span>Breaches</span><b id="attacksLost">0</b></div>
         </div>
         <button id="buySec" class="btn btn-primary wide">Upgrade defense</button>
-        <p class="muted small explain">Hackers strike every 1.5–2.5 minutes. Tap <b>Defend</b> within 12 seconds to stop the attack and earn a reward. If you miss it, your defense level decides. A breach steals 10% of your GDP and halves income for 30 seconds.</p>
+        <p class="muted small explain">Hackers strike every 1.5–2.5 minutes. Tap <b>Defend</b> and catch the malware 5 times before the timer runs out to stop the attack and earn a reward. If you miss it, your defense level decides. A breach steals 10% of your GDP and halves income for 30 seconds.</p>
       </section>
 
-      <!-- GLOBAL -->
+      <!-- GOVERN -->
       <section class="screen" id="screen-global" hidden>
-        <div class="screen-head"><h2>Global Stage</h2></div>
-        <div class="card export">
-          <div class="export-head">
-            <span class="tile tile-violet tile-lg"><svg class="ic"><use href="#i-globe"/></svg></span>
-            <span>
-              <span class="card-title">Export Technology</span>
-              <span class="muted small">Sell your tech to other nations. Your country restarts, but you earn <b>Influence</b>. Each point permanently adds <b>+10%</b> to all income.</span>
-            </span>
+        <div class="screen-head"><h2>Government</h2></div>
+
+        <div class="card era-card">
+          <span class="tile tile-cyan tile-lg"><svg class="ic"><use href="#i-flask"/></svg></span>
+          <span class="era-body">
+            <span class="eyebrow" id="eraNum">Era I</span>
+            <span id="eraName" class="card-title">Connected Era</span>
+            <span id="eraNext" class="muted small">Complete 4 research projects to reach the Information Era</span>
+            <span class="meter"><i id="eraBar"></i></span>
+          </span>
+          <span id="eraMult" class="era-mult">×1</span>
+        </div>
+
+        <div id="govTabs" class="seg seg-wide" role="tablist" aria-label="Government">
+          <button data-gov="policies" class="on">Policies</button>
+          <button data-gov="research">Research<b id="resBadge" class="seg-dot" hidden></b></button>
+          <button data-gov="export">Export</button>
+        </div>
+
+        <div id="gov-policies" class="gov-panel">
+          <div id="policyLock" class="card lock-card" hidden>
+            <span class="tile tile-locked"><svg class="ic"><use href="#i-lock"/></svg></span>
+            <span><span class="card-title">Policies are locked</span><span id="policyLockText" class="muted small">Build 5 E-Government portals to start making national policy.</span></span>
           </div>
-          <div class="info-list flat">
-            <div class="kv"><span>GDP earned this era</span><b id="runEarned">$0</b></div>
-            <div class="kv"><span>Influence you would gain</span><b id="claimable" class="gold-text">0</b></div>
-            <div class="kv"><span>Current influence bonus</span><b id="inflBonus">+0%</b></div>
-            <div class="kv"><span>Partner nations</span><b id="countries">0</b></div>
+          <div id="policies" class="list"></div>
+        </div>
+
+        <div id="gov-research" class="gov-panel" hidden>
+          <div id="researchLock" class="card lock-card" hidden>
+            <span class="tile tile-locked"><svg class="ic"><use href="#i-lock"/></svg></span>
+            <span><span class="card-title">Research is locked</span><span class="muted small">Build your first Mobile Banking service to open the national research program.</span></span>
           </div>
-          <button id="prestige" class="btn btn-violet wide">Export technology</button>
-          <p class="muted small center">Earn $10M GDP in one era to gain your first point.</p>
+          <div id="researchBody">
+            <div class="card rp-card">
+              <span class="tile tile-cyan"><svg class="ic"><use href="#i-flask"/></svg></span>
+              <span class="rp-body"><span class="eyebrow">Research points</span><span id="rpValue" class="stat-v">0 RP</span></span>
+              <span id="rpRate" class="ips-pill rp-pill">+0/s</span>
+            </div>
+            <p class="muted small explain">Your facilities generate research points. Data Centers, AI Labs and Quantum Computers produce the most. Research is permanent: it stays after you export technology.</p>
+            <div id="research" class="research"></div>
+          </div>
+        </div>
+
+        <div id="gov-export" class="gov-panel" hidden>
+          <div class="card export">
+            <div class="export-head">
+              <span class="tile tile-violet tile-lg"><svg class="ic"><use href="#i-globe"/></svg></span>
+              <span>
+                <span class="card-title">Export Technology</span>
+                <span class="muted small">Sell your tech to other nations. Your economy restarts, but you earn <b>Influence</b>. Each point permanently adds <b>+10%</b> to all income. Research and policies are kept.</span>
+              </span>
+            </div>
+            <div class="info-list flat">
+              <div class="kv"><span>GDP since last export</span><b id="runEarned">$0</b></div>
+              <div class="kv"><span>Influence you would gain</span><b id="claimable" class="gold-text">0</b></div>
+              <div class="kv"><span>Current influence bonus</span><b id="inflBonus">+0%</b></div>
+              <div class="kv"><span>Partner nations</span><b id="countries">0</b></div>
+            </div>
+            <button id="prestige" class="btn btn-violet wide">Export technology</button>
+            <p class="muted small center">Earn $10M GDP between exports to gain your first point.</p>
+          </div>
         </div>
       </section>
 
@@ -291,7 +339,7 @@
       <button data-screen="sectors"><svg class="ic"><use href="#i-grid"/></svg><span>Sectors</span></button>
       <button data-screen="upgrades"><svg class="ic"><use href="#i-up"/></svg><span>Upgrades</span><b id="upgBadge" class="badge" hidden>0</b></button>
       <button data-screen="security"><svg class="ic"><use href="#i-shield"/></svg><span>Security</span><b id="secBadge" class="badge dot" hidden></b></button>
-      <button data-screen="global"><svg class="ic"><use href="#i-globe"/></svg><span>Global</span></button>
+      <button data-screen="global"><svg class="ic"><use href="#i-egov"/></svg><span>Govern</span><b id="govBadge" class="badge dot" hidden></b></button>
     </nav>
   </div>
 
@@ -318,6 +366,18 @@
         <button id="dailyClose" class="btn btn-ghost">Later</button>
         <button id="dailyClaim" class="btn btn-gold">Claim</button>
       </div>
+    </div>
+  </div>
+
+  <div id="cyberGame" class="modal" hidden>
+    <div class="modal-box game-box" role="dialog" aria-modal="true" aria-labelledby="gameTitle">
+      <h3 id="gameTitle">Stop the intrusion</h3>
+      <p>Tap the malware 5 times before it breaks through.</p>
+      <div class="game-meta">
+        <span id="gameHits" class="game-hits">0 / 5</span>
+        <span class="meter meter-bad"><i id="gameBar"></i></span>
+      </div>
+      <div id="gameGrid" class="game-grid"></div>
     </div>
   </div>
 

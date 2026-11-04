@@ -51,7 +51,7 @@ The bottom tab bar has five screens:
 | **Sectors** | 10 sectors, from Internet Provider to Satellite Internet. Buy ×1 / ×10 / ×100 / Max. Income doubles at 25, 50, 100, 200… owned |
 | **Upgrades** | Sector boosts, AI upgrades that multiply all income, and tax (tap power) upgrades |
 | **Security** | Defense level, auto-defense chance, and attack history |
-| **Global** | Technology export (prestige) |
+| **Govern** | Era progress, plus three tabs: **Policies**, **Research** and **Export** (prestige) |
 | **Profile** | Opened from the avatar or flag at the top. Leader and nation names, avatar, national flag, achievements, statistics, and app install |
 
 ## Core systems
@@ -59,8 +59,11 @@ The bottom tab bar has five screens:
 - **GDP** is the main currency. You earn it from sectors every second and from taps.
 - **Population and welfare** grow with your facilities and multiply all income. Smart City has the biggest effect on welfare.
 - **Tech ranking** moves from #195 to #1 based on the GDP you have earned in total.
-- **Cyber attacks** happen every 1.5–2.5 minutes. You have 12 seconds to tap **Defend** for a reward. If you miss it, your defense level decides the outcome. A breach steals 10% of your GDP and halves income for 30 seconds.
-- **Technology export** resets the run in exchange for Influence. Each point adds a permanent +10% to all income.
+- **Cyber attacks** happen every 1.5–2.5 minutes. Tap **Defend** to open a mini-game: catch the malware 5 times on a 3×3 grid before the timer runs out (12 s, or more with research). Winning gives 30 seconds of income. If you miss it, your defense level decides the outcome. A breach steals 10% of your GDP and halves income for 30 seconds.
+- **Technology export** resets the economy in exchange for Influence. Each point adds a permanent +10% to all income. Research and policies are kept.
+- **Policies** unlock at 5 E-Government portals. There are four areas (Tax Rate, Internet, Education, Trade), each with three options. Every option has a benefit and a cost, and changing one starts a 1-minute cooldown.
+- **Research** unlocks with the first Mobile Banking service. Facilities produce research points (RP), and Data Centers, AI Labs and Quantum Computers produce the most. The tree has 12 permanent projects in three branches: Economy, Society and Security.
+- **Eras**: Connected → Information (4 research) → AI (8 research + an AI Lab) → Quantum (12 research + Quantum Computing). Each era multiplies all income: ×1.5, ×2.25, ×3.5.
 - **Offline income**: while you're away, you earn 50% of your normal income for up to 8 hours.
 - **2× boost**: a stand-in for a rewarded ad.
 - **Tutorial**: four guided steps for new players (tap, open Sectors, build, passive income), then one-time tips for the first cyber attack, the first affordable upgrade, and the first technology export. It can be replayed from Profile → Settings.

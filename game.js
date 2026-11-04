@@ -20,6 +20,7 @@ const DEFAULT_NATION = 'Digital Nation';
 const DEFAULT_PLAYER = { name: 'Leader', avatar: 'ai', tone: 'gold', flag: 0 };
 const DEFAULT_SETTINGS = { sound: true, vibration: true };
 const DEFAULT_DAILY = { streak: 0, last: '', best: 0 };
+const DEFAULT_POLICIES = { tax: 1, net: 1, edu: 1, trade: 1 };
 
 // c1/c2: icon tile gradient
 const SECTORS = [
@@ -88,6 +89,8 @@ function defaultState() {
     startedAt: now, lastSave: now,
     player: { ...DEFAULT_PLAYER }, achievements: {},
     settings: { ...DEFAULT_SETTINGS }, daily: { ...DEFAULT_DAILY }, coach: {},
+    rp: 0, research: {}, policies: { ...DEFAULT_POLICIES }, policyChangedAt: {}, era: 0,
+    policyChanges: 0, gamesWon: 0,
   };
 }
 
@@ -110,7 +113,8 @@ function sectorMult(s) {
 
 function welfare() {
   const score = totalOwned() + owned('smart') * 5 + owned('egov') * 0.5;
-  return 100 * (1 - Math.exp(-score / 200));
+  const w = 100 * (1 - Math.exp(-score / 200)) + mods().welfare;
+  return Math.max(0, Math.min(100, w));
 }
 
 function popTarget() { return 1e6 * (1 + totalOwned() * 0.015) * (1 + welfare() / 100); }
@@ -121,6 +125,7 @@ function globalMult(withTemp) {
   m *= 1 + welfare() / 100;
   m *= Math.sqrt(state.pop / 1e6);
   m *= 1 + state.influence * INFLUENCE_BONUS;
+  m *= mods().income * ERAS[currentEra()].mult;
   if (withTemp) {
     const now = Date.now();
     if (now < state.boostUntil) m *= 2;
@@ -140,19 +145,19 @@ function incomePerSec(withTemp = true) {
 function clickValue() {
   let m = 1;
   for (const u of UPGRADES) if (u.kind === 'click' && state.upgrades[u.id]) m *= u.mult;
-  return (1 + incomePerSec() * 0.05) * m;
+  return (1 + incomePerSec() * 0.05) * m * mods().tap;
 }
 
 function earn(x) { state.gdp += x; state.runEarned += x; state.lifeEarned += x; }
 
 function costFor(s, n) {
   const r = COST_GROWTH;
-  return s.base * Math.pow(r, owned(s.id)) * (Math.pow(r, n) - 1) / (r - 1);
+  return s.base * mods().cost * Math.pow(r, owned(s.id)) * (Math.pow(r, n) - 1) / (r - 1);
 }
 
 function maxAffordable(s) {
   const r = COST_GROWTH;
-  const c0 = s.base * Math.pow(r, owned(s.id));
+  const c0 = s.base * mods().cost * Math.pow(r, owned(s.id));
   return Math.max(0, Math.floor(Math.log(state.gdp * (r - 1) / c0 + 1) / Math.log(r)));
 }
 
@@ -188,7 +193,8 @@ function buyUpgrade(id) {
 /* ---------------- Cybersecurity ---------------- */
 
 function secCost() { return 2000 * Math.pow(10, state.secLevel); }
-function secChance() { return Math.min(0.95, 0.25 + state.secLevel * 0.1); }
+function secChance() { return Math.max(0.05, Math.min(0.95, 0.25 + state.secLevel * 0.1 + mods().defense)); }
+function attackWindow() { return ATTACK_WINDOW + mods().window * 1000; }
 
 function buySecurity() {
   if (state.secLevel >= SEC_MAX || state.gdp < secCost()) return;
@@ -202,7 +208,7 @@ function scheduleAttack(now) { state.nextAttack = now + (90 + Math.random() * 60
 
 function repelAttack() {
   if (!state.attack) return;
-  const reward = Math.max(50, incomePerSec(false) * 20);
+  const reward = Math.max(80, incomePerSec(false) * 30);
   earn(reward);
   state.attack = null;
   state.attacksRepelled++;
@@ -213,12 +219,13 @@ function repelAttack() {
 
 function resolveAttack(now) {
   state.attack = null;
+  if (game) closeGame();
   if (Math.random() < secChance()) {
     state.attacksRepelled++;
     Sound.play('defend');
     toast('Auto-defense blocked the attack', 'shield-check', 'green');
   } else {
-    const stolen = state.gdp * 0.1;
+    const stolen = state.gdp * 0.1 * mods().breach;
     state.gdp -= stolen;
     state.debuffUntil = now + DEBUFF_DURATION;
     state.attacksLost++;
@@ -232,7 +239,7 @@ function updateAttack(now) {
   if (state.attack) {
     if (now >= state.attack.endsAt) resolveAttack(now);
   } else if (now >= state.nextAttack) {
-    if (incomePerSec(false) >= 5) { state.attack = { endsAt: now + ATTACK_WINDOW }; Sound.play('alarm'); buzz([180, 80, 180]); }
+    if (incomePerSec(false) >= 5) { state.attack = { endsAt: now + attackWindow(), len: attackWindow() }; Sound.play('alarm'); buzz([180, 80, 180]); }
     else scheduleAttack(now);
   }
 }
@@ -250,7 +257,7 @@ function activateBoost() {
 
 /* ---------------- Prestige: technology export ---------------- */
 
-function claimableInfluence() { return Math.floor(Math.sqrt(state.runEarned / PRESTIGE_DIVISOR)); }
+function claimableInfluence() { return Math.floor(Math.sqrt(state.runEarned / PRESTIGE_DIVISOR) * mods().influence); }
 
 function doPrestige() {
   const gain = claimableInfluence();
@@ -269,6 +276,8 @@ function performPrestige() {
     clicks: state.clicks, attacksRepelled: state.attacksRepelled, attacksLost: state.attacksLost,
     startedAt: state.startedAt, player: state.player, achievements: state.achievements,
     settings: state.settings, daily: state.daily, coach: state.coach,
+    research: state.research, policies: state.policies, era: state.era,
+    policyChanges: state.policyChanges, gamesWon: state.gamesWon,
   };
   state = Object.assign(defaultState(), keep);
   sectorSig = ''; upgSig = '';
@@ -343,6 +352,8 @@ function loadGame() {
   if (!s.achievements || typeof s.achievements !== 'object') s.achievements = {};
   s.settings = Object.assign({ ...DEFAULT_SETTINGS }, saved && saved.settings);
   s.daily = Object.assign({ ...DEFAULT_DAILY }, saved && saved.daily);
+  s.policies = Object.assign({ ...DEFAULT_POLICIES }, saved && saved.policies);
+  if (!s.research || typeof s.research !== 'object') s.research = {};
   // Players from before the tutorial existed skip it.
   if (!saved || typeof saved.coach !== 'object' || !saved.coach) s.coach = saved ? { t1: 1, t2: 1, t3: 1, t4: 1 } : {};
   return s;
@@ -356,7 +367,8 @@ function applyOffline() {
   if (elapsed < 30) return;
   const target = popTarget();
   state.pop = target - (target - state.pop) * Math.exp(-elapsed * 0.05);
-  const gain = incomePerSec(false) * elapsed * OFFLINE_EFFICIENCY;
+  if (researchUnlocked()) state.rp += rpRate() * elapsed * OFFLINE_EFFICIENCY;
+  const gain = incomePerSec(false) * elapsed * (OFFLINE_EFFICIENCY + mods().offline);
   if (gain <= 0) return;
   earn(gain);
   showModal('Welcome back', `Your nation earned ${money(gain)} while you were away for ${dur(elapsed * 1000)}.`, { icon: 'moon', tone: 'cyan' });
@@ -640,6 +652,11 @@ function renderSecurity(now) {
 }
 
 function renderGlobal(now) {
+  renderEra();
+  for (const b of $('govTabs').children) b.classList.toggle('on', b.dataset.gov === govTab);
+  for (const k of ['policies', 'research', 'export']) $(`gov-${k}`).hidden = k !== govTab;
+  if (govTab === 'policies') renderPolicies(now);
+  if (govTab === 'research') renderResearch();
   const claim = claimableInfluence();
   $('runEarned').textContent = money(state.runEarned);
   $('claimable').textContent = `+${claim}`;
@@ -655,6 +672,9 @@ function renderStats(now) {
     ['Income multiplier', `×${fmt(globalMult(true))}`],
     ['Taxes collected (taps)', state.clicks],
     ['Technology exports', state.prestiges],
+    ['Research completed', `${researchCount()} / ${RESEARCH.length}`],
+    ['Current era', ERAS[currentEra()].name],
+    ['Cyber mini-games won', state.gamesWon],
     ['Time played', dur(now - state.startedAt)],
   ];
   $('statsList').innerHTML = rows.map(([k, v]) => `<div class="kv"><span>${k}</span><b>${v}</b></div>`).join('');
@@ -677,7 +697,7 @@ function render() {
   if (now < state.debuffUntil) fx.push(`<span class="chip bad">${icon('alert', 'ic-xs')}Breach −50% · ${dur(state.debuffUntil - now)}</span>`);
   $('effects').innerHTML = fx.join('');
   $('attack').hidden = !state.attack;
-  if (state.attack) $('attackBar').style.width = `${Math.max(0, (state.attack.endsAt - now) / ATTACK_WINDOW) * 100}%`;
+  if (state.attack) $('attackBar').style.width = `${Math.max(0, (state.attack.endsAt - now) / (state.attack.len || ATTACK_WINDOW)) * 100}%`;
 
   // tab badges
   const ups = availableUpgrades();
@@ -685,6 +705,9 @@ function render() {
   $('upgBadge').hidden = affordable === 0;
   $('upgBadge').textContent = affordable;
   $('secBadge').hidden = !(state.attack || (state.secLevel < SEC_MAX && state.gdp >= secCost()));
+  const resReady = researchUnlocked() && RESEARCH.some(n => researchAvailable(n) && state.rp >= n.cost);
+  $('resBadge').hidden = !resReady;
+  $('govBadge').hidden = !(resReady || claimableInfluence() >= 1) || screen === 'global';
   const daily = dailyStatus();
   const tutorialDone = COACH.filter(c => c.tut).every(c => state.coach[c.id]);
   $('nationBadge').hidden = !daily.ready || screen === 'nation' || !tutorialDone;
@@ -696,6 +719,7 @@ function render() {
     $('defStat').textContent = `Lv ${state.secLevel}`;
     $('tapValue').textContent = `+${money(clickValue())} per tap`;
     $('buildingCount').textContent = `${totalOwned()} facilities`;
+    $('eraChip').textContent = ERAS[currentEra()].name;
     $('dailyCardDot').hidden = !daily.ready;
     $('dailyCardText').textContent = daily.ready ? `Day ${daily.day} reward is ready` : `Next reward in ${dur(msToMidnight())}`;
     const g = nextGoal();
@@ -780,6 +804,10 @@ const ACHIEVEMENTS = [
   { id: 'top50',   icon: 'trophy',       name: 'Top 50',               desc: 'Reach #50 in the tech ranking',  prog: () => [196 - techRank(), 146] },
   { id: 'orbit',   icon: 'space',        name: 'Orbit Reached',        desc: 'Launch Satellite Internet',      prog: () => [owned('space'), 1] },
   { id: 'loyal',   icon: 'gift',         name: 'Loyal Leader',         desc: 'Claim 7 daily rewards in a row', prog: () => [state.daily.best, 7] },
+  { id: 'policy',  icon: 'egov',         name: 'Policy Maker',         desc: 'Change a national policy',       prog: () => [state.policyChanges, 1] },
+  { id: 'think',   icon: 'flask',        name: 'Think Tank',           desc: 'Complete 6 research projects',   prog: () => [researchCount(), 6] },
+  { id: 'hacker',  icon: 'bug',          name: 'Firewall Hero',        desc: 'Win the cyber mini-game 5 times', prog: () => [state.gamesWon, 5] },
+  { id: 'quantumEra', icon: 'quantum',   name: 'Quantum Leap',         desc: 'Reach the Quantum Era',          prog: () => [currentEra(), 3] },
 ];
 
 function checkAchievements(silent) {
@@ -868,6 +896,245 @@ function registerServiceWorker() {
   window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => { /* unsupported host */ }); });
 }
 
+/* ---------------- Policies, research, eras ---------------- */
+
+const POLICY_COOLDOWN = 60e3;
+const POLICIES = [
+  { id: 'tax', name: 'Tax Rate', icon: 'coin', options: [
+    { label: 'Low', mods: { income: 0.85, welfare: 15 } },
+    { label: 'Balanced', mods: {} },
+    { label: 'High', mods: { income: 1.3, welfare: -20, popGrowth: 0.6 } } ] },
+  { id: 'net', name: 'Internet Policy', icon: 'isp', options: [
+    { label: 'Open', mods: { income: 1.15, defense: -0.15 } },
+    { label: 'Balanced', mods: {} },
+    { label: 'Firewall', mods: { defense: 0.2, income: 0.9 } } ] },
+  { id: 'edu', name: 'Education', icon: 'book', options: [
+    { label: 'Tech', mods: { research: 1.5, welfare: -5 } },
+    { label: 'Balanced', mods: {} },
+    { label: 'Social', mods: { welfare: 10, research: 0.8 } } ] },
+  { id: 'trade', name: 'Trade', icon: 'globe', options: [
+    { label: 'Export', mods: { influence: 1.25, offline: 0.2, breach: 1.5 } },
+    { label: 'Balanced', mods: {} },
+    { label: 'Self-reliant', mods: { breach: 0.5, income: 0.95 } } ] },
+];
+
+const RESEARCH = [
+  { id: 'e1', branch: 'eco', name: 'Digital Taxes',         cost: 20,   mods: { tap: 2 },                  desc: 'Tap power ×2' },
+  { id: 'e2', branch: 'eco', name: 'E-Commerce',            cost: 120,  mods: { income: 1.25 },            desc: 'All income ×1.25' },
+  { id: 'e3', branch: 'eco', name: 'Digital Currency',      cost: 700,  mods: { income: 1.5 },             desc: 'All income ×1.5' },
+  { id: 'e4', branch: 'eco', name: 'Smart Contracts',       cost: 4000, mods: { cost: 0.9 },               desc: 'Sectors cost 10% less' },
+  { id: 's1', branch: 'soc', name: 'E-Health',              cost: 30,   mods: { welfare: 5 },              desc: 'Welfare +5' },
+  { id: 's2', branch: 'soc', name: 'Online Learning',       cost: 150,  mods: { research: 1.25 },          desc: 'Research points ×1.25' },
+  { id: 's3', branch: 'soc', name: 'Digital Identity',      cost: 800,  mods: { popGrowth: 1.5, welfare: 5 }, desc: 'Population grows 50% faster · Welfare +5' },
+  { id: 's4', branch: 'soc', name: 'Universal Connectivity', cost: 4500, mods: { welfare: 10, income: 1.1 }, desc: 'Welfare +10 · All income ×1.1' },
+  { id: 'c1', branch: 'sec', name: 'Firewalls',             cost: 25,   mods: { defense: 0.1 },            desc: 'Auto-defense +10%' },
+  { id: 'c2', branch: 'sec', name: 'Threat Intelligence',   cost: 130,  mods: { window: 5 },               desc: '+5 seconds to respond to attacks' },
+  { id: 'c3', branch: 'sec', name: 'AI Defense Grid',       cost: 750,  mods: { defense: 0.15 },           desc: 'Auto-defense +15%' },
+  { id: 'c4', branch: 'sec', name: 'Quantum Encryption',    cost: 4200, mods: { breach: 0.5 },             desc: 'Breaches steal half as much' },
+];
+const BRANCHES = [
+  { id: 'eco', name: 'Economy', icon: 'coins', tone: 'gold' },
+  { id: 'soc', name: 'Society', icon: 'users', tone: 'rose' },
+  { id: 'sec', name: 'Security', icon: 'shield', tone: 'green' },
+];
+const ERAS = [
+  { name: 'Connected Era',   need: 0,  mult: 1 },
+  { name: 'Information Era', need: 4,  mult: 1.5 },
+  { name: 'AI Era',          need: 8,  mult: 2.25, sector: 'ai' },
+  { name: 'Quantum Era',     need: 12, mult: 3.5,  sector: 'quantum' },
+];
+const ROMAN = ['I', 'II', 'III', 'IV'];
+
+const MULT_KEYS = ['income', 'tap', 'research', 'popGrowth', 'cost', 'breach', 'influence'];
+function mods() {
+  const m = { income: 1, tap: 1, research: 1, popGrowth: 1, cost: 1, breach: 1, influence: 1, welfare: 0, defense: 0, window: 0, offline: 0 };
+  const apply = src => { for (const [k, v] of Object.entries(src)) { if (MULT_KEYS.includes(k)) m[k] *= v; else m[k] += v; } };
+  for (const p of POLICIES) apply(p.options[state.policies[p.id] ?? 1].mods);
+  for (const n of RESEARCH) if (state.research[n.id]) apply(n.mods);
+  return m;
+}
+
+function policiesUnlocked() { return owned('egov') >= 5 || state.policyChanges > 0; }
+function researchUnlocked() { return owned('mbank') > 0 || researchCount() > 0; }
+function researchCount() { return RESEARCH.filter(n => state.research[n.id]).length; }
+function researchAvailable(n) {
+  if (state.research[n.id]) return false;
+  const prev = RESEARCH.filter(x => x.branch === n.branch);
+  const i = prev.indexOf(n);
+  return i === 0 || !!state.research[prev[i - 1].id];
+}
+function rpRate() {
+  const base = 0.02 * totalOwned() + 0.2 * owned('dc') + 1 * owned('ai') + 5 * owned('quantum') + 0.05 * owned('egov');
+  return base * mods().research;
+}
+
+function currentEra() {
+  const n = researchCount();
+  let e = 0;
+  ERAS.forEach((era, i) => { if (n >= era.need && (!era.sector || owned(era.sector) > 0)) e = i; });
+  return e;
+}
+function checkEra() {
+  const e = currentEra();
+  if (e > state.era) {
+    state.era = e;
+    Sound.play('reward'); buzz([30, 60, 30]);
+    queueOverlay(() => showModal(`Welcome to the ${ERAS[e].name}`, `Your nation entered Era ${ROMAN[e]}. All income is now ×${ERAS[e].mult}.`, { icon: 'flask', tone: 'cyan' }));
+  }
+}
+
+function fmtMods(m) {
+  const parts = [];
+  const pct = v => `${v > 0 ? '+' : '−'}${Math.round(Math.abs(v) * 100)}%`;
+  const add = (good, text) => parts.push(`<span class="${good ? 'up' : 'down'}">${text}</span>`);
+  if (m.income) add(m.income > 1, `Income ×${m.income}`);
+  if (m.welfare) add(m.welfare > 0, `Welfare ${m.welfare > 0 ? '+' : '−'}${Math.abs(m.welfare)}`);
+  if (m.popGrowth) add(m.popGrowth > 1, m.popGrowth > 1 ? 'Faster population growth' : 'Slower population growth');
+  if (m.defense) add(m.defense > 0, `Auto-defense ${pct(m.defense)}`);
+  if (m.research) add(m.research > 1, `Research ×${m.research}`);
+  if (m.influence) add(m.influence > 1, `Export influence ×${m.influence}`);
+  if (m.offline) add(m.offline > 0, `Offline earnings ${pct(m.offline)}`);
+  if (m.breach) add(m.breach < 1, `Breach damage ×${m.breach}`);
+  return parts.length ? parts.join(' · ') : '<span class="muted">No bonuses or penalties</span>';
+}
+
+function setPolicy(id, opt) {
+  const now = Date.now();
+  if (!policiesUnlocked() || state.policies[id] === opt) return;
+  if (now - (state.policyChangedAt[id] || 0) < POLICY_COOLDOWN) return;
+  state.policies[id] = opt;
+  state.policyChangedAt[id] = now;
+  state.policyChanges++;
+  const p = POLICIES.find(x => x.id === id);
+  Sound.play('buy'); buzz(15);
+  toast(`${p.name}: ${p.options[opt].label}`, 'egov', 'cyan');
+  saveGame();
+  render();
+}
+
+function buyResearch(id) {
+  const n = RESEARCH.find(x => x.id === id);
+  if (!n || !researchUnlocked() || !researchAvailable(n) || state.rp < n.cost) return;
+  state.rp -= n.cost;
+  state.research[id] = Date.now();
+  Sound.play('upgrade'); buzz([12, 40, 12]);
+  toast(`Research complete: ${n.name}`, 'flask', 'cyan');
+  researchSig = '';
+  saveGame();
+  render();
+}
+
+let govTab = 'policies';
+let policiesBuilt = false;
+function renderPolicies(now) {
+  const unlocked = policiesUnlocked();
+  $('policyLock').hidden = unlocked;
+  if (!unlocked) $('policyLockText').textContent = `Build 5 E-Government portals to start making national policy (${owned('egov')} / 5).`;
+  if (!policiesBuilt) {
+    policiesBuilt = true;
+    $('policies').innerHTML = POLICIES.map(p => `<div class="card policy" data-pid="${p.id}">
+      <div class="policy-head">${tile(p.icon, 'cyan')}<span><span class="card-title">${p.name}</span><span class="policy-cd" data-f="cd"></span></span></div>
+      <div class="policy-opts">${p.options.map((o, i) => `<button data-policy="${p.id}" data-opt="${i}">${o.label}</button>`).join('')}</div>
+      <div class="policy-effect" data-f="fx"></div></div>`).join('');
+  }
+  for (const card of $('policies').children) {
+    const p = POLICIES.find(x => x.id === card.dataset.pid);
+    const sel = state.policies[p.id] ?? 1;
+    const wait = POLICY_COOLDOWN - (now - (state.policyChangedAt[p.id] || 0));
+    card.querySelectorAll('button').forEach((b, i) => {
+      b.classList.toggle('on', i === sel);
+      b.disabled = !unlocked || (wait > 0 && i !== sel);
+    });
+    card.querySelector('[data-f="fx"]').innerHTML = fmtMods(p.options[sel].mods);
+    card.querySelector('[data-f="cd"]').textContent = !unlocked ? 'Locked' : (wait > 0 ? `Can change again in ${dur(wait)}` : 'You can change this now');
+  }
+}
+
+let researchSig = '';
+function renderResearch() {
+  const unlocked = researchUnlocked();
+  $('researchLock').hidden = unlocked;
+  $('researchBody').hidden = !unlocked;
+  if (!unlocked) return;
+  $('rpValue').textContent = `${fmt(state.rp)} RP`;
+  $('rpRate').textContent = `+${fmt(rpRate())}/s`;
+  const sig = RESEARCH.map(n => `${n.id}${state.research[n.id] ? 'd' : researchAvailable(n) ? (state.rp >= n.cost ? 'a' : 'w') : 'l'}`).join('');
+  if (sig === researchSig) return;
+  researchSig = sig;
+  $('research').innerHTML = BRANCHES.map(b => `<div class="branch">
+    <div class="branch-head">${icon(b.icon, 'ic-sm')}${b.name}</div>
+    ${RESEARCH.filter(n => n.branch === b.id).map(n => {
+      const done = !!state.research[n.id], avail = researchAvailable(n), can = avail && state.rp >= n.cost;
+      const cls = done ? 'done' : (avail ? '' : 'locked');
+      const btn = done ? `<button class="buy" disabled>${icon('check', 'ic-sm')}<small>Done</small></button>`
+        : `<button class="buy rp ${can ? 'can' : ''}" data-res="${n.id}" ${can ? '' : 'disabled'}>${avail ? 'Research' : 'Locked'}<small>${fmt(n.cost)} RP</small></button>`;
+      return `<div class="row node ${cls}">${tile(done ? 'check' : 'flask', done ? 'green' : b.tone)}
+        <div class="row-title"><span class="nm">${n.name}</span></div>${btn}
+        <div class="row-sub"><span>${n.desc}</span></div></div>`;
+    }).join('')}</div>`).join('');
+}
+
+function renderEra() {
+  const e = currentEra(), era = ERAS[e], next = ERAS[e + 1];
+  $('eraNum').textContent = `Era ${ROMAN[e]}`;
+  $('eraName').textContent = era.name;
+  $('eraMult').textContent = `×${era.mult}`;
+  if (!next) {
+    $('eraNext').textContent = 'The final era. Your nation leads the world in technology.';
+    $('eraBar').style.width = '100%';
+    return;
+  }
+  const n = researchCount();
+  const needSector = next.sector && owned(next.sector) === 0 ? ` and build a ${SECTORS.find(s => s.id === next.sector).name}` : '';
+  $('eraNext').textContent = `Complete ${next.need} research projects${needSector} to reach the ${next.name} (×${next.mult})`;
+  $('eraBar').style.width = `${Math.min(100, (n / next.need) * 100)}%`;
+}
+
+/* ---------------- Cyber mini-game ---------------- */
+
+const GAME_HITS = 5;
+let game = null;
+function startGame() {
+  if (!state.attack || game) return;
+  game = { hits: 0, cell: -1, moveAt: 0 };
+  $('gameGrid').innerHTML = Array.from({ length: 9 }, (_, i) => `<button class="cell" data-cell="${i}" aria-label="Server ${i + 1}">${icon('bug')}</button>`).join('');
+  $('gameHits').textContent = `0 / ${GAME_HITS}`;
+  $('cyberGame').hidden = false;
+  moveBug();
+  updateCoach();
+}
+function moveBug() {
+  if (!game) return;
+  let c;
+  do c = Math.floor(Math.random() * 9); while (c === game.cell);
+  game.cell = c;
+  game.moveAt = Date.now() + Math.max(650, 1100 - game.hits * 90);
+  $('gameGrid').querySelectorAll('.cell').forEach((el, i) => el.classList.toggle('bug', i === c));
+}
+function hitCell(i, el) {
+  if (!game) return;
+  if (i !== game.cell) {
+    el.classList.remove('miss'); void el.offsetWidth; el.classList.add('miss');
+    return;
+  }
+  game.hits++;
+  $('gameHits').textContent = `${game.hits} / ${GAME_HITS}`;
+  Sound.play('tap'); buzz(10);
+  if (game.hits >= GAME_HITS) {
+    closeGame();
+    state.gamesWon++;
+    repelAttack();
+    render();
+    return;
+  }
+  moveBug();
+}
+function closeGame() {
+  game = null;
+  $('cyberGame').hidden = true;
+  if (!overlayOpen()) nextOverlay();
+}
+
 /* ---------------- Sound + haptics ---------------- */
 
 const Sound = (() => {
@@ -924,7 +1191,7 @@ function buzz(pattern) {
 /* ---------------- Overlays (modal + daily) queue ---------------- */
 
 const overlayQueue = [];
-function overlayOpen() { return !$('modal').hidden || !$('daily').hidden; }
+function overlayOpen() { return !$('modal').hidden || !$('daily').hidden || !$('cyberGame').hidden; }
 function queueOverlay(fn) { if (overlayOpen()) overlayQueue.push(fn); else fn(); }
 function nextOverlay() { const fn = overlayQueue.shift(); if (fn) fn(); updateCoach(); }
 
@@ -1003,9 +1270,13 @@ const COACH = [
   { id: 't4', tut: true, target: () => document.querySelector('.ips-pill'), button: "Let's go",
     text: 'Your nation now earns on its own, even while you are away. Keep building to climb the world ranking!' },
   { id: 'tipSec', when: () => !!state.attack, target: () => $('repel'),
-    text: 'Hackers are attacking! Tap <b>Defend</b> before the timer runs out.', until: () => !state.attack },
+    text: 'Hackers are attacking! Tap <b>Defend</b>, then catch the malware before the timer runs out.', until: () => !state.attack },
   { id: 'tipUpg', when: () => availableUpgrades().some(u => state.gdp >= u.cost), target: () => tabBtn('upgrades'),
     text: 'An <b>upgrade</b> is ready. Upgrades multiply your income.', until: () => screen === 'upgrades' },
+  { id: 'tipPolicy', when: () => policiesUnlocked(), target: () => tabBtn('global'),
+    text: 'You can now set <b>national policy</b>. Every choice has a benefit and a cost.', until: () => screen === 'global' },
+  { id: 'tipResearch', when: () => researchUnlocked() && state.rp >= RESEARCH[0].cost, target: () => tabBtn('global'),
+    text: 'Your first <b>research</b> project is ready. Research is permanent.', until: () => screen === 'global' && govTab === 'research' },
   { id: 'tipExport', when: () => claimableInfluence() >= 1, target: () => tabBtn('global'),
     text: 'You can now <b>export technology</b> for permanent Influence.', until: () => screen === 'global' },
 ];
@@ -1031,7 +1302,8 @@ function updateCoach() {
   if (coachShown !== c.id) {
     coachShown = c.id;
     const skip = c.tut && c.id !== 't4' ? '<button class="coach-skip" data-coach="skip">Skip tutorial</button>' : '';
-    const ok = c.button ? `<button class="btn btn-gold" data-coach="ok">${c.button}</button>` : '';
+    const okLabel = c.button || (c.tut ? '' : 'Got it');
+    const ok = okLabel ? `<button class="btn btn-gold" data-coach="ok">${okLabel}</button>` : '';
     bubble.innerHTML = `<div>${c.text}</div><div class="coach-actions">${skip}${ok}</div>`;
   }
   const r = target.getBoundingClientRect();
@@ -1062,7 +1334,11 @@ function tick() {
   const dt = Math.min(1, (now - lastTick) / 1000); // long gaps are handled by applyOffline
   lastTick = now;
   earn(incomePerSec() * dt);
-  state.pop += (popTarget() - state.pop) * Math.min(1, dt * 0.05);
+  state.pop += (popTarget() - state.pop) * Math.min(1, dt * 0.05 * mods().popGrowth);
+  if (researchUnlocked()) state.rp += rpRate() * dt;
+  checkEra();
+  if (game && now >= game.moveAt) moveBug();
+  if (game) $('gameBar').style.width = state.attack ? `${Math.max(0, (state.attack.endsAt - now) / (state.attack.len || ATTACK_WINDOW)) * 100}%` : '0%';
   updateAttack(now);
   if (now - achTimer > 1000) { achTimer = now; checkAchievements(false); maybeAutoDaily(); }
   render();
@@ -1088,7 +1364,23 @@ function bindUI() {
     render();
   });
   $('boost').addEventListener('click', () => { activateBoost(); render(); });
-  $('repel').addEventListener('click', () => { repelAttack(); render(); });
+  $('repel').addEventListener('click', () => { startGame(); render(); });
+  $('gameGrid').addEventListener('pointerdown', e => {
+    const c = e.target.closest('[data-cell]');
+    if (c) { e.preventDefault(); hitCell(Number(c.dataset.cell), c); }
+  });
+  $('govTabs').addEventListener('click', e => {
+    const b = e.target.closest('[data-gov]');
+    if (b) { govTab = b.dataset.gov; researchSig = ''; render(); }
+  });
+  $('policies').addEventListener('click', e => {
+    const b = e.target.closest('[data-policy]');
+    if (b) setPolicy(b.dataset.policy, Number(b.dataset.opt));
+  });
+  $('research').addEventListener('click', e => {
+    const b = e.target.closest('[data-res]');
+    if (b) buyResearch(b.dataset.res);
+  });
   $('buySec').addEventListener('click', () => { buySecurity(); render(); });
   $('prestige').addEventListener('click', doPrestige);
   $('goal').addEventListener('click', () => showScreen('sectors'));
@@ -1194,4 +1486,4 @@ setInterval(tick, 100);
 setInterval(saveGame, 5000);
 
 // Debug / test hook
-window.DN = { get state() { return state; }, incomePerSec, earn, render, showScreen, dailyStatus, SECTORS, UPGRADES };
+window.DN = { get state() { return state; }, incomePerSec, earn, render, showScreen, dailyStatus, mods, rpRate, currentEra, SECTORS, UPGRADES, RESEARCH };
