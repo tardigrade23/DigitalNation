@@ -70,6 +70,22 @@ The bottom tab bar has five screens:
 - **Daily reward**: a 7-day streak. Rewards are minutes of current income with a minimum amount, and day 7 also gives 30 minutes of 2× income. Missing a day restarts the streak.
 - **Sound and vibration**: synthesized with Web Audio, so there are no audio files. Vibration works on Android only. Both can be turned off in Profile → Settings.
 
+## Monetization (prototype)
+
+Real-money purchases are **simulated** in the web build and clearly labeled. They will be connected to Google Play Billing and StoreKit (for example through RevenueCat) in the native build. Rewarded ads are a 3-second placeholder screen, to be replaced by AdMob.
+
+- **Gems** (premium currency). New players start with 25.
+  - Free sources: +10 per achievement, daily reward days 3/5/7 (+5/+10/+20), +25 per new era, +2 per cyber mini-game win, and +5 per rewarded ad (5 per day).
+  - Saves from before gems existed get gems for the achievements they already earned.
+- **Gem packs**: 100 ($0.99), 550 ($4.99), 1,200 ($9.99), 2,500 ($19.99).
+- **Time Warp**: 1 h / 4 h / 24 h of income for 40 / 120 / 500 gems.
+- **Boosts**:
+  - Golden Economy: permanent ×2 income, kept after exports, 1,500 gems.
+  - Cyber Shield: no attacks for 24 h, 150 gems.
+  - Research Grant: 1 h of RP, at least 200 RP, 100 gems.
+- **Cosmetics**: 4 premium flags and 3 premium avatar colors (100–250 gems). Buy them in the Shop, or tap a locked item in Profile.
+- **VIP ($4.99 / month)**: no ads, full offline earnings for up to 24 h, +10 gems with every daily reward, and a gold avatar ring with a VIP badge.
+
 ## Files
 
 - `index.html`: app shell, the SVG icon sprite, and the screens
@@ -80,6 +96,4 @@ The bottom tab bar has five screens:
 ## Next steps
 
 - Tune the balance through playtests: the first 10 minutes and the time to the first export
-- VIP membership
-- A gem shop with time skips, a permanent 2× multiplier, and cosmetic flags
 - Native Android / iOS builds through Capacitor, for real rewarded ads and in-app purchases

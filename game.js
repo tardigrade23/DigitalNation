@@ -21,6 +21,7 @@ const DEFAULT_PLAYER = { name: 'Leader', avatar: 'ai', tone: 'gold', flag: 0 };
 const DEFAULT_SETTINGS = { sound: true, vibration: true };
 const DEFAULT_DAILY = { streak: 0, last: '', best: 0 };
 const DEFAULT_POLICIES = { tax: 1, net: 1, edu: 1, trade: 1 };
+const START_GEMS = 25;
 
 // c1/c2: icon tile gradient
 const SECTORS = [
@@ -91,6 +92,7 @@ function defaultState() {
     settings: { ...DEFAULT_SETTINGS }, daily: { ...DEFAULT_DAILY }, coach: {},
     rp: 0, research: {}, policies: { ...DEFAULT_POLICIES }, policyChangedAt: {}, era: 0,
     policyChanges: 0, gamesWon: 0,
+    gems: START_GEMS, vipUntil: 0, shieldUntil: 0, owned: { golden: false, flags: [], tones: [] }, adGems: { day: '', n: 0 },
   };
 }
 
@@ -126,6 +128,7 @@ function globalMult(withTemp) {
   m *= Math.sqrt(state.pop / 1e6);
   m *= 1 + state.influence * INFLUENCE_BONUS;
   m *= mods().income * ERAS[currentEra()].mult;
+  if (state.owned.golden) m *= 2;
   if (withTemp) {
     const now = Date.now();
     if (now < state.boostUntil) m *= 2;
@@ -236,6 +239,7 @@ function resolveAttack(now) {
 }
 
 function updateAttack(now) {
+  if (!state.attack && now < state.shieldUntil) { if (now >= state.nextAttack) scheduleAttack(now); return; }
   if (state.attack) {
     if (now >= state.attack.endsAt) resolveAttack(now);
   } else if (now >= state.nextAttack) {
@@ -278,6 +282,7 @@ function performPrestige() {
     settings: state.settings, daily: state.daily, coach: state.coach,
     research: state.research, policies: state.policies, era: state.era,
     policyChanges: state.policyChanges, gamesWon: state.gamesWon,
+    gems: state.gems, vipUntil: state.vipUntil, shieldUntil: state.shieldUntil, owned: state.owned, adGems: state.adGems,
   };
   state = Object.assign(defaultState(), keep);
   sectorSig = ''; upgSig = '';
@@ -354,6 +359,9 @@ function loadGame() {
   s.daily = Object.assign({ ...DEFAULT_DAILY }, saved && saved.daily);
   s.policies = Object.assign({ ...DEFAULT_POLICIES }, saved && saved.policies);
   if (!s.research || typeof s.research !== 'object') s.research = {};
+  s.owned = Object.assign({ golden: false, flags: [], tones: [] }, saved && saved.owned);
+  // Saves from before gems existed get gems for the achievements they already earned.
+  if (saved && saved.gems === undefined) s.gems = START_GEMS + 10 * Object.keys(s.achievements).length;
   // Players from before the tutorial existed skip it.
   if (!saved || typeof saved.coach !== 'object' || !saved.coach) s.coach = saved ? { t1: 1, t2: 1, t3: 1, t4: 1 } : {};
   return s;
@@ -361,14 +369,14 @@ function loadGame() {
 
 function applyOffline() {
   const now = Date.now();
-  const elapsed = Math.min(OFFLINE_MAX_SEC, (now - state.lastSave) / 1000);
+  const elapsed = Math.min(isVip() ? 24 * 3600 : OFFLINE_MAX_SEC, (now - state.lastSave) / 1000);
   state.attack = null;
   state.nextAttack = Math.max(state.nextAttack, now + 60e3);
   if (elapsed < 30) return;
   const target = popTarget();
   state.pop = target - (target - state.pop) * Math.exp(-elapsed * 0.05);
   if (researchUnlocked()) state.rp += rpRate() * elapsed * OFFLINE_EFFICIENCY;
-  const gain = incomePerSec(false) * elapsed * (OFFLINE_EFFICIENCY + mods().offline);
+  const gain = incomePerSec(false) * elapsed * (isVip() ? 1 : OFFLINE_EFFICIENCY + mods().offline);
   if (gain <= 0) return;
   earn(gain);
   showModal('Welcome back', `Your nation earned ${money(gain)} while you were away for ${dur(elapsed * 1000)}.`, { icon: 'moon', tone: 'cyan' });
@@ -675,6 +683,7 @@ function renderStats(now) {
     ['Research completed', `${researchCount()} / ${RESEARCH.length}`],
     ['Current era', ERAS[currentEra()].name],
     ['Cyber mini-games won', state.gamesWon],
+    ['Gems', fmt(state.gems)],
     ['Time played', dur(now - state.startedAt)],
   ];
   $('statsList').innerHTML = rows.map(([k, v]) => `<div class="kv"><span>${k}</span><b>${v}</b></div>`).join('');
@@ -690,10 +699,13 @@ function render() {
   $('rank').textContent = `#${r}`;
   $('title').textContent = rankTitle(r);
   renderIdentity();
+  $('gems').textContent = fmt(state.gems);
+  $('profileBtn').classList.toggle('vip', isVip());
 
   // effects + attack (visible on every screen)
   const fx = [];
   if (now < state.boostUntil) fx.push(`<span class="chip good">${icon('bolt', 'ic-xs')}2× income · ${dur(state.boostUntil - now)}</span>`);
+  if (now < state.shieldUntil) fx.push(`<span class="chip good">${icon('shield-check', 'ic-xs')}Cyber Shield · ${dur(state.shieldUntil - now)}</span>`);
   if (now < state.debuffUntil) fx.push(`<span class="chip bad">${icon('alert', 'ic-xs')}Breach −50% · ${dur(state.debuffUntil - now)}</span>`);
   $('effects').innerHTML = fx.join('');
   $('attack').hidden = !state.attack;
@@ -733,8 +745,8 @@ function render() {
       boostBtn.disabled = true; boostBtn.textContent = dur(state.boostReadyAt - now);
       $('boostSub').textContent = 'Next boost is recharging';
     } else {
-      boostBtn.disabled = false; boostBtn.textContent = 'Watch';
-      $('boostSub').textContent = 'Watch a short ad for 2× income (2 min)';
+      boostBtn.disabled = false; boostBtn.textContent = isVip() ? 'Claim' : 'Watch';
+      $('boostSub').textContent = isVip() ? 'VIP: 2× income for 2 minutes, no ad' : 'Watch a short ad for 2× income (2 min)';
     }
   } else if (screen === 'sectors') {
     renderSectors();
@@ -746,6 +758,8 @@ function render() {
     renderGlobal(now);
   } else if (screen === 'profile') {
     renderProfile(now, r);
+  } else if (screen === 'shop') {
+    renderShop(now);
   }
   updateCoach();
 }
@@ -753,7 +767,7 @@ function render() {
 let lastTab = 'nation';
 function showScreen(name) {
   screen = name;
-  if (name !== 'profile') lastTab = name;
+  if (name !== 'profile' && name !== 'shop') lastTab = name;
   for (const b of document.querySelectorAll('.tabbar button')) b.classList.toggle('on', b.dataset.screen === name);
   for (const s of document.querySelectorAll('.screen')) s.hidden = s.id !== `screen-${name}`;
   sectorSig = ''; upgSig = ''; achSig = '';
@@ -768,7 +782,9 @@ const AVATARS = ['ai', 'quantum', 'space', 'globe', 'shield', 'bolt', 'trophy', 
 const TONE_COLORS = {
   gold: ['#F7C75B', '#D98E1C'], cyan: ['#4CC9F0', '#1F7FB8'], violet: ['#A99BFF', '#5B47D6'],
   rose: ['#FF8FAB', '#D2456B'], green: ['#5EE29A', '#1E9A5A'],
+  neon: ['#FF4D9D', '#7C3AED'], platinum: ['#F1F5F9', '#8796AE'], royal: ['#FFD86B', '#6D28D9'],
 };
+const TONE_PRICES = { neon: 100, platinum: 150, royal: 200 };
 // [top band, middle band, bottom band, emblem]
 const FLAGS = [
   ['#0F6E8C', '#F5B841', '#1B2839', '#F5B841'],
@@ -777,7 +793,14 @@ const FLAGS = [
   ['#5B47D6', '#4CC9F0', '#1B2839', '#4CC9F0'],
   ['#1E9A5A', '#E8EEF6', '#1E9A5A', '#1E9A5A'],
   ['#1B2839', '#F5B841', '#0C1420', '#F5B841'],
+  // premium
+  ['#5EF0E0', '#9B8CFF', '#1B1050', '#5EF0E0'],
+  ['#F5B841', '#0C1420', '#F5B841', '#F5B841'],
+  ['#FF7A59', '#FFC94A', '#C2287A', '#C2287A'],
+  ['#FF4D9D', '#0C1420', '#22D3EE', '#22D3EE'],
 ];
+const FLAG_PRICES = { 6: 150, 7: 200, 8: 150, 9: 250 };
+const FLAG_NAMES = { 6: 'Aurora', 7: 'Royal Gold', 8: 'Sunset', 9: 'Neon' };
 
 function flagSvg(i) {
   const [a, b, c, e] = FLAGS[i] || FLAGS[0];
@@ -816,7 +839,8 @@ function checkAchievements(silent) {
     const [cur, target] = a.prog();
     if (cur >= target) {
       state.achievements[a.id] = Date.now();
-      if (!silent) { toast(`Achievement: ${a.name}`, 'star', 'gold'); Sound.play('reward'); buzz([20, 40, 20]); }
+      state.gems += ACH_GEMS;
+      if (!silent) { toast(`Achievement: ${a.name} · +${ACH_GEMS} gems`, 'star', 'gold'); Sound.play('reward'); buzz([20, 40, 20]); }
     }
   }
 }
@@ -826,8 +850,9 @@ function buildPickers() {
   $('avatarIcons').innerHTML = AVATARS.map(id =>
     `<button data-avatar="${id}" aria-label="Avatar ${id}">${avatarTile(id, tone)}</button>`).join('');
   $('avatarTones').innerHTML = Object.entries(TONE_COLORS).map(([k, [c1, c2]]) =>
-    `<button data-tone="${k}" aria-label="${k} color" style="--c1:${c1};--c2:${c2}"></button>`).join('');
-  $('flagPicker').innerHTML = FLAGS.map((_, i) => `<button data-flag="${i}" aria-label="Flag ${i + 1}">${flagSvg(i)}</button>`).join('');
+    `<button data-tone="${k}" aria-label="${k} color" style="--c1:${c1};--c2:${c2}">${toneOwned(k) ? '' : lockBadge(TONE_PRICES[k])}</button>`).join('');
+  $('flagPicker').innerHTML = FLAGS.map((_, i) => `<button data-flag="${i}" aria-label="Flag ${i + 1}">${flagSvg(i)}${flagOwned(i) ? '' : lockBadge(FLAG_PRICES[i])}</button>`).join('');
+  shopSig = '';
 }
 
 let identitySig = '';
@@ -853,6 +878,7 @@ function renderProfile(now, rank) {
   const done = ACHIEVEMENTS.filter(a => state.achievements[a.id]).length;
   $('profileRank').textContent = `#${rank}`;
   $('profileAch').textContent = `${done} / ${ACHIEVEMENTS.length}`;
+  $('vipChip').hidden = !isVip();
   const rows = ACHIEVEMENTS.map(a => {
     const got = !!state.achievements[a.id];
     const [cur, target] = a.prog();
@@ -894,6 +920,175 @@ function registerServiceWorker() {
   window.addEventListener('appinstalled', () => { deferredInstall = null; toast('Digital Nation installed', 'check', 'green'); renderInstall(); });
   if (!isPwaBuild() || !('serviceWorker' in navigator) || !/^https?:$/.test(location.protocol)) return;
   window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => { /* unsupported host */ }); });
+}
+
+/* ---------------- Gems, shop, VIP, ads ---------------- */
+
+const ACH_GEMS = 10;
+const AD_GEMS_PER_DAY = 5;
+const GEM_PACKS = [
+  { id: 'p1', gems: 100,  price: '$0.99' },
+  { id: 'p2', gems: 550,  price: '$4.99',  tag: '+10% bonus' },
+  { id: 'p3', gems: 1200, price: '$9.99',  tag: 'Popular' },
+  { id: 'p4', gems: 2500, price: '$19.99', tag: 'Best value' },
+];
+const WARPS = [{ h: 1, cost: 40 }, { h: 4, cost: 120 }, { h: 24, cost: 500 }];
+const SHOP_BOOSTS = [
+  { id: 'golden', icon: 'coins', tone: 'gold', name: 'Golden Economy', desc: 'Permanent ×2 income. Kept forever, even after exports.', cost: 1500 },
+  { id: 'shield', icon: 'shield-check', tone: 'green', name: 'Cyber Shield', desc: 'No cyber attacks for 24 hours.', cost: 150 },
+  { id: 'grant', icon: 'flask', tone: 'cyan', name: 'Research Grant', desc: 'Get 1 hour of research points (at least 200 RP).', cost: 100 },
+];
+
+const isVip = () => Date.now() < state.vipUntil;
+const gemCost = n => `<span class="gem-cost">${icon('gem')}${fmt(n)}</span>`;
+const lockBadge = price => `<span class="lockbadge">${icon('gem')}${price}</span>`;
+const flagOwned = i => !FLAG_PRICES[i] || state.owned.flags.includes(i);
+const toneOwned = k => !TONE_PRICES[k] || state.owned.tones.includes(k);
+const adGemsUsed = () => (state.adGems.day === dayKey() ? state.adGems.n : 0);
+const adGemsLeft = () => AD_GEMS_PER_DAY - adGemsUsed();
+
+function addGems(n, reason) {
+  state.gems += n;
+  Sound.play('reward'); buzz([15, 30, 15]);
+  toast(`+${n} gems${reason ? ` · ${reason}` : ''}`, 'gem', 'violet');
+  saveGame();
+  render();
+}
+
+function spendGems(n, label, onDone) {
+  if (state.gems < n) {
+    showModal('Not enough gems', `You need ${fmt(n)} gems for ${label}. You have ${fmt(state.gems)}.`, {
+      icon: 'gem', tone: 'violet', okText: 'Get gems', onOk: () => { showScreen('shop'); },
+    });
+    return;
+  }
+  showModal(`Buy ${label}?`, `This costs ${fmt(n)} gems. You have ${fmt(state.gems)}.`, {
+    icon: 'gem', tone: 'violet', okText: `Spend ${fmt(n)} gems`,
+    onOk: () => { state.gems -= n; onDone(); Sound.play('upgrade'); saveGame(); shopSig = ''; render(); },
+  });
+}
+
+// Real-money purchases are simulated in the web prototype.
+function simulatedPurchase(title, price, onDone) {
+  showModal(title, `Price: ${price}\nPrototype: no money is charged. The store version will use Google Play and App Store billing.`, {
+    icon: 'gem', tone: 'violet', okText: 'Buy (simulated)', onOk: onDone,
+  });
+}
+
+function buyPack(id) {
+  const p = GEM_PACKS.find(x => x.id === id);
+  if (p) simulatedPurchase(`Buy ${fmt(p.gems)} gems?`, p.price, () => addGems(p.gems, 'Purchase'));
+}
+
+function buyVip() {
+  simulatedPurchase(isVip() ? 'Extend VIP by 30 days?' : 'Start VIP membership?', '$4.99 / month', () => {
+    state.vipUntil = Math.max(Date.now(), state.vipUntil) + 30 * 86400e3;
+    Sound.play('reward'); buzz([20, 40, 20]);
+    toast('VIP active for 30 days', 'crown', 'gold');
+    saveGame(); identitySig = ''; render();
+  });
+}
+
+function buyWarp(h) {
+  const w = WARPS.find(x => x.h === h);
+  if (!w) return;
+  const amount = incomePerSec(false) * h * 3600;
+  spendGems(w.cost, `a ${h}-hour time warp (${money(amount)})`, () => {
+    earn(amount);
+    toast(`Time warp: +${money(amount)}`, 'clock', 'cyan');
+  });
+}
+
+function buyShopBoost(id) {
+  const b = SHOP_BOOSTS.find(x => x.id === id);
+  if (!b || (id === 'golden' && state.owned.golden)) return;
+  spendGems(b.cost, b.name, () => {
+    if (id === 'golden') state.owned.golden = true;
+    if (id === 'shield') { state.shieldUntil = Math.max(Date.now(), state.shieldUntil) + 24 * 3600e3; state.attack = null; }
+    if (id === 'grant') state.rp += Math.max(200, rpRate() * 3600);
+    toast(`${b.name} activated`, b.icon, b.tone);
+  });
+}
+
+function pickFlag(i) {
+  if (flagOwned(i)) { state.player.flag = i; saveGame(); shopSig = ''; render(); return; }
+  spendGems(FLAG_PRICES[i], `the ${FLAG_NAMES[i]} flag`, () => {
+    state.owned.flags.push(i);
+    state.player.flag = i;
+    buildPickers();
+  });
+}
+
+function pickTone(k) {
+  if (toneOwned(k)) { state.player.tone = k; saveGame(); buildPickers(); render(); return; }
+  spendGems(TONE_PRICES[k], `the ${k} avatar color`, () => {
+    state.owned.tones.push(k);
+    state.player.tone = k;
+    buildPickers();
+  });
+}
+
+// Rewarded-ad placeholder: VIP players skip it.
+let adTimer = null;
+function watchAd(onReward) {
+  if (isVip()) { onReward(); return; }
+  if (overlayOpen()) return;
+  const start = Date.now(), len = 3000;
+  $('adOverlay').hidden = false;
+  updateCoach();
+  adTimer = setInterval(() => {
+    const left = len - (Date.now() - start);
+    $('adBar').style.width = `${Math.min(100, (1 - left / len) * 100)}%`;
+    $('adText').textContent = left > 0 ? `Your reward arrives in ${Math.ceil(left / 1000)} seconds` : 'Done!';
+    if (left <= 0) {
+      clearInterval(adTimer);
+      $('adOverlay').hidden = true;
+      onReward();
+      if (!overlayOpen()) nextOverlay();
+    }
+  }, 100);
+}
+
+let shopSig = '';
+function renderShop(now) {
+  $('shopGems').textContent = fmt(state.gems);
+  $('vipStatus').textContent = isVip() ? `Active · ${Math.ceil((state.vipUntil - now) / 86400e3)} days left` : 'Monthly membership';
+  $('vipBtn').textContent = isVip() ? 'Extend VIP · $4.99' : 'Start VIP · $4.99 / month';
+  const left = adGemsLeft();
+  $('adGemsText').textContent = left > 0 ? `${isVip() ? 'VIP: no ad needed' : 'Watch a short ad'} · +5 gems (${left} of ${AD_GEMS_PER_DAY} left today)` : 'Come back tomorrow for more free gems';
+  $('adGemsBtn').disabled = left <= 0;
+  $('adGemsBtn').textContent = isVip() ? 'Claim' : 'Watch';
+
+  const ips = incomePerSec(false);
+  const sig = [state.gems, fmt(ips), state.owned.golden, state.owned.flags.join(), state.owned.tones.join(), state.player.flag, state.player.tone, Math.floor(state.shieldUntil / 60e3), fmt(rpRate())].join('|');
+  if (sig === shopSig) return;
+  shopSig = sig;
+  if (!$('gemPacks').children.length) {
+    $('gemPacks').innerHTML = GEM_PACKS.map(p => `<button class="pack" data-pack="${p.id}">
+      ${p.tag ? `<span class="tag">${p.tag}</span>` : ''}${icon('gem')}<b>${fmt(p.gems)}</b><span class="price">${p.price}</span></button>`).join('');
+  }
+  $('warps').innerHTML = WARPS.map(w => {
+    const can = state.gems >= w.cost;
+    return `<div class="row">${tile('clock', 'cyan')}
+      <div class="row-title"><span class="nm">${w.h} hour${w.h > 1 ? 's' : ''} of income</span></div>
+      <button class="buy gem ${can ? 'can' : ''}" data-warp="${w.h}">Warp<small>${gemCost(w.cost)}</small></button>
+      <div class="row-sub"><span>+${money(ips * w.h * 3600)} instantly</span></div></div>`;
+  }).join('');
+  $('shopBoosts').innerHTML = SHOP_BOOSTS.map(b => {
+    const owned = b.id === 'golden' && state.owned.golden;
+    const active = b.id === 'shield' && now < state.shieldUntil;
+    const can = state.gems >= b.cost;
+    const btn = owned ? `<button class="buy" disabled>${icon('check', 'ic-sm')}<small>Owned</small></button>`
+      : `<button class="buy gem ${can ? 'can' : ''}" data-sboost="${b.id}">${active ? 'Extend' : 'Buy'}<small>${gemCost(b.cost)}</small></button>`;
+    return `<div class="row">${tile(b.icon, b.tone)}<div class="row-title"><span class="nm">${b.name}</span></div>${btn}
+      <div class="row-sub"><span>${b.desc}${active ? ` Active for ${dur(state.shieldUntil - now)}.` : ''}</span></div></div>`;
+  }).join('');
+  $('shopFlags').innerHTML = Object.keys(FLAG_PRICES).map(Number).map(i =>
+    `<button data-flag="${i}" class="${state.player.flag === i ? 'on' : ''}" aria-label="${FLAG_NAMES[i]} flag">${flagSvg(i)}${flagOwned(i) ? '' : lockBadge(FLAG_PRICES[i])}</button>`).join('');
+  $('shopTones').innerHTML = Object.keys(TONE_PRICES).map(k => {
+    const [c1, c2] = TONE_COLORS[k];
+    return `<button data-tone="${k}" class="${state.player.tone === k ? 'on' : ''}"><span class="swatch" style="--c1:${c1};--c2:${c2}"></span>${toneOwned(k) ? k : gemCost(TONE_PRICES[k])}</button>`;
+  }).join('');
 }
 
 /* ---------------- Policies, research, eras ---------------- */
@@ -978,8 +1173,9 @@ function checkEra() {
   const e = currentEra();
   if (e > state.era) {
     state.era = e;
+    state.gems += 25;
     Sound.play('reward'); buzz([30, 60, 30]);
-    queueOverlay(() => showModal(`Welcome to the ${ERAS[e].name}`, `Your nation entered Era ${ROMAN[e]}. All income is now ×${ERAS[e].mult}.`, { icon: 'flask', tone: 'cyan' }));
+    queueOverlay(() => showModal(`Welcome to the ${ERAS[e].name}`, `Your nation entered Era ${ROMAN[e]}. All income is now ×${ERAS[e].mult}, and you received 25 gems.`, { icon: 'flask', tone: 'cyan' }));
   }
 }
 
@@ -1123,6 +1319,7 @@ function hitCell(i, el) {
   if (game.hits >= GAME_HITS) {
     closeGame();
     state.gamesWon++;
+    state.gems += 2;
     repelAttack();
     render();
     return;
@@ -1191,7 +1388,7 @@ function buzz(pattern) {
 /* ---------------- Overlays (modal + daily) queue ---------------- */
 
 const overlayQueue = [];
-function overlayOpen() { return !$('modal').hidden || !$('daily').hidden || !$('cyberGame').hidden; }
+function overlayOpen() { return !$('modal').hidden || !$('daily').hidden || !$('cyberGame').hidden || !$('adOverlay').hidden; }
 function queueOverlay(fn) { if (overlayOpen()) overlayQueue.push(fn); else fn(); }
 function nextOverlay() { const fn = overlayQueue.shift(); if (fn) fn(); updateCoach(); }
 
@@ -1199,8 +1396,8 @@ function nextOverlay() { const fn = overlayQueue.shift(); if (fn) fn(); updateCo
 
 // minutes of current income, with a floor for brand-new nations
 const DAILY = [
-  { min: 10, base: 100 }, { min: 15, base: 300 }, { min: 20, base: 800 }, { min: 30, base: 2000 },
-  { min: 45, base: 5000 }, { min: 60, base: 12000 }, { min: 120, base: 30000, boost: 30 },
+  { min: 10, base: 100 }, { min: 15, base: 300 }, { min: 20, base: 800, gems: 5 }, { min: 30, base: 2000 },
+  { min: 45, base: 5000, gems: 10 }, { min: 60, base: 12000 }, { min: 120, base: 30000, boost: 30, gems: 20 },
 ];
 function dayKey(d = new Date()) { return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`; }
 function yesterdayKey() { const d = new Date(); d.setDate(d.getDate() - 1); return dayKey(d); }
@@ -1222,7 +1419,9 @@ function renderDaily() {
     const today = st.ready && day === st.day;
     const cls = `day ${day === DAILY.length ? 'big' : ''} ${done ? 'done' : ''} ${today ? 'today' : ''}`;
     const extra = r.boost ? ` + 2× ${r.boost}m` : '';
-    return `<div class="${cls}">Day ${day}${icon(done ? 'check' : (r.boost ? 'gift' : 'coin'))}<b>${money(dailyAmount(day))}${extra}</b></div>`;
+    const gems = (r.gems || 0) + (isVip() ? 10 : 0);
+    const gemTxt = gems ? `<span class="gem-mini">${icon('gem')}+${gems}</span>` : '';
+    return `<div class="${cls}">Day ${day}${icon(done ? 'check' : (r.boost ? 'gift' : 'coin'))}<b>${money(dailyAmount(day))}${extra}</b>${gemTxt}</div>`;
   }).join('');
   $('dailyClaim').hidden = !st.ready;
   $('dailyClose').textContent = st.ready ? 'Later' : 'Close';
@@ -1241,10 +1440,12 @@ function claimDaily() {
   earn(amount);
   const r = DAILY[st.day - 1];
   if (r.boost) state.boostUntil = Math.max(Date.now(), state.boostUntil) + r.boost * 60e3;
+  const gems = (r.gems || 0) + (isVip() ? 10 : 0);
+  state.gems += gems;
   state.daily = { streak: st.day, last: dayKey(), best: Math.max(state.daily.best, st.day) };
   saveGame();
   Sound.play('reward'); buzz([20, 40, 20]);
-  toast(`Day ${st.day} reward: ${money(amount)}`, 'gift', 'rose');
+  toast(`Day ${st.day} reward: ${money(amount)}${gems ? ` · +${gems} gems` : ''}`, 'gift', 'rose');
   closeDaily();
   render();
 }
@@ -1277,6 +1478,8 @@ const COACH = [
     text: 'You can now set <b>national policy</b>. Every choice has a benefit and a cost.', until: () => screen === 'global' },
   { id: 'tipResearch', when: () => researchUnlocked() && state.rp >= RESEARCH[0].cost, target: () => tabBtn('global'),
     text: 'Your first <b>research</b> project is ready. Research is permanent.', until: () => screen === 'global' && govTab === 'research' },
+  { id: 'tipShop', when: () => state.gems >= 50, target: () => $('gemBtn'),
+    text: 'You have <b>gems</b>! Spend them in the shop on time warps, boosts and premium flags.', until: () => screen === 'shop' },
   { id: 'tipExport', when: () => claimableInfluence() >= 1, target: () => tabBtn('global'),
     text: 'You can now <b>export technology</b> for permanent Influence.', until: () => screen === 'global' },
 ];
@@ -1363,7 +1566,16 @@ function bindUI() {
     setTimeout(() => f.remove(), 900);
     render();
   });
-  $('boost').addEventListener('click', () => { activateBoost(); render(); });
+  $('boost').addEventListener('click', () => { if (Date.now() >= state.boostReadyAt) watchAd(() => { activateBoost(); render(); }); });
+  $('gemBtn').addEventListener('click', () => showScreen('shop'));
+  $('shopBack').addEventListener('click', () => showScreen(lastTab));
+  $('vipBtn').addEventListener('click', buyVip);
+  $('adGemsBtn').addEventListener('click', () => { if (adGemsLeft() > 0) watchAd(() => { state.adGems = { day: dayKey(), n: adGemsUsed() + 1 }; addGems(5, 'Ad reward'); }); });
+  $('gemPacks').addEventListener('click', e => { const b = e.target.closest('[data-pack]'); if (b) buyPack(b.dataset.pack); });
+  $('warps').addEventListener('click', e => { const b = e.target.closest('[data-warp]'); if (b) buyWarp(Number(b.dataset.warp)); });
+  $('shopBoosts').addEventListener('click', e => { const b = e.target.closest('[data-sboost]'); if (b) buyShopBoost(b.dataset.sboost); });
+  $('shopFlags').addEventListener('click', e => { const b = e.target.closest('[data-flag]'); if (b) pickFlag(Number(b.dataset.flag)); });
+  $('shopTones').addEventListener('click', e => { const b = e.target.closest('[data-tone]'); if (b) pickTone(b.dataset.tone); });
   $('repel').addEventListener('click', () => { startGame(); render(); });
   $('gameGrid').addEventListener('pointerdown', e => {
     const c = e.target.closest('[data-cell]');
@@ -1428,11 +1640,11 @@ function bindUI() {
   });
   $('avatarTones').addEventListener('click', e => {
     const b = e.target.closest('[data-tone]');
-    if (b) { state.player.tone = b.dataset.tone; saveGame(); buildPickers(); render(); }
+    if (b) pickTone(b.dataset.tone);
   });
   $('flagPicker').addEventListener('click', e => {
     const b = e.target.closest('[data-flag]');
-    if (b) { state.player.flag = Number(b.dataset.flag); saveGame(); render(); }
+    if (b) pickFlag(Number(b.dataset.flag));
   });
   $('dailyCard').addEventListener('click', () => queueOverlay(showDaily));
   $('dailyClaim').addEventListener('click', claimDaily);
@@ -1486,4 +1698,4 @@ setInterval(tick, 100);
 setInterval(saveGame, 5000);
 
 // Debug / test hook
-window.DN = { get state() { return state; }, incomePerSec, earn, render, showScreen, dailyStatus, mods, rpRate, currentEra, SECTORS, UPGRADES, RESEARCH };
+window.DN = { get state() { return state; }, isVip, addGems, incomePerSec, earn, render, showScreen, dailyStatus, mods, rpRate, currentEra, SECTORS, UPGRADES, RESEARCH };

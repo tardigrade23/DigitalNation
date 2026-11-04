@@ -474,6 +474,71 @@ main { padding-block: 16px; padding-left: var(--gutter-l); padding-right: var(--
 @keyframes bugIn { from { transform: scale(.7); } }
 @keyframes shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
 
+/* Gems + shop */
+.gem-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 6px 10px; border-radius: 999px;
+  background: rgba(155, 140, 255, .14); border: 1px solid rgba(155, 140, 255, .4);
+  color: var(--violet); font-family: var(--font-display); font-weight: 700;
+  font-variant-numeric: tabular-nums; flex: none;
+}
+.gem-pill.static { cursor: default; }
+.avatar-btn.vip .tile { box-shadow: 0 0 0 2px var(--ink), 0 0 0 4px var(--gold); }
+.vip-chip { color: var(--gold); border-color: rgba(245, 184, 65, .5); }
+
+.vip-card {
+  background: linear-gradient(150deg, #3A2A08, #1B1530 70%);
+  border-color: rgba(245, 184, 65, .5);
+  display: flex; flex-direction: column; gap: 12px;
+}
+.vip-head { display: flex; align-items: center; gap: 12px; }
+.vip-head > span:last-child { display: flex; flex-direction: column; }
+#vipStatus { color: var(--gold); font-weight: 700; }
+.perks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
+.perks li { display: flex; align-items: center; gap: 8px; }
+.perks .ic { color: var(--gold); }
+
+.shop-row { display: flex; align-items: center; gap: 12px; }
+.shop-row-body { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.pack-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.pack {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 16px 10px 12px; border-radius: var(--radius);
+  background: var(--surface); border: 1px solid var(--line);
+}
+.pack .ic { width: 34px; height: 34px; color: var(--violet); }
+.pack b { font-family: var(--font-display); font-size: 20px; font-variant-numeric: tabular-nums; }
+.pack .price { width: 100%; padding: 8px; border-radius: 10px; background: var(--violet); color: #140C3A; font-weight: 800; }
+.pack .tag { position: absolute; top: -9px; left: 50%; transform: translateX(-50%); white-space: nowrap; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: var(--gold); color: var(--gold-ink); }
+.buy.gem.can { background: var(--violet); border-color: var(--violet); color: #140C3A; }
+.buy.gem.can small { color: #140C3A; }
+.gem-cost { display: inline-flex; align-items: center; gap: 3px; }
+.gem-cost .ic { width: 12px; height: 12px; }
+
+.flag-grid button, .tone-shop button { position: relative; }
+.lockbadge {
+  position: absolute; right: 4px; bottom: 4px;
+  display: inline-flex; align-items: center; gap: 2px;
+  padding: 1px 6px; border-radius: 999px; font-size: 10px; font-weight: 800;
+  background: var(--violet); color: #140C3A;
+}
+.lockbadge .ic { width: 10px; height: 10px; }
+#shopFlags { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.tone-shop { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+.tone-shop button { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: var(--muted); }
+.tone-shop .swatch { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(145deg, var(--c1), var(--c2)); border: 2px solid transparent; }
+.tone-shop button.on .swatch { border-color: var(--text); }
+.tone-row button .lockbadge { right: -8px; bottom: -6px; }
+.gem-mini { display: inline-flex; align-items: center; gap: 2px; color: var(--violet); font-weight: 800; }
+.gem-mini .ic { width: 11px !important; height: 11px !important; color: var(--violet) !important; }
+
+.ad-box { width: min(320px, 100%); }
+.ad-art { width: 100%; aspect-ratio: 16 / 9; border-radius: 14px; display: grid; place-items: center; background: linear-gradient(135deg, #2A1D63, #0F2A4A); }
+.ad-art .ic { width: 56px; height: 56px; color: var(--text); opacity: .8; }
+.ad-box .meter { width: 100%; }
+.ad-box .meter i { transition: none; }
+
 /* Tab bar */
 .tabbar {
   position: fixed;
@@ -555,6 +620,11 @@ main { padding-block: 16px; padding-left: var(--gutter-l); padding-right: var(--
 @media (prefers-reduced-motion: reduce) {
   .attack, .floater, .toast, .coach-ring, .cell.bug, .cell.miss { animation: none; }
   .meter i { transition: none; }
+}
+@media (max-width: 400px) {
+  .rank-pill { padding: 5px 8px; }
+  .gem-pill { padding: 5px 8px; }
+  .appbar-right { gap: 6px; }
 }
 @media (max-width: 360px) {
   .gdp { font-size: 28px; }
