@@ -18,6 +18,8 @@ const DEBUFF_DURATION = 30e3;
 const SEC_MAX = 7;
 const DEFAULT_NATION = 'Digital Nation';
 const DEFAULT_PLAYER = { name: 'Leader', avatar: 'ai', tone: 'gold', flag: 0 };
+const DEFAULT_SETTINGS = { sound: true, vibration: true };
+const DEFAULT_DAILY = { streak: 0, last: '', best: 0 };
 
 // c1/c2: icon tile gradient
 const SECTORS = [
@@ -85,6 +87,7 @@ function defaultState() {
     attack: null, nextAttack: now + 90e3,
     startedAt: now, lastSave: now,
     player: { ...DEFAULT_PLAYER }, achievements: {},
+    settings: { ...DEFAULT_SETTINGS }, daily: { ...DEFAULT_DAILY }, coach: {},
   };
 }
 
@@ -167,6 +170,7 @@ function buySector(id) {
   const before = owned(id);
   state.gdp -= cost;
   state.sectors[id] = before + n;
+  Sound.play('buy'); buzz(12);
   if (before === 0) toast(`${s.name} is online`, s.id, s);
   const hit = MILESTONES.filter(m => before < m && before + n >= m).pop();
   if (hit) toast(`${s.name} reached ${hit}: income ×2`, s.id, s);
@@ -177,6 +181,7 @@ function buyUpgrade(id) {
   if (!u || state.upgrades[id] || !u.unlocked() || state.gdp < u.cost) return;
   state.gdp -= u.cost;
   state.upgrades[id] = true;
+  Sound.play('upgrade'); buzz([12, 40, 12]);
   toast(`${u.name} activated`, u.icon, u);
 }
 
@@ -189,6 +194,7 @@ function buySecurity() {
   if (state.secLevel >= SEC_MAX || state.gdp < secCost()) return;
   state.gdp -= secCost();
   state.secLevel++;
+  Sound.play('upgrade'); buzz([12, 40, 12]);
   toast(`Defense upgraded to level ${state.secLevel}`, 'shield-check', 'green');
 }
 
@@ -201,6 +207,7 @@ function repelAttack() {
   state.attack = null;
   state.attacksRepelled++;
   scheduleAttack(Date.now());
+  Sound.play('defend'); buzz(20);
   toast(`Attack stopped. Reward: ${money(reward)}`, 'shield-check', 'green');
 }
 
@@ -208,12 +215,14 @@ function resolveAttack(now) {
   state.attack = null;
   if (Math.random() < secChance()) {
     state.attacksRepelled++;
+    Sound.play('defend');
     toast('Auto-defense blocked the attack', 'shield-check', 'green');
   } else {
     const stolen = state.gdp * 0.1;
     state.gdp -= stolen;
     state.debuffUntil = now + DEBUFF_DURATION;
     state.attacksLost++;
+    Sound.play('breach'); buzz(300);
     toast(`Breach! Hackers stole ${money(stolen)}`, 'alert', 'bad');
   }
   scheduleAttack(now);
@@ -223,7 +232,7 @@ function updateAttack(now) {
   if (state.attack) {
     if (now >= state.attack.endsAt) resolveAttack(now);
   } else if (now >= state.nextAttack) {
-    if (incomePerSec(false) >= 5) state.attack = { endsAt: now + ATTACK_WINDOW };
+    if (incomePerSec(false) >= 5) { state.attack = { endsAt: now + ATTACK_WINDOW }; Sound.play('alarm'); buzz([180, 80, 180]); }
     else scheduleAttack(now);
   }
 }
@@ -235,6 +244,7 @@ function activateBoost() {
   if (now < state.boostReadyAt) return;
   state.boostUntil = now + BOOST_DURATION;
   state.boostReadyAt = now + BOOST_COOLDOWN;
+  Sound.play('buy');
   toast('2× income for 2 minutes', 'bolt', 'gold');
 }
 
@@ -258,10 +268,12 @@ function performPrestige() {
     influence: state.influence + gain, prestiges: state.prestiges + 1,
     clicks: state.clicks, attacksRepelled: state.attacksRepelled, attacksLost: state.attacksLost,
     startedAt: state.startedAt, player: state.player, achievements: state.achievements,
+    settings: state.settings, daily: state.daily, coach: state.coach,
   };
   state = Object.assign(defaultState(), keep);
   sectorSig = ''; upgSig = '';
   saveGame();
+  Sound.play('reward');
   showModal('Technology exported', `+${gain} Influence. All income is now +${Math.round(state.influence * INFLUENCE_BONUS * 100)}%.`, { icon: 'globe', tone: 'violet' });
 }
 
@@ -329,6 +341,10 @@ function loadGame() {
   if (s.nation === 'Rəqəmsal Respublika' || s.nation === 'Digital Republic') s.nation = DEFAULT_NATION; // older defaults
   s.player = Object.assign({ ...DEFAULT_PLAYER }, saved && saved.player);
   if (!s.achievements || typeof s.achievements !== 'object') s.achievements = {};
+  s.settings = Object.assign({ ...DEFAULT_SETTINGS }, saved && saved.settings);
+  s.daily = Object.assign({ ...DEFAULT_DAILY }, saved && saved.daily);
+  // Players from before the tutorial existed skip it.
+  if (!saved || typeof saved.coach !== 'object' || !saved.coach) s.coach = saved ? { t1: 1, t2: 1, t3: 1, t4: 1 } : {};
   return s;
 }
 
@@ -381,6 +397,7 @@ function showModal(title, text, opts = {}) {
   $('modalOk').textContent = opts.okText || 'Continue';
   modalOnOk = opts.onOk || null;
   $('modal').hidden = false;
+  updateCoach();
   if (!input.hidden) input.focus();
 }
 
@@ -390,6 +407,7 @@ function closeModal(confirmed) {
   modalOnOk = null;
   $('modal').hidden = true;
   if (fn) fn(value);
+  if (!overlayOpen()) nextOverlay();
 }
 
 /* ---------------- Skyline (canvas) ---------------- */
@@ -667,6 +685,9 @@ function render() {
   $('upgBadge').hidden = affordable === 0;
   $('upgBadge').textContent = affordable;
   $('secBadge').hidden = !(state.attack || (state.secLevel < SEC_MAX && state.gdp >= secCost()));
+  const daily = dailyStatus();
+  const tutorialDone = COACH.filter(c => c.tut).every(c => state.coach[c.id]);
+  $('nationBadge').hidden = !daily.ready || screen === 'nation' || !tutorialDone;
 
   if (screen === 'nation') {
     $('pop').textContent = fmt(state.pop);
@@ -675,6 +696,8 @@ function render() {
     $('defStat').textContent = `Lv ${state.secLevel}`;
     $('tapValue').textContent = `+${money(clickValue())} per tap`;
     $('buildingCount').textContent = `${totalOwned()} facilities`;
+    $('dailyCardDot').hidden = !daily.ready;
+    $('dailyCardText').textContent = daily.ready ? `Day ${daily.day} reward is ready` : `Next reward in ${dur(msToMidnight())}`;
     const g = nextGoal();
     $('goalText').textContent = g.cost ? `${g.text} · ${money(g.cost)}` : g.text;
     $('goalBar').style.width = `${g.cost ? Math.min(100, (state.gdp / g.cost) * 100) : 100}%`;
@@ -700,6 +723,7 @@ function render() {
   } else if (screen === 'profile') {
     renderProfile(now, r);
   }
+  updateCoach();
 }
 
 let lastTab = 'nation';
@@ -755,6 +779,7 @@ const ACHIEVEMENTS = [
   { id: 'export',  icon: 'globe',        name: 'Tech Exporter',        desc: 'Export technology once',         prog: () => [state.prestiges, 1] },
   { id: 'top50',   icon: 'trophy',       name: 'Top 50',               desc: 'Reach #50 in the tech ranking',  prog: () => [196 - techRank(), 146] },
   { id: 'orbit',   icon: 'space',        name: 'Orbit Reached',        desc: 'Launch Satellite Internet',      prog: () => [owned('space'), 1] },
+  { id: 'loyal',   icon: 'gift',         name: 'Loyal Leader',         desc: 'Claim 7 daily rewards in a row', prog: () => [state.daily.best, 7] },
 ];
 
 function checkAchievements(silent) {
@@ -763,7 +788,7 @@ function checkAchievements(silent) {
     const [cur, target] = a.prog();
     if (cur >= target) {
       state.achievements[a.id] = Date.now();
-      if (!silent) toast(`Achievement: ${a.name}`, 'star', 'gold');
+      if (!silent) { toast(`Achievement: ${a.name}`, 'star', 'gold'); Sound.play('reward'); buzz([20, 40, 20]); }
     }
   }
 }
@@ -817,6 +842,7 @@ function renderProfile(now, rank) {
     </div>`).join('');
   }
   renderStats(now);
+  for (const [id, key] of [['setSound', 'sound'], ['setVibe', 'vibration']]) $(id).setAttribute('aria-checked', String(!!state.settings[key]));
 }
 
 /* ---------------- PWA: install + offline ---------------- */
@@ -842,6 +868,190 @@ function registerServiceWorker() {
   window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => { /* unsupported host */ }); });
 }
 
+/* ---------------- Sound + haptics ---------------- */
+
+const Sound = (() => {
+  let ctx = null, lastTap = 0;
+  function ac() {
+    if (!ctx) {
+      const C = window.AudioContext || window.webkitAudioContext;
+      if (!C) return null;
+      try { ctx = new C(); } catch (e) { return null; }
+    }
+    if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+    return ctx;
+  }
+  function tone(freq, dur, { type = 'sine', vol = 0.08, delay = 0, slide = 0 } = {}) {
+    const a = ac();
+    if (!a) return;
+    const t = a.currentTime + delay;
+    const o = a.createOscillator(), g = a.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(freq, t);
+    if (slide) o.frequency.exponentialRampToValueAtTime(freq * slide, t + dur);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g).connect(a.destination);
+    o.start(t);
+    o.stop(t + dur + 0.03);
+  }
+  const SFX = {
+    tap: () => {
+      const now = performance.now();
+      if (now - lastTap < 45) return;
+      lastTap = now;
+      tone(820 + Math.random() * 120, 0.07, { type: 'triangle', vol: 0.05, slide: 1.35 });
+    },
+    buy: () => { tone(523, 0.08, { type: 'triangle' }); tone(784, 0.13, { type: 'triangle', delay: 0.07 }); },
+    upgrade: () => [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.13, { type: 'triangle', vol: 0.07, delay: i * 0.06 })),
+    reward: () => [784, 988, 1175, 1568].forEach((f, i) => tone(f, 0.2, { vol: 0.07, delay: i * 0.08 })),
+    alarm: () => [0, 0.26, 0.52].forEach(d => { tone(740, 0.12, { type: 'square', vol: 0.03, delay: d }); tone(554, 0.12, { type: 'square', vol: 0.03, delay: d + 0.13 }); }),
+    defend: () => { tone(392, 0.1, { type: 'triangle' }); tone(784, 0.22, { type: 'triangle', delay: 0.08 }); },
+    breach: () => tone(220, 0.45, { type: 'sawtooth', vol: 0.05, slide: 0.5 }),
+  };
+  return {
+    play(name) { if (!state.settings.sound || !SFX[name]) return; try { SFX[name](); } catch (e) { /* audio unavailable */ } },
+    unlock() { if (state.settings.sound) ac(); },
+  };
+})();
+
+function buzz(pattern) {
+  if (!state.settings.vibration || !navigator.vibrate) return;
+  try { navigator.vibrate(pattern); } catch (e) { /* not supported */ }
+}
+
+/* ---------------- Overlays (modal + daily) queue ---------------- */
+
+const overlayQueue = [];
+function overlayOpen() { return !$('modal').hidden || !$('daily').hidden; }
+function queueOverlay(fn) { if (overlayOpen()) overlayQueue.push(fn); else fn(); }
+function nextOverlay() { const fn = overlayQueue.shift(); if (fn) fn(); updateCoach(); }
+
+/* ---------------- Daily reward ---------------- */
+
+// minutes of current income, with a floor for brand-new nations
+const DAILY = [
+  { min: 10, base: 100 }, { min: 15, base: 300 }, { min: 20, base: 800 }, { min: 30, base: 2000 },
+  { min: 45, base: 5000 }, { min: 60, base: 12000 }, { min: 120, base: 30000, boost: 30 },
+];
+function dayKey(d = new Date()) { return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`; }
+function yesterdayKey() { const d = new Date(); d.setDate(d.getDate() - 1); return dayKey(d); }
+function msToMidnight() { const d = new Date(); d.setHours(24, 0, 0, 0); return d - Date.now(); }
+
+function dailyStatus() {
+  const d = state.daily;
+  if (d.last === dayKey()) return { ready: false, day: d.streak };
+  const continues = d.last === yesterdayKey() && d.streak < DAILY.length;
+  return { ready: true, day: continues ? d.streak + 1 : 1 };
+}
+function dailyAmount(day) { const r = DAILY[day - 1]; return Math.max(r.base, incomePerSec(false) * r.min * 60); }
+
+function renderDaily() {
+  const st = dailyStatus();
+  $('dailyGrid').innerHTML = DAILY.map((r, i) => {
+    const day = i + 1;
+    const done = st.ready ? day < st.day : day <= st.day;
+    const today = st.ready && day === st.day;
+    const cls = `day ${day === DAILY.length ? 'big' : ''} ${done ? 'done' : ''} ${today ? 'today' : ''}`;
+    const extra = r.boost ? ` + 2× ${r.boost}m` : '';
+    return `<div class="${cls}">Day ${day}${icon(done ? 'check' : (r.boost ? 'gift' : 'coin'))}<b>${money(dailyAmount(day))}${extra}</b></div>`;
+  }).join('');
+  $('dailyClaim').hidden = !st.ready;
+  $('dailyClose').textContent = st.ready ? 'Later' : 'Close';
+  $('dailySub').textContent = st.ready
+    ? (st.day === 1 ? 'Come back every day. Rewards grow with each day in a row.' : `Day ${st.day} in a row. Keep the streak going!`)
+    : `Claimed for today. Next reward in ${dur(msToMidnight())}.`;
+}
+
+function showDaily() { renderDaily(); $('daily').hidden = false; updateCoach(); }
+function closeDaily() { $('daily').hidden = true; if (!overlayOpen()) nextOverlay(); }
+
+function claimDaily() {
+  const st = dailyStatus();
+  if (!st.ready) return;
+  const amount = dailyAmount(st.day);
+  earn(amount);
+  const r = DAILY[st.day - 1];
+  if (r.boost) state.boostUntil = Math.max(Date.now(), state.boostUntil) + r.boost * 60e3;
+  state.daily = { streak: st.day, last: dayKey(), best: Math.max(state.daily.best, st.day) };
+  saveGame();
+  Sound.play('reward'); buzz([20, 40, 20]);
+  toast(`Day ${st.day} reward: ${money(amount)}`, 'gift', 'rose');
+  closeDaily();
+  render();
+}
+
+let dailyAutoShown = '';
+function maybeAutoDaily() {
+  const tutorialDone = COACH.filter(c => c.tut).every(c => state.coach[c.id]);
+  if (!tutorialDone || dailyAutoShown === dayKey() || !dailyStatus().ready) return;
+  dailyAutoShown = dayKey();
+  queueOverlay(showDaily);
+}
+
+/* ---------------- Tutorial + one-time tips (coach marks) ---------------- */
+
+const tabBtn = name => document.querySelector(`.tabbar [data-screen="${name}"]`);
+const COACH = [
+  { id: 't1', tut: true, screen: 'nation', target: () => $('tap'),
+    text: 'Welcome, Leader! Tap <b>Collect Taxes</b> to raise your first $15.', until: () => state.gdp >= 15 || owned('isp') > 0 },
+  { id: 't2', tut: true, target: () => tabBtn('sectors'),
+    text: 'Well done. Now open <b>Sectors</b> to invest in your country.', until: () => screen === 'sectors' || owned('isp') > 0 },
+  { id: 't3', tut: true, screen: 'sectors', target: () => document.querySelector('[data-buy="isp"]'),
+    text: 'Build your first <b>Internet Provider</b>. It earns GDP every second.', until: () => owned('isp') > 0 },
+  { id: 't4', tut: true, target: () => document.querySelector('.ips-pill'), button: "Let's go",
+    text: 'Your nation now earns on its own, even while you are away. Keep building to climb the world ranking!' },
+  { id: 'tipSec', when: () => !!state.attack, target: () => $('repel'),
+    text: 'Hackers are attacking! Tap <b>Defend</b> before the timer runs out.', until: () => !state.attack },
+  { id: 'tipUpg', when: () => availableUpgrades().some(u => state.gdp >= u.cost), target: () => tabBtn('upgrades'),
+    text: 'An <b>upgrade</b> is ready. Upgrades multiply your income.', until: () => screen === 'upgrades' },
+  { id: 'tipExport', when: () => claimableInfluence() >= 1, target: () => tabBtn('global'),
+    text: 'You can now <b>export technology</b> for permanent Influence.', until: () => screen === 'global' },
+];
+
+function currentCoach() {
+  const tutDone = COACH.filter(c => c.tut).every(c => state.coach[c.id]);
+  for (const c of COACH) {
+    if (state.coach[c.id]) continue;
+    if (c.tut) return c;              // tutorial steps run in order
+    if (tutDone && c.when()) return c; // tips appear once their moment comes
+  }
+  return null;
+}
+
+let coachShown = '';
+function updateCoach() {
+  let c = currentCoach();
+  while (c && c.until && c.until()) { state.coach[c.id] = 1; c = currentCoach(); }
+  const bubble = $('coach'), ring = $('coachRing');
+  const target = c && (!c.screen || c.screen === screen) && !overlayOpen() ? c.target() : null;
+  if (!target || target.getClientRects().length === 0) { bubble.hidden = true; ring.hidden = true; return; }
+
+  if (coachShown !== c.id) {
+    coachShown = c.id;
+    const skip = c.tut && c.id !== 't4' ? '<button class="coach-skip" data-coach="skip">Skip tutorial</button>' : '';
+    const ok = c.button ? `<button class="btn btn-gold" data-coach="ok">${c.button}</button>` : '';
+    bubble.innerHTML = `<div>${c.text}</div><div class="coach-actions">${skip}${ok}</div>`;
+  }
+  const r = target.getBoundingClientRect();
+  const pad = 6;
+  ring.hidden = false;
+  Object.assign(ring.style, { left: `${r.left - pad}px`, top: `${r.top - pad}px`, width: `${r.width + pad * 2}px`, height: `${r.height + pad * 2}px` });
+
+  bubble.hidden = false;
+  const bw = Math.min(320, window.innerWidth - 32);
+  bubble.style.width = `${bw}px`;
+  const bh = bubble.offsetHeight;
+  const below = r.top + r.height / 2 < window.innerHeight / 2;
+  const top = below ? r.bottom + pad + 14 : r.top - pad - 14 - bh;
+  const left = Math.max(16, Math.min(window.innerWidth - 16 - bw, r.left + r.width / 2 - bw / 2));
+  bubble.dataset.side = below ? 'below' : 'above';
+  bubble.style.top = `${top}px`;
+  bubble.style.left = `${left}px`;
+  bubble.style.setProperty('--ax', `${Math.max(18, Math.min(bw - 18, r.left + r.width / 2 - left))}px`);
+}
+
 /* ---------------- Loop ---------------- */
 
 let lastTick = Date.now();
@@ -854,7 +1064,7 @@ function tick() {
   earn(incomePerSec() * dt);
   state.pop += (popTarget() - state.pop) * Math.min(1, dt * 0.05);
   updateAttack(now);
-  if (now - achTimer > 1000) { achTimer = now; checkAchievements(false); }
+  if (now - achTimer > 1000) { achTimer = now; checkAchievements(false); maybeAutoDaily(); }
   render();
   if (now - skyTimer > (reduceMotion ? 3000 : 150)) { skyTimer = now; drawSkyline(); }
 }
@@ -864,6 +1074,7 @@ function bindUI() {
     const v = clickValue();
     earn(v);
     state.clicks++;
+    Sound.play('tap'); buzz(6);
     const f = document.createElement('span');
     f.className = 'floater';
     f.textContent = '+' + money(v);
@@ -931,6 +1142,22 @@ function bindUI() {
     const b = e.target.closest('[data-flag]');
     if (b) { state.player.flag = Number(b.dataset.flag); saveGame(); render(); }
   });
+  $('dailyCard').addEventListener('click', () => queueOverlay(showDaily));
+  $('dailyClaim').addEventListener('click', claimDaily);
+  $('dailyClose').addEventListener('click', closeDaily);
+  $('setSound').addEventListener('click', () => { state.settings.sound = !state.settings.sound; Sound.play('tap'); saveGame(); render(); });
+  $('setVibe').addEventListener('click', () => { state.settings.vibration = !state.settings.vibration; buzz(30); saveGame(); render(); });
+  $('replayTut').addEventListener('click', () => { for (const c of COACH) if (c.tut) delete state.coach[c.id]; coachShown = ''; showScreen('nation'); });
+  $('coach').addEventListener('click', e => {
+    const c = currentCoach();
+    if (!c) return;
+    if (e.target.closest('[data-coach="skip"]')) { for (const x of COACH) if (x.tut) state.coach[x.id] = 1; saveGame(); }
+    else if (e.target.closest('[data-coach="ok"]')) { state.coach[c.id] = 1; saveGame(); }
+    updateCoach();
+  });
+  // Browsers only allow audio after a user gesture.
+  document.addEventListener('pointerdown', () => Sound.unlock(), { once: true });
+  window.addEventListener('scroll', updateCoach, { passive: true });
   $('installBtn').addEventListener('click', async () => {
     if (!deferredInstall) return;
     deferredInstall.prompt();
@@ -941,14 +1168,14 @@ function bindUI() {
   $('reset').addEventListener('click', () => {
     showModal('Reset everything?', 'All progress, including Influence, will be deleted. This cannot be undone.', {
       icon: 'trash', tone: 'bad', okText: 'Reset',
-      onOk: () => { state = defaultState(); sectorSig = ''; upgSig = ''; achSig = ''; saveGame(); buildPickers(); showScreen('nation'); },
+      onOk: () => { state = defaultState(); sectorSig = ''; upgSig = ''; achSig = ''; coachShown = ''; dailyAutoShown = ''; saveGame(); buildPickers(); showScreen('nation'); },
     });
   });
 
   window.addEventListener('resize', drawSkyline);
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) saveGame();
-    else { applyOffline(); lastTick = Date.now(); render(); }
+    else { applyOffline(); lastTick = Date.now(); render(); maybeAutoDaily(); }
   });
   window.addEventListener('beforeunload', saveGame);
 }
@@ -960,10 +1187,11 @@ renderInstall();
 registerServiceWorker();
 applyOffline();
 render();
+maybeAutoDaily();
 drawSkyline();
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawSkyline);
 setInterval(tick, 100);
 setInterval(saveGame, 5000);
 
 // Debug / test hook
-window.DN = { get state() { return state; }, incomePerSec, earn, render, showScreen, SECTORS, UPGRADES };
+window.DN = { get state() { return state; }, incomePerSec, earn, render, showScreen, dailyStatus, SECTORS, UPGRADES };

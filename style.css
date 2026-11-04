@@ -358,6 +358,58 @@ main { padding-block: 16px; padding-left: var(--gutter-l); padding-right: var(--
 .install { display: flex; align-items: center; gap: 12px; }
 .install-body { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; line-height: 1.45; }
 
+/* Daily reward */
+.dot-live { width: 10px; height: 10px; border-radius: 50%; background: var(--bad); box-shadow: 0 0 0 4px rgba(255, 93, 110, .2); flex: none; }
+.daily-box { width: min(380px, 100%); }
+.daily-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; width: 100%; margin-top: 6px; }
+.day {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 10px 4px 8px; border-radius: 12px;
+  background: var(--surface-2); border: 1px solid var(--line);
+  font-size: 11px; font-weight: 700; color: var(--muted);
+}
+.day .ic { width: 22px; height: 22px; color: var(--gold); }
+.day b { color: var(--text); font-size: 12px; font-variant-numeric: tabular-nums; }
+.day.big { grid-column: span 2; }
+.day.done { opacity: .55; }
+.day.done .ic { color: var(--good); }
+.day.today { border-color: var(--gold); background: rgba(245, 184, 65, .12); color: var(--gold); box-shadow: 0 0 0 1px var(--gold); }
+
+/* Settings switches */
+.kv-btn > .ic { margin-right: 2px; }
+.kv-btn > span.switch { flex: none; }
+.switch { position: relative; width: 44px; height: 26px; border-radius: 13px; background: var(--line); transition: background .15s; }
+.switch i { position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--text); transition: transform .15s; }
+[aria-checked="true"] .switch { background: var(--good); }
+[aria-checked="true"] .switch i { transform: translateX(18px); }
+
+/* Coach marks (tutorial) */
+.coach-ring {
+  position: fixed; z-index: 47; pointer-events: none;
+  border: 3px solid var(--gold); border-radius: 16px;
+  box-shadow: 0 0 0 4px rgba(245, 184, 65, .25), 0 0 24px rgba(245, 184, 65, .5);
+  animation: coachPulse 1.2s ease-in-out infinite;
+}
+@keyframes coachPulse { 50% { box-shadow: 0 0 0 9px rgba(245, 184, 65, .12), 0 0 30px rgba(245, 184, 65, .6); } }
+.coach {
+  position: fixed; z-index: 48;
+  background: var(--text); color: var(--ink);
+  border-radius: 16px; padding: 12px 14px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, .55);
+  font-size: 14px; line-height: 1.45; font-weight: 600;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.coach::after {
+  content: ""; position: absolute; left: var(--ax, 50%); width: 14px; height: 14px;
+  background: var(--text); transform: translateX(-50%) rotate(45deg); border-radius: 2px;
+}
+.coach[data-side="below"]::after { top: -6px; }
+.coach[data-side="above"]::after { bottom: -6px; }
+.coach-actions { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.coach-actions:empty { display: none; }
+.coach-skip { font-size: 12px; font-weight: 700; color: #5A6B82; text-decoration: underline; }
+.coach .btn { padding: 8px 14px; margin-left: auto; }
+
 /* Tab bar */
 .tabbar {
   position: fixed;
@@ -437,7 +489,7 @@ main { padding-block: 16px; padding-left: var(--gutter-l); padding-right: var(--
 @keyframes toastIn { from { transform: translateY(10px); opacity: 0; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .attack, .floater, .toast { animation: none; }
+  .attack, .floater, .toast, .coach-ring { animation: none; }
   .meter i { transition: none; }
 }
 @media (max-width: 360px) {

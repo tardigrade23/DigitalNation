@@ -58,6 +58,10 @@
       <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></symbol>
       <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></symbol>
       <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></symbol>
+      <symbol id="i-gift" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></symbol>
+      <symbol id="i-volume" viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></symbol>
+      <symbol id="i-vibrate" viewBox="0 0 24 24"><rect x="7" y="4" width="10" height="16" rx="2"/><path d="M3 8v8M21 8v8"/></symbol>
+      <symbol id="i-replay" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></symbol>
     </defs>
   </svg>
 
@@ -124,6 +128,16 @@
           <div class="stat"><span class="tile tile-violet"><svg class="ic"><use href="#i-globe"/></svg></span><span><span class="stat-k">Influence</span><span id="influence" class="stat-v">0</span></span></div>
           <div class="stat"><span class="tile tile-green"><svg class="ic"><use href="#i-shield"/></svg></span><span><span class="stat-k">Defense</span><span id="defStat" class="stat-v">Lv 0</span></span></div>
         </div>
+
+        <button id="dailyCard" class="card goal">
+          <span class="tile tile-rose"><svg class="ic"><use href="#i-gift"/></svg></span>
+          <span class="goal-body">
+            <span class="eyebrow">Daily reward</span>
+            <span id="dailyCardText" class="card-title">Day 1 reward is ready</span>
+          </span>
+          <span id="dailyCardDot" class="dot-live" hidden></span>
+          <svg class="ic ic-sm muted-ic"><use href="#i-chevron"/></svg>
+        </button>
 
         <button id="goal" class="card goal">
           <span class="tile tile-gold"><svg class="ic"><use href="#i-target"/></svg></span>
@@ -251,6 +265,13 @@
         <h3 class="sub-head">Statistics</h3>
         <div id="statsList" class="info-list"></div>
 
+        <h3 class="sub-head">Settings</h3>
+        <div class="info-list">
+          <button id="setSound" class="kv kv-btn" role="switch" aria-checked="true"><svg class="ic ic-sm muted-ic"><use href="#i-volume"/></svg><span>Sound effects</span><span class="switch"><i></i></span></button>
+          <button id="setVibe" class="kv kv-btn" role="switch" aria-checked="true"><svg class="ic ic-sm muted-ic"><use href="#i-vibrate"/></svg><span>Vibration</span><span class="switch"><i></i></span></button>
+          <button id="replayTut" class="kv kv-btn"><svg class="ic ic-sm muted-ic"><use href="#i-replay"/></svg><span>Replay tutorial</span><svg class="ic ic-sm muted-ic"><use href="#i-chevron"/></svg></button>
+        </div>
+
         <h3 class="sub-head">App</h3>
         <div class="card install">
           <span class="tile tile-cyan"><svg class="ic"><use href="#i-download"/></svg></span>
@@ -266,7 +287,7 @@
     </main>
 
     <nav class="tabbar" aria-label="Main">
-      <button data-screen="nation" class="on"><svg class="ic"><use href="#i-home"/></svg><span>Nation</span></button>
+      <button data-screen="nation" class="on"><svg class="ic"><use href="#i-home"/></svg><span>Nation</span><b id="nationBadge" class="badge dot" hidden></b></button>
       <button data-screen="sectors"><svg class="ic"><use href="#i-grid"/></svg><span>Sectors</span></button>
       <button data-screen="upgrades"><svg class="ic"><use href="#i-up"/></svg><span>Upgrades</span><b id="upgBadge" class="badge" hidden>0</b></button>
       <button data-screen="security"><svg class="ic"><use href="#i-shield"/></svg><span>Security</span><b id="secBadge" class="badge dot" hidden></b></button>
@@ -286,6 +307,22 @@
       </div>
     </div>
   </div>
+
+  <div id="daily" class="modal" hidden>
+    <div class="modal-box daily-box" role="dialog" aria-modal="true" aria-labelledby="dailyTitle">
+      <span class="tile tile-rose tile-lg modal-icon"><svg class="ic"><use href="#i-gift"/></svg></span>
+      <h3 id="dailyTitle">Daily Reward</h3>
+      <p id="dailySub">Come back every day. Rewards grow with each day in a row.</p>
+      <div id="dailyGrid" class="daily-grid"></div>
+      <div class="modal-actions">
+        <button id="dailyClose" class="btn btn-ghost">Later</button>
+        <button id="dailyClaim" class="btn btn-gold">Claim</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="coachRing" class="coach-ring" hidden></div>
+  <div id="coach" class="coach" hidden></div>
 
   <div id="toasts" class="toasts" aria-live="polite"></div>
 

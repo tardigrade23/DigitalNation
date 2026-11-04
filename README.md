@@ -63,6 +63,9 @@ The bottom tab bar has five screens:
 - **Technology export** resets the run in exchange for Influence. Each point adds a permanent +10% to all income.
 - **Offline income**: while you're away, you earn 50% of your normal income for up to 8 hours.
 - **2× boost**: a stand-in for a rewarded ad.
+- **Tutorial**: four guided steps for new players (tap, open Sectors, build, passive income), then one-time tips for the first cyber attack, the first affordable upgrade, and the first technology export. It can be replayed from Profile → Settings.
+- **Daily reward**: a 7-day streak. Rewards are minutes of current income with a minimum amount, and day 7 also gives 30 minutes of 2× income. Missing a day restarts the streak.
+- **Sound and vibration**: synthesized with Web Audio, so there are no audio files. Vibration works on Android only. Both can be turned off in Profile → Settings.
 
 ## Files
 
@@ -74,7 +77,6 @@ The bottom tab bar has five screens:
 ## Next steps
 
 - Tune the balance through playtests: the first 10 minutes and the time to the first export
-- Daily rewards and VIP membership
+- VIP membership
 - A gem shop with time skips, a permanent 2× multiplier, and cosmetic flags
-- Sound effects and haptics
 - Native Android / iOS builds through Capacitor, for real rewarded ads and in-app purchases
