@@ -1,66 +1,65 @@
-isp: Internet service provider -> Stealth_Fiber_Crew_installing_fiber_cable_underneath_the_streets_of_Manhattan.jpg (CC BY-SA 3.0)
-egov: no free image found
-mbank: Mobile banking -> Community_Noun_project_39956.svg (CC BY 3.0)
-fiber: Optical fiber -> Fibreoptic.jpg (CC BY-SA 3.0)
-fintech: Financial technology -> Luchtfoto_van_Lower_Manhattan.jpg (CC BY-SA 2.0)
-dc: Data center -> Data_Center_of_CNPC.jpg (CC BY-SA 4.0)
-digid: Estonian identity card -> New_Estonian_ID_card_(2021)(front).jpg (Public domain)
-g5: 5G -> Cellular_network_standards_and_generation_timeline.svg (CC BY-SA 4.0)
-opendata: Open data -> Lod.png (CC BY-SA 4.0)
-cloud: Cloud computing -> Cloud_computing.svg (CC BY-SA 3.0)
-pay: Pix (payment system) -> Pix_(Brazil)_logo.svg (Public domain)
-ehealth: Electronic health record -> Electronic_medical_record.jpg (GPL)
-iot: Internet of things -> Internet_of_Things_using_NEST.png (CC BY-SA 4.0)
-smart: Smart city -> Songdo_Central_Park_and_Posco_Tower_Songdo.jpg (CC BY-SA 2.0)
-edu: Educational technology -> Interactive_whiteboard_at_CeBIT_2007.jpg (CC BY 2.0)
-ai: no free image found
-robotics: Industrial robot -> Automation_of_foundry_with_robot.jpg (Public domain)
-auto: Waymo -> Waymo_logo.svg (Public domain)
-chip: Semiconductor device fabrication -> How_ST_designs_and_manufactures_semiconductor_devices_-_screenshot_1.png (CC BY 3.0)
-quantum: Quantum computing -> IBM_Quantum_Computer_Demo_at_ITUWTSA_2024,_Delhi_2.jpg (CC BY-SA 4.0)
-biotech: CRISPR -> 4QYZ.png (CC BY-SA 4.0)
-space: Starlink -> Starlink_Logo_2024.svg (Public domain)
-fusion: ITER -> ITER_participants.svg (Public domain)
-agency: Sputnik 1 -> Первый_в_мире_искусственный_спутник_Земли.jpg (CC BY-SA 3.0)
-e1: Tax return -> Mantelbögen.JPG (Public domain)
-e2: Online shopping -> Shopping_online_with_bank_card.jpg (CC BY 4.0)
-e3: Central bank digital currency -> Digital_RMB_sign_Hangzhou.jpg (CC BY-SA 4.0)
-e4: Ethereum -> Eth-diamond-(color).svg (CC BY 4.0)
-e5: API -> 20261024_API.svg (CC BY-SA 4.0)
-e6: Tokenization (data security) -> How_mobile_payment_tokenization_works.png (CC0)
-e7: Electronic invoicing -> UML_class_diagram_invoice.svg (CC0)
-s1: Medical record -> US_Navy_041019-N-5821P-019_Airman_Lauren_Thurgood_of_Las_Vegas,_Nev.,_pulls_patient_medical_records_in_the_inpatient_ward_aboard_the_conventionally_powered_aircraft_carrier_USS_Kitty_Hawk.jpg (Public domain)
-s2: no free image found
-s3: Digital signature -> Private_key_signing.svg (CC BY-SA 4.0)
-s4: Broadband -> Broadband_penetration_by_country,_World,_2023_(cropped).svg (CC BY 4.0)
-s5: Electronic voting -> Eleições_(15263106629).jpg (CC BY 2.0)
-s6: Telehealth -> Doctor_attending_by_teleconsultation.jpg (CC BY-SA 4.0)
-s7: Digital literacy -> A._Stuart_and_Students.jpg (CC BY-SA 3.0)
-c1: no free image found
-c2: no free image found
-c3: Public key infrastructure -> Public-Key-Infrastructure.svg (CC BY-SA 3.0)
-c4: Computer security -> Operating_system_placement.svg (CC BY-SA 3.0)
-c5: Security operations center -> National_Security_Operations_Center_photograph,_c._1975_-_National_Cryptologic_Museum_-_DSC07658.JPG (CC0)
-c6: no free image found
-c7: no free image found
-i1: ARPANET -> Arpanet_logical_map,_march_1977.png (Public domain)
-i2: IPv6 -> IPv6_header-en.svg (CC BY-SA 4.0)
-i3: Virtualization -> QEMU_6.2_screenshot.png (CDDL)
-i4: DE-CIX -> DE-CIX_GERMANY_-_Switch_Rack_(6218137120).jpg (CC BY-SA 2.0)
-i5: Edge computing -> Edge_computing_infrastructure.png (CC BY-SA 4.0)
-i6: Smart grid -> Staying_big_or_getting_smaller.jpg (CC BY-SA 4.0)
-i7: Building information modeling -> Scan-to-BIM_Mechanical_Room.jpg (CC BY-SA 2.0)
-a1: no free image found
-a2: Big data -> Revised_NIST_Big_Data_Taxonomy.jpg (CC BY-SA 4.0)
-a3: Deep learning -> Deep_Learning.jpg (CC BY-SA 4.0)
-a4: Transformer (deep learning architecture) -> Transformer,_full_architecture.png (CC BY 4.0)
-a5: no free image found
-a6: no free image found
-a7: no free image found
-n1: no free image found
-n2: Renewable energy -> Andasol_Guadix_4.jpg (CC BY-SA 4.0)
-n3: Electronic waste -> Ewaste-pile.jpg (Public domain)
-n4: Bicycle-sharing system -> 00_2141_Bicycle-sharing_systems_-_Sweden.jpg (CC BY-SA 4.0)
-n5: Carbon accounting -> Carbon_Accounting_Scopes.png (CC BY 4.0)
-n6: Electrolysis of water -> Aa-battery-electrolysis.jpg (CC BY-SA 4.0)
-n7: Grid energy storage -> 20241206_Grid_energy_storage.svg (CC BY-SA 4.0)
+a1: 345 KB -> 81 KB
+a2: 71 KB -> 18 KB
+a3: 217 KB -> 65 KB
+a4: 140 KB -> 24 KB
+a5: 419 KB -> 17 KB
+a6: 100 KB -> 27 KB
+a7: 98 KB -> 19 KB
+agency: 130 KB -> 15 KB
+ai: 167 KB -> 47 KB
+auto: 106 KB -> 26 KB
+biotech: 136 KB -> 31 KB
+c1: 172 KB -> 34 KB
+c2: 145 KB -> 38 KB
+c3: 150 KB -> 20 KB
+c4: 91 KB -> 11 KB
+c5: 177 KB -> 45 KB
+c6: 276 KB -> 73 KB
+c7: 171 KB -> 36 KB
+chip: 609 KB -> 25 KB
+cloud: 157 KB -> 20 KB
+dc: 159 KB -> 43 KB
+digid: 56 KB -> 49 KB
+e1: 198 KB -> 50 KB
+e2: 82 KB -> 15 KB
+e3: 96 KB -> 20 KB
+e4: 106 KB -> 30 KB
+e5: 151 KB -> 40 KB
+e6: 216 KB -> 67 KB
+e7: 398 KB -> 104 KB
+edu: 84 KB -> 30 KB
+egov: 158 KB -> 39 KB
+ehealth: 127 KB -> 29 KB
+fiber: 33 KB -> 14 KB
+fintech: 206 KB -> 43 KB
+fusion: 292 KB -> 92 KB
+g5: 89 KB -> 21 KB
+i1: 161 KB -> 55 KB
+i2: 121 KB -> 26 KB
+i3: 544 KB -> 34 KB
+i4: 252 KB -> 65 KB
+i5: 35 KB -> 11 KB
+i6: 156 KB -> 35 KB
+i7: 263 KB -> 81 KB
+iot: 265 KB -> 13 KB
+isp: 224 KB -> 68 KB
+mbank: 191 KB -> 47 KB
+n2: 172 KB -> 43 KB
+n3: 329 KB -> 74 KB
+n4: 301 KB -> 105 KB
+n5: 241 KB -> 57 KB
+n6: 69 KB -> 12 KB
+n7: 142 KB -> 37 KB
+opendata: 140 KB -> 42 KB
+pay: 264 KB -> 76 KB
+quantum: 402 KB -> 110 KB
+robotics: 34 KB -> 28 KB
+s1: 162 KB -> 41 KB
+s2: 152 KB -> 22 KB
+s3: 54 KB -> 17 KB
+s4: 175 KB -> 47 KB
+s5: 63 KB -> 10 KB
+s6: 63 KB -> 13 KB
+s7: 334 KB -> 81 KB
+smart: 223 KB -> 65 KB
+space: 66 KB -> 14 KB
