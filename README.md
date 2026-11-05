@@ -122,6 +122,10 @@ from events where name = 'quiz_answer' group by 1 having count(*) >= 5 order by 
 
 `public.prune_events()` deletes statistics older than 12 months. Run it from the SQL Editor or a scheduled job.
 
+## Player leaderboard
+
+Govern → **Leaders** ranks real players by Tech Index (top 50, plus your own position if you are lower). Signed-in players' entries (nation, leader, flag, score, era) are written to `public.leaderboard` when they sync, at most every 5 minutes. Anyone can read the table; each player can write only their own row. Scores are reported by the game client, so they can be faked by a determined cheater; before a public launch, move the score calculation to the server or add plausibility checks.
+
 ## Monetization (prototype)
 
 Real-money purchases are **simulated** in the web build and clearly labeled, with a test-mode limit of 2 per day so the balance stays realistic. They will be connected to Google Play Billing and StoreKit (for example through RevenueCat) in the native build. Rewarded ads are a 3-second placeholder screen, to be replaced by AdMob.

@@ -261,6 +261,7 @@
           <button data-gov="policies" class="on">Policies</button>
           <button data-gov="research">Research<b id="resBadge" class="seg-dot" hidden></b></button>
           <button data-gov="export">Export</button>
+          <button data-gov="leaders">Leaders</button>
         </div>
 
         <div id="gov-policies" class="gov-panel">
@@ -285,6 +286,19 @@
             <p class="muted small explain">Your facilities generate research points. Data Centers, Open Data, Cloud, E-Education, AI Labs, Quantum Computers and the Space Agency produce the most. Each project takes time, and your lab runs one at a time, even while you are away. Research is permanent: it stays after you export technology.</p>
             <div id="research" class="research"></div>
           </div>
+        </div>
+
+        <div id="gov-leaders" class="gov-panel" hidden>
+          <div class="card lb-head">
+            <span class="tile tile-gold"><svg class="ic"><use href="#i-trophy"/></svg></span>
+            <span class="lb-head-body">
+              <span class="card-title">Player leaderboard</span>
+              <span id="lbMe" class="muted small">Real players ranked by Tech Index.</span>
+            </span>
+            <button id="lbRefresh" class="icon-btn" aria-label="Refresh leaderboard"><svg class="ic ic-sm"><use href="#i-sync"/></svg></button>
+          </div>
+          <button id="lbJoin" class="btn btn-primary wide" hidden>Sign in to join the leaderboard</button>
+          <div id="lbList" class="lb-list"></div>
         </div>
 
         <div id="gov-export" class="gov-panel" hidden>

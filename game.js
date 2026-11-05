@@ -348,7 +348,7 @@ function techRank() {
 function showTechIndex() {
   const { parts, score } = techIndex();
   const lines = parts.map(p => `${p.label}: ${Math.round(p.pts)} / ${p.max} · ${p.detail}`).join('\n');
-  showModal(`Tech Index ${Math.round(score)} · #${techRank()}`, `The world ranking looks at your whole nation:\n\n${lines}\n\n${Math.round(TECH_INDEX_TOP)} points takes you to #1.`, { icon: 'trophy', tone: 'gold' });
+  showModal(`Tech Index ${Math.round(score)} · #${techRank()}`, `The world ranking looks at your whole nation:\n\n${lines}\n\n${Math.round(TECH_INDEX_TOP)} points takes you to #1.\n\nSee how you compare with real players in Govern → Leaders.`, { icon: 'trophy', tone: 'gold' });
 }
 
 function rankTitle(r) {
@@ -733,9 +733,10 @@ function renderSecurity(now) {
 function renderGlobal(now) {
   renderEra();
   for (const b of $('govTabs').children) b.classList.toggle('on', b.dataset.gov === govTab);
-  for (const k of ['policies', 'research', 'export']) $(`gov-${k}`).hidden = k !== govTab;
+  for (const k of ['policies', 'research', 'export', 'leaders']) $(`gov-${k}`).hidden = k !== govTab;
   if (govTab === 'policies') renderPolicies(now);
   if (govTab === 'research') renderResearch();
+  if (govTab === 'leaders') renderLeaderboard();
   const claim = claimableInfluence();
   $('runEarned').textContent = money(state.runEarned);
   $('claimable').textContent = `+${claim}`;
@@ -1038,6 +1039,7 @@ async function pushSave() {
   const { data, error } = await cloud.client.from('saves').upsert(row).select('updated_at').single();
   if (error) throw error;
   markSynced(data.updated_at);
+  pushLeaderboard();
 }
 
 // Each device remembers the server timestamp of the last save it wrote or loaded.
@@ -1515,6 +1517,81 @@ async function connectWallet() {
     saveGame();
     render();
   } catch (e) { cloud.walletReady = false; }
+}
+
+/* ---------------- Player leaderboard ---------------- */
+
+// public.leaderboard: everyone can read it; signed-in players write only their own row.
+const LB_PUSH_EVERY = 5 * 60e3, LB_CACHE = 60e3, LB_SIZE = 50;
+const lb = { rows: null, myRank: null, loadedAt: 0, pushedAt: 0, loading: false, error: '' };
+
+async function pushLeaderboard(force) {
+  if (!cloud.user || !cloud.client || (!force && Date.now() - lb.pushedAt < LB_PUSH_EVERY)) return;
+  lb.pushedAt = Date.now();
+  const row = {
+    user_id: cloud.user.id,
+    nation: String(state.nation || 'Digital Nation').slice(0, 32),
+    leader: String(state.player.name || 'Leader').slice(0, 24),
+    flag: Math.min(20, Math.max(0, state.player.flag | 0)),
+    score: Math.min(1000, Math.round(techIndex().score * 10) / 10),
+    era: currentEra(),
+    lifetime_gdp: state.lifeEarned,
+  };
+  try { const { error } = await cloud.client.from('leaderboard').upsert(row); if (error) throw error; }
+  catch (e) { lb.pushedAt = 0; }
+}
+
+async function loadLeaderboard(force) {
+  if (!cloud.client || lb.loading || (!force && lb.rows && Date.now() - lb.loadedAt < LB_CACHE)) return;
+  lb.loading = true; lb.error = ''; renderLeaderboard(true);
+  try {
+    if (cloud.user) await pushLeaderboard(true);
+    const { data, error } = await cloud.client.from('leaderboard')
+      .select('user_id, nation, leader, flag, score, era').order('score', { ascending: false }).limit(LB_SIZE);
+    if (error) throw error;
+    lb.rows = data || [];
+    lb.myRank = null;
+    if (cloud.user) {
+      const r = await cloud.client.rpc('my_leaderboard_rank');
+      if (!r.error) lb.myRank = r.data;
+    }
+    lb.loadedAt = Date.now();
+  } catch (e) {
+    lb.error = 'Could not load the leaderboard. Check your connection and tap refresh.';
+  }
+  lb.loading = false;
+  renderLeaderboard(true);
+}
+
+let lbSig = '';
+function renderLeaderboard(force) {
+  if (!cloud.client) {
+    $('lbMe').textContent = 'The leaderboard works in the web version at tardigrade23.github.io/DigitalNation.';
+    $('lbJoin').hidden = true; $('lbList').innerHTML = '';
+    return;
+  }
+  if (!force && !lb.rows && !lb.loading) { loadLeaderboard(); return; }
+  if (!force && lb.rows && Date.now() - lb.loadedAt > LB_CACHE) { loadLeaderboard(); return; }
+  const me = cloud.user && cloud.user.id;
+  $('lbJoin').hidden = !!me;
+  $('lbMe').textContent = lb.loading ? 'Loading…'
+    : lb.error ? lb.error
+    : me ? (lb.myRank ? `You are #${lb.myRank} with a Tech Index of ${Math.round(techIndex().score)}.` : 'Your nation will appear after the next sync.')
+    : 'Real players ranked by Tech Index. Sign in to add your nation.';
+  const sig = JSON.stringify([lb.rows, lb.myRank, me]);
+  if (sig === lbSig) return;
+  lbSig = sig;
+  if (!lb.rows) { $('lbList').innerHTML = ''; return; }
+  if (!lb.rows.length) { $('lbList').innerHTML = '<div class="empty">No nations yet. Sign in and be the first!</div>'; return; }
+  const row = (r, pos) => `<div class="lb-row ${r.user_id === me ? 'me' : ''}">
+      <span class="lb-pos">${pos}</span><span class="lb-flag">${flagSvg(r.flag)}</span>
+      <span class="lb-name"><b>${esc(r.nation)}</b><span>${esc(r.leader)} · ${ERAS[r.era] ? ERAS[r.era].name : ''}</span></span>
+      <span class="lb-score">${Math.round(r.score)}</span></div>`;
+  let html = lb.rows.map((r, i) => row(r, i + 1)).join('');
+  if (me && lb.myRank && lb.myRank > lb.rows.length) {
+    html += `<div class="lb-gap">…</div>` + row({ user_id: me, nation: state.nation, leader: state.player.name, flag: state.player.flag, era: currentEra(), score: techIndex().score }, lb.myRank);
+  }
+  $('lbList').innerHTML = html;
 }
 
 /* ---------------- Gems, shop, VIP, ads ---------------- */
@@ -2389,6 +2466,8 @@ function bindUI() {
     const c = e.target.closest('[data-cell]');
     if (c) { e.preventDefault(); hitCell(Number(c.dataset.cell), c); }
   });
+  $('lbRefresh').addEventListener('click', () => loadLeaderboard(true));
+  $('lbJoin').addEventListener('click', openAuth);
   $('govTabs').addEventListener('click', e => {
     const b = e.target.closest('[data-gov]');
     if (b) { govTab = b.dataset.gov; researchSig = ''; render(); }
