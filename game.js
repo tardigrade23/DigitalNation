@@ -6,11 +6,11 @@
 
 const SAVE_KEY = 'digitalnation_save_v1';
 const COST_GROWTH = 1.15;
-const MILESTONES = [25, 50, 100, 200, 300, 400, 500];
+const MILESTONES = [25, 50, 100, 200, 300, 400];
 const OFFLINE_MAX_SEC = 8 * 3600;
 const OFFLINE_EFFICIENCY = 0.5;
-const PRESTIGE_DIVISOR = 1e7;      // influence = floor(sqrt(runEarned / 1e7))
-const INFLUENCE_BONUS = 0.10;      // +10% income per influence point
+const PRESTIGE_DIVISOR = 1e9;      // influence = floor(25 * log10(runEarned / 1e9)): grows with every order of magnitude
+const INFLUENCE_BONUS = 0.05;      // +5% income per influence point
 const BOOST_DURATION = 120e3;
 const BOOST_COOLDOWN = 300e3;
 const ATTACK_WINDOW = 12e3;
@@ -29,43 +29,43 @@ const SAVE_VERSION = 2; // 2: 24 sectors, 42 research, 7 eras, encyclopedia
 const SECTORS = [
   // Era I · Connected
   { id: 'isp',      era: 0, name: 'Internet Provider',    base: 15,     inc: 0.5,   c1: '#5AB8FF', c2: '#2563C9' },
-  { id: 'egov',     era: 0, name: 'E-Government',         base: 100,    inc: 4,     c1: '#7FD1C7', c2: '#1F8A7E' },
-  { id: 'mbank',    era: 0, name: 'Mobile Banking',       base: 1100,   inc: 20,    c1: '#FFB86B', c2: '#D9681C' },
-  { id: 'fiber',    era: 0, name: 'Fiber Backbone',       base: 6000,   inc: 60,    c1: '#9BE7FF', c2: '#1B8DB8' },
-  { id: 'fintech',  era: 0, name: 'Fintech Hub',          base: 12e3,   inc: 100,   c1: '#6EE29C', c2: '#1E9A5A' },
-  { id: 'dc',       era: 0, name: 'Data Center',          base: 130e3,  inc: 550,   c1: '#8FA3FF', c2: '#3B4FCF' },
+  { id: 'egov',     era: 0, name: 'E-Government',         base: 120,    inc: 2.8,     c1: '#7FD1C7', c2: '#1F8A7E' },
+  { id: 'mbank',    era: 0, name: 'Mobile Banking',       base: 960,   inc: 15,    c1: '#FFB86B', c2: '#D9681C' },
+  { id: 'fiber',    era: 0, name: 'Fiber Backbone',       base: 7700,   inc: 83,    c1: '#9BE7FF', c2: '#1B8DB8' },
+  { id: 'fintech',  era: 0, name: 'Fintech Hub',          base: 61000,   inc: 460,   c1: '#6EE29C', c2: '#1E9A5A' },
+  { id: 'dc',       era: 0, name: 'Data Center',          base: 4.9e5,  inc: 2500,   c1: '#8FA3FF', c2: '#3B4FCF' },
   // Era II · Information
-  { id: 'digid',    era: 1, name: 'Digital ID',           base: 6e5,    inc: 1500,  c1: '#FFD27A', c2: '#B9770E' },
-  { id: 'g5',       era: 1, name: '5G Network',           base: 1.4e6,  inc: 3000,  c1: '#FF8FAB', c2: '#C23A63' },
-  { id: 'opendata', era: 1, name: 'Open Data Portal',     base: 5e6,    inc: 8000,  c1: '#A7F3D0', c2: '#0F8F6B' },
+  { id: 'digid',    era: 1, name: 'Digital ID',           base: 3.9e6,    inc: 14000,  c1: '#FFD27A', c2: '#B9770E' },
+  { id: 'g5',       era: 1, name: '5G Network',           base: 3.1e7,  inc: 76000,  c1: '#FF8FAB', c2: '#C23A63' },
+  { id: 'opendata', era: 1, name: 'Open Data Portal',     base: 2.5e8,    inc: 4.2e5,  c1: '#A7F3D0', c2: '#0F8F6B' },
   // Era III · Platform
-  { id: 'cloud',    era: 2, name: 'Cloud Platform',       base: 1.2e7,  inc: 15e3,  c1: '#BAE6FD', c2: '#3A7BD5' },
-  { id: 'pay',      era: 2, name: 'Instant Payments',     base: 4e7,    inc: 40e3,  c1: '#FDE68A', c2: '#D97706' },
-  { id: 'ehealth',  era: 2, name: 'E-Health',             base: 1.2e8,  inc: 90e3,  c1: '#FFA8B8', c2: '#D23B5E' },
+  { id: 'cloud',    era: 2, name: 'Cloud Platform',       base: 2e9,  inc: 2.3e6,  c1: '#BAE6FD', c2: '#3A7BD5' },
+  { id: 'pay',      era: 2, name: 'Instant Payments',     base: 1.6e10,    inc: 1.3e7,  c1: '#FDE68A', c2: '#D97706' },
+  { id: 'ehealth',  era: 2, name: 'E-Health',             base: 1.3e11,  inc: 7e7,  c1: '#FFA8B8', c2: '#D23B5E' },
   // Era IV · Smart
-  { id: 'iot',      era: 3, name: 'IoT Network',          base: 3.3e8,  inc: 2e5,   c1: '#99F6E4', c2: '#0E9384' },
-  { id: 'smart',    era: 3, name: 'Smart City',           base: 9e8,    inc: 4.5e5, c1: '#F7C75B', c2: '#C7800F' },
-  { id: 'edu',      era: 3, name: 'E-Education',          base: 2.5e9,  inc: 1e6,   c1: '#C4B5FD', c2: '#6D4AD6' },
+  { id: 'iot',      era: 3, name: 'IoT Network',          base: 1e12,  inc: 3.8e8,   c1: '#99F6E4', c2: '#0E9384' },
+  { id: 'smart',    era: 3, name: 'Smart City',           base: 8.2e12,    inc: 2.1e9, c1: '#F7C75B', c2: '#C7800F' },
+  { id: 'edu',      era: 3, name: 'E-Education',          base: 6.6e13,  inc: 1.2e10,   c1: '#C4B5FD', c2: '#6D4AD6' },
   // Era V · AI
-  { id: 'ai',       era: 4, name: 'AI Lab',               base: 7e9,    inc: 2.4e6, c1: '#C29BFF', c2: '#6A3FD6' },
-  { id: 'robotics', era: 4, name: 'Robotics',             base: 2e10,   inc: 5.5e6, c1: '#CBD5E1', c2: '#566683' },
-  { id: 'auto',     era: 4, name: 'Autonomous Transport', base: 6e10,   inc: 1.2e7, c1: '#93C5FD', c2: '#2457C5' },
+  { id: 'ai',       era: 4, name: 'AI Lab',               base: 5.3e14,    inc: 6.4e10, c1: '#C29BFF', c2: '#6A3FD6' },
+  { id: 'robotics', era: 4, name: 'Robotics',             base: 4.2e15,   inc: 3.5e11, c1: '#CBD5E1', c2: '#566683' },
+  { id: 'auto',     era: 4, name: 'Autonomous Transport', base: 3.4e16,   inc: 1.9e12, c1: '#93C5FD', c2: '#2457C5' },
   // Era VI · Quantum
-  { id: 'chip',     era: 5, name: 'Semiconductor Fab',    base: 1.8e11, inc: 2.8e7, c1: '#FCD34D', c2: '#8A6A12' },
-  { id: 'quantum',  era: 5, name: 'Quantum Computing',    base: 5.5e11, inc: 6.5e7, c1: '#5EF0E0', c2: '#138A9C' },
-  { id: 'biotech',  era: 5, name: 'Biotech Lab',          base: 1.7e12, inc: 1.5e8, c1: '#86EFAC', c2: '#1F8A4C' },
+  { id: 'chip',     era: 5, name: 'Semiconductor Fab',    base: 2.7e17, inc: 1.1e13, c1: '#FCD34D', c2: '#8A6A12' },
+  { id: 'quantum',  era: 5, name: 'Quantum Computing',    base: 2.2e18, inc: 5.8e13, c1: '#5EF0E0', c2: '#138A9C' },
+  { id: 'biotech',  era: 5, name: 'Biotech Lab',          base: 1.7e19, inc: 3.2e14, c1: '#86EFAC', c2: '#1F8A4C' },
   // Era VII · Space
-  { id: 'space',    era: 6, name: 'Satellite Internet',   base: 5e12,   inc: 3.5e8, c1: '#B5C3D9', c2: '#4A5A75' },
-  { id: 'fusion',   era: 6, name: 'Fusion Power',         base: 1.6e13, inc: 8e8,   c1: '#FDBA74', c2: '#C2410C' },
-  { id: 'agency',   era: 6, name: 'Space Agency',         base: 5e13,   inc: 2e9,   c1: '#A5B4FC', c2: '#3730A3' },
+  { id: 'space',    era: 6, name: 'Satellite Internet',   base: 1.4e20,   inc: 1.8e15, c1: '#B5C3D9', c2: '#4A5A75' },
+  { id: 'fusion',   era: 6, name: 'Fusion Power',         base: 1.1e21, inc: 9.7e15,   c1: '#FDBA74', c2: '#C2410C' },
+  { id: 'agency',   era: 6, name: 'Space Agency',         base: 8.9e21,   inc: 5.3e16,   c1: '#A5B4FC', c2: '#3730A3' },
 ];
 
 const UPGRADES = [];
 (function buildUpgrades() {
   const tiers = [
-    { req: 10,  costMul: 50,  mult: 3, label: 'Optimization' },
-    { req: 50,  costMul: 5e3, mult: 3, label: 'Automation' },
-    { req: 150, costMul: 5e6, mult: 5, label: 'AI Integration' },
+    { req: 25,  costMul: 200, mult: 2, label: 'Optimization' },
+    { req: 75,  costMul: 2e4, mult: 2, label: 'Automation' },
+    { req: 150, costMul: 2e6, mult: 3, label: 'AI Integration' },
   ];
   for (const s of SECTORS) {
     tiers.forEach((t, i) => UPGRADES.push({
@@ -78,11 +78,11 @@ const UPGRADES = [];
     }));
   }
   const ai = [
-    ['AI Assistant',                 1.5, 5e4,  1e4],
-    ['Government AI',                2,   5e6,  1e6],
-    ['Neural Cloud',                 2,   5e8,  1e8],
-    ['National Language Model',      3,   5e10, 1e10],
-    ['Artificial General Intelligence', 5, 5e13, 1e13],
+    ['AI Assistant',                 1.5, 1e6,  1e5],
+    ['Government AI',                2,   1e10, 1e9],
+    ['Neural Cloud',                 2,   1e14, 1e13],
+    ['National Language Model',      3,   1e18, 1e17],
+    ['Artificial General Intelligence', 5, 1e22, 1e21],
   ];
   ai.forEach(([name, mult, cost, need], i) => UPGRADES.push({
     id: `ai_${i}`, kind: 'global', mult, cost, name, icon: 'ai', c1: '#C29BFF', c2: '#6A3FD6', tag: 'AI',
@@ -149,7 +149,7 @@ function globalMult(withTemp) {
   let m = 1;
   for (const u of UPGRADES) if (u.kind === 'global' && state.upgrades[u.id]) m *= u.mult;
   m *= 1 + welfare() / 100;
-  m *= Math.sqrt(state.pop / 1e6);
+  m *= Math.pow(state.pop / 1e6, 0.35);
   m *= 1 + state.influence * INFLUENCE_BONUS;
   m *= mods().income * ERAS[currentEra()].mult;
   if (state.owned.golden) m *= 2;
@@ -172,7 +172,7 @@ function incomePerSec(withTemp = true) {
 function clickValue() {
   let m = 1;
   for (const u of UPGRADES) if (u.kind === 'click' && state.upgrades[u.id]) m *= u.mult;
-  return (1 + incomePerSec() * 0.05) * m * mods().tap;
+  return m * mods().tap + incomePerSec() * 0.05;
 }
 
 function earn(x) { state.gdp += x; state.runEarned += x; state.lifeEarned += x; }
@@ -292,7 +292,7 @@ function activateBoost() {
 
 /* ---------------- Prestige: technology export ---------------- */
 
-function claimableInfluence() { return Math.floor(Math.sqrt(state.runEarned / PRESTIGE_DIVISOR) * mods().influence); }
+function claimableInfluence() { return state.runEarned < PRESTIGE_DIVISOR ? 0 : Math.floor(25 * Math.log10(state.runEarned / PRESTIGE_DIVISOR) * mods().influence); }
 
 function doPrestige() {
   const gain = claimableInfluence();
@@ -316,6 +316,7 @@ function performPrestige() {
     policyChanges: state.policyChanges, gamesWon: state.gamesWon,
     gems: state.gems, vipUntil: state.vipUntil, shieldUntil: state.shieldUntil, owned: state.owned, adGems: state.adGems,
     v: state.v, library: state.library, quiz: state.quiz, warps: state.warps, simBuys: state.simBuys, pendingEarns: state.pendingEarns,
+    researching: state.researching,
   };
   state = Object.assign(defaultState(), keep);
   sectorSig = ''; upgSig = '';
@@ -335,7 +336,7 @@ function techIndex() {
     { label: 'Era', detail: ERAS[currentEra()].name, pts: 25 * currentEra(), max: 25 * (ERAS.length - 1) },
     { label: 'Welfare', detail: `${Math.round(welfare())}%`, pts: 0.4 * welfare(), max: 40 },
     { label: 'Security', detail: `Defense level ${state.secLevel}`, pts: 4 * state.secLevel, max: 4 * SEC_MAX },
-    { label: 'Influence', detail: `${state.influence} points`, pts: 2 * Math.min(state.influence, 50), max: 100 },
+    { label: 'Influence', detail: `${state.influence} points`, pts: 25 * Math.log10(1 + state.influence), max: 100 },
   ];
   parts.forEach(p => { p.pts = Math.min(p.max, p.pts); });
   return { parts, score: parts.reduce((a, p) => a + p.pts, 0) };
@@ -423,6 +424,7 @@ function normalizeSave(saved) {
   if (saved && saved.gems === undefined) s.gems = START_GEMS + 10 * Object.keys(s.achievements).length;
   for (const k of ['library', 'quiz']) if (!s[k] || typeof s[k] !== 'object') s[k] = {};
   if (!Array.isArray(s.pendingEarns)) s.pendingEarns = [];
+  if (!s.researching || typeof s.researching !== 'object') s.researching = null;
   if (saved && !saved.v) s.v = 1;
   // Players from before the tutorial existed skip it.
   if (!saved || typeof saved.coach !== 'object' || !saved.coach) s.coach = saved ? { t1: 1, t2: 1, t3: 1, t4: 1 } : {};
@@ -438,6 +440,7 @@ function applyOffline() {
   const target = popTarget();
   state.pop = target - (target - state.pop) * Math.exp(-elapsed * 0.05);
   if (researchUnlocked()) state.rp += rpRate() * elapsed * OFFLINE_EFFICIENCY;
+  progressResearch(Math.max(0, (now - state.lastSave) / 1000)); // projects run at full speed offline
   const gain = incomePerSec(false) * elapsed * (isVip() ? 1 : OFFLINE_EFFICIENCY + mods().offline);
   if (gain <= 0) return;
   earn(gain);
@@ -787,7 +790,7 @@ function render() {
   $('upgBadge').hidden = affordable === 0;
   $('upgBadge').textContent = affordable;
   $('secBadge').hidden = !(state.attack || (state.secLevel < SEC_MAX && state.gdp >= secCost()));
-  const resReady = researchUnlocked() && RESEARCH.some(n => researchAvailable(n) && state.rp >= n.cost);
+  const resReady = researchUnlocked() && !state.researching && RESEARCH.some(n => researchAvailable(n) && state.rp >= n.cost);
   $('resBadge').hidden = !resReady;
   $('govBadge').hidden = !(resReady || claimableInfluence() >= 1) || screen === 'global';
   const daily = dailyStatus();
@@ -1756,52 +1759,52 @@ const POLICIES = [
 const RESEARCH = [
   // Economy
   { id: 'e1', branch: 'eco', name: 'Digital Taxes',            cost: 20,     mods: { tap: 2 },                         desc: 'Tap power ×2' },
-  { id: 'e2', branch: 'eco', name: 'E-Commerce',               cost: 120,    mods: { income: 1.25 },                   desc: 'All income ×1.25' },
-  { id: 'e3', branch: 'eco', name: 'Digital Currency (CBDC)',  cost: 700,    mods: { income: 1.5 },                    desc: 'All income ×1.5' },
-  { id: 'e4', branch: 'eco', name: 'Smart Contracts',          cost: 4000,   mods: { cost: 0.9 },                      desc: 'Sectors cost 10% less' },
-  { id: 'e5', branch: 'eco', name: 'Open Banking',             cost: 25e3,   mods: { income: 1.5 },                    desc: 'All income ×1.5' },
-  { id: 'e6', branch: 'eco', name: 'Tokenization',             cost: 15e4,   mods: { cost: 0.85 },                     desc: 'Sectors cost 15% less' },
-  { id: 'e7', branch: 'eco', name: 'Real-Time Economy',        cost: 9e5,    mods: { income: 2 },                      desc: 'All income ×2' },
+  { id: 'e2', branch: 'eco', name: 'E-Commerce',               cost: 150,    mods: { income: 1.25 },                   desc: 'All income ×1.25' },
+  { id: 'e3', branch: 'eco', name: 'Digital Currency (CBDC)',  cost: 1500,    mods: { income: 1.5 },                    desc: 'All income ×1.5' },
+  { id: 'e4', branch: 'eco', name: 'Smart Contracts',          cost: 15000,   mods: { cost: 0.9 },                      desc: 'Sectors cost 10% less' },
+  { id: 'e5', branch: 'eco', name: 'Open Banking',             cost: 2e5,   mods: { income: 1.5 },                    desc: 'All income ×1.5' },
+  { id: 'e6', branch: 'eco', name: 'Tokenization',             cost: 3e6,   mods: { cost: 0.85 },                     desc: 'Sectors cost 15% less' },
+  { id: 'e7', branch: 'eco', name: 'Real-Time Economy',        cost: 4e7,    mods: { income: 2 },                      desc: 'All income ×2' },
   // Society
-  { id: 's1', branch: 'soc', name: 'Electronic Health Records', cost: 30,    mods: { welfare: 5 },                     desc: 'Welfare +5' },
-  { id: 's2', branch: 'soc', name: 'Online Learning',          cost: 150,    mods: { research: 1.25 },                 desc: 'Research points ×1.25' },
-  { id: 's3', branch: 'soc', name: 'e-Signatures',             cost: 800,    mods: { popGrowth: 1.5, welfare: 5 },     desc: 'Population grows 50% faster · Welfare +5' },
-  { id: 's4', branch: 'soc', name: 'Universal Connectivity',   cost: 4500,   mods: { welfare: 10, income: 1.1 },       desc: 'Welfare +10 · All income ×1.1' },
-  { id: 's5', branch: 'soc', name: 'Internet Voting',          cost: 27e3,   mods: { welfare: 5, influence: 1.15 },    desc: 'Welfare +5 · Export influence ×1.15' },
-  { id: 's6', branch: 'soc', name: 'Telemedicine',             cost: 16e4,   mods: { welfare: 8, popGrowth: 1.3 },     desc: 'Welfare +8 · Faster population growth' },
-  { id: 's7', branch: 'soc', name: 'Digital Literacy',         cost: 95e4,   mods: { research: 1.5, defense: 0.05 },   desc: 'Research ×1.5 · Auto-defense +5%' },
+  { id: 's1', branch: 'soc', name: 'Electronic Health Records', cost: 24,    mods: { welfare: 5 },                     desc: 'Welfare +5' },
+  { id: 's2', branch: 'soc', name: 'Online Learning',          cost: 180,    mods: { research: 1.25 },                 desc: 'Research points ×1.25' },
+  { id: 's3', branch: 'soc', name: 'e-Signatures',             cost: 1800,    mods: { popGrowth: 1.5, welfare: 5 },     desc: 'Population grows 50% faster · Welfare +5' },
+  { id: 's4', branch: 'soc', name: 'Universal Connectivity',   cost: 18000,   mods: { welfare: 10, income: 1.1 },       desc: 'Welfare +10 · All income ×1.1' },
+  { id: 's5', branch: 'soc', name: 'Internet Voting',          cost: 2.4e5,   mods: { welfare: 5, influence: 1.15 },    desc: 'Welfare +5 · Export influence ×1.15' },
+  { id: 's6', branch: 'soc', name: 'Telemedicine',             cost: 3.6e6,   mods: { welfare: 8, popGrowth: 1.3 },     desc: 'Welfare +8 · Faster population growth' },
+  { id: 's7', branch: 'soc', name: 'Digital Literacy',         cost: 4.8e7,   mods: { research: 1.5, defense: 0.05 },   desc: 'Research ×1.5 · Auto-defense +5%' },
   // Security
-  { id: 'c1', branch: 'sec', name: 'Firewalls',                cost: 25,     mods: { defense: 0.1 },                   desc: 'Auto-defense +10%' },
-  { id: 'c2', branch: 'sec', name: 'Threat Intelligence',      cost: 130,    mods: { window: 5 },                      desc: '+5 seconds to respond to attacks' },
-  { id: 'c3', branch: 'sec', name: 'Public Key Infrastructure', cost: 750,   mods: { defense: 0.1 },                   desc: 'Auto-defense +10%' },
-  { id: 'c4', branch: 'sec', name: 'Zero Trust',               cost: 4200,   mods: { defense: 0.1 },                   desc: 'Auto-defense +10%' },
-  { id: 'c5', branch: 'sec', name: 'AI Threat Detection',      cost: 26e3,   mods: { defense: 0.1, window: 3 },        desc: 'Auto-defense +10% · +3 seconds to respond' },
-  { id: 'c6', branch: 'sec', name: 'Post-Quantum Cryptography', cost: 15e4,  mods: { breach: 0.5 },                    desc: 'Breaches steal half as much' },
-  { id: 'c7', branch: 'sec', name: 'Cyber Resilience',         cost: 9e5,    mods: { breach: 0.6, defense: 0.05 },     desc: 'Breach damage ×0.6 · Auto-defense +5%' },
+  { id: 'c1', branch: 'sec', name: 'Firewalls',                cost: 22,     mods: { defense: 0.1 },                   desc: 'Auto-defense +10%' },
+  { id: 'c2', branch: 'sec', name: 'Threat Intelligence',      cost: 160,    mods: { window: 5 },                      desc: '+5 seconds to respond to attacks' },
+  { id: 'c3', branch: 'sec', name: 'Public Key Infrastructure', cost: 1700,   mods: { defense: 0.1 },                   desc: 'Auto-defense +10%' },
+  { id: 'c4', branch: 'sec', name: 'Zero Trust',               cost: 16000,   mods: { defense: 0.1 },                   desc: 'Auto-defense +10%' },
+  { id: 'c5', branch: 'sec', name: 'AI Threat Detection',      cost: 2.2e5,   mods: { defense: 0.1, window: 3 },        desc: 'Auto-defense +10% · +3 seconds to respond' },
+  { id: 'c6', branch: 'sec', name: 'Post-Quantum Cryptography', cost: 3.3e6,  mods: { breach: 0.5 },                    desc: 'Breaches steal half as much' },
+  { id: 'c7', branch: 'sec', name: 'Cyber Resilience',         cost: 4.4e7,    mods: { breach: 0.6, defense: 0.05 },     desc: 'Breach damage ×0.6 · Auto-defense +5%' },
   // Infrastructure
-  { id: 'i1', branch: 'inf', name: 'TCP/IP',                   cost: 40,     mods: { income: 1.1 },                    desc: 'All income ×1.1' },
-  { id: 'i2', branch: 'inf', name: 'IPv6',                     cost: 220,    mods: { income: 1.15 },                   desc: 'All income ×1.15' },
-  { id: 'i3', branch: 'inf', name: 'Virtualization',           cost: 1100,   mods: { cost: 0.95 },                     desc: 'Sectors cost 5% less' },
-  { id: 'i4', branch: 'inf', name: 'Internet Exchange Points', cost: 6000,   mods: { income: 1.25 },                   desc: 'All income ×1.25' },
-  { id: 'i5', branch: 'inf', name: 'Edge Computing',           cost: 35e3,   mods: { income: 1.3 },                    desc: 'All income ×1.3' },
-  { id: 'i6', branch: 'inf', name: 'Smart Grid',               cost: 2e5,    mods: { income: 1.3, welfare: 3 },        desc: 'All income ×1.3 · Welfare +3' },
-  { id: 'i7', branch: 'inf', name: 'Digital Twin',             cost: 11e5,   mods: { cost: 0.9 },                      desc: 'Sectors cost 10% less' },
+  { id: 'i1', branch: 'inf', name: 'TCP/IP',                   cost: 26,     mods: { income: 1.1 },                    desc: 'All income ×1.1' },
+  { id: 'i2', branch: 'inf', name: 'IPv6',                     cost: 190,    mods: { income: 1.15 },                   desc: 'All income ×1.15' },
+  { id: 'i3', branch: 'inf', name: 'Virtualization',           cost: 1900,   mods: { cost: 0.95 },                     desc: 'Sectors cost 5% less' },
+  { id: 'i4', branch: 'inf', name: 'Internet Exchange Points', cost: 19000,   mods: { income: 1.25 },                   desc: 'All income ×1.25' },
+  { id: 'i5', branch: 'inf', name: 'Edge Computing',           cost: 2.6e5,   mods: { income: 1.3 },                    desc: 'All income ×1.3' },
+  { id: 'i6', branch: 'inf', name: 'Smart Grid',               cost: 3.9e6,    mods: { income: 1.3, welfare: 3 },        desc: 'All income ×1.3 · Welfare +3' },
+  { id: 'i7', branch: 'inf', name: 'Digital Twin',             cost: 5.2e7,   mods: { cost: 0.9 },                      desc: 'Sectors cost 10% less' },
   // Science & AI
-  { id: 'a1', branch: 'sci', name: 'Machine Learning',         cost: 60,     mods: { research: 1.2 },                  desc: 'Research points ×1.2' },
-  { id: 'a2', branch: 'sci', name: 'Big Data',                 cost: 300,    mods: { income: 1.15 },                   desc: 'All income ×1.15' },
-  { id: 'a3', branch: 'sci', name: 'Deep Learning',            cost: 1500,   mods: { research: 1.3 },                  desc: 'Research points ×1.3' },
-  { id: 'a4', branch: 'sci', name: 'Transformers (LLMs)',      cost: 8000,   mods: { tap: 3, research: 1.2 },          desc: 'Tap power ×3 · Research ×1.2' },
-  { id: 'a5', branch: 'sci', name: 'Quantum Algorithms',       cost: 45e3,   mods: { research: 1.5 },                  desc: 'Research points ×1.5' },
-  { id: 'a6', branch: 'sci', name: 'Neuromorphic Chips',       cost: 25e4,   mods: { income: 1.5 },                    desc: 'All income ×1.5' },
-  { id: 'a7', branch: 'sci', name: 'AI Alignment',             cost: 13e5,   mods: { income: 2, welfare: 5 },          desc: 'All income ×2 · Welfare +5' },
+  { id: 'a1', branch: 'sci', name: 'Machine Learning',         cost: 30,     mods: { research: 1.2 },                  desc: 'Research points ×1.2' },
+  { id: 'a2', branch: 'sci', name: 'Big Data',                 cost: 220,    mods: { income: 1.15 },                   desc: 'All income ×1.15' },
+  { id: 'a3', branch: 'sci', name: 'Deep Learning',            cost: 2200,   mods: { research: 1.3 },                  desc: 'Research points ×1.3' },
+  { id: 'a4', branch: 'sci', name: 'Transformers (LLMs)',      cost: 22000,   mods: { tap: 3, research: 1.2 },          desc: 'Tap power ×3 · Research ×1.2' },
+  { id: 'a5', branch: 'sci', name: 'Quantum Algorithms',       cost: 3e5,   mods: { research: 1.5 },                  desc: 'Research points ×1.5' },
+  { id: 'a6', branch: 'sci', name: 'Neuromorphic Chips',       cost: 4.5e6,   mods: { income: 1.5 },                    desc: 'All income ×1.5' },
+  { id: 'a7', branch: 'sci', name: 'AI Alignment',             cost: 6e7,   mods: { income: 2, welfare: 5 },          desc: 'All income ×2 · Welfare +5' },
   // Green tech
-  { id: 'n1', branch: 'grn', name: 'Efficient Data Centers',   cost: 50,     mods: { income: 1.05, welfare: 2 },       desc: 'All income ×1.05 · Welfare +2' },
-  { id: 'n2', branch: 'grn', name: 'Renewable Power',          cost: 260,    mods: { cost: 0.95, welfare: 3 },         desc: 'Sectors cost 5% less · Welfare +3' },
-  { id: 'n3', branch: 'grn', name: 'E-Waste Recycling',        cost: 1300,   mods: { cost: 0.97, welfare: 3 },         desc: 'Sectors cost 3% less · Welfare +3' },
-  { id: 'n4', branch: 'grn', name: 'Smart Mobility',           cost: 7000,   mods: { popGrowth: 1.2, welfare: 4 },     desc: 'Faster population growth · Welfare +4' },
-  { id: 'n5', branch: 'grn', name: 'Carbon Accounting',        cost: 4e4,    mods: { influence: 1.15 },                desc: 'Export influence ×1.15' },
-  { id: 'n6', branch: 'grn', name: 'Green Hydrogen',           cost: 22e4,   mods: { income: 1.3 },                    desc: 'All income ×1.3' },
-  { id: 'n7', branch: 'grn', name: 'Energy Storage',           cost: 12e5,   mods: { income: 1.5, offline: 0.1 },      desc: 'All income ×1.5 · Offline earnings +10%' },
+  { id: 'n1', branch: 'grn', name: 'Efficient Data Centers',   cost: 28,     mods: { income: 1.05, welfare: 2 },       desc: 'All income ×1.05 · Welfare +2' },
+  { id: 'n2', branch: 'grn', name: 'Renewable Power',          cost: 210,    mods: { cost: 0.95, welfare: 3 },         desc: 'Sectors cost 5% less · Welfare +3' },
+  { id: 'n3', branch: 'grn', name: 'E-Waste Recycling',        cost: 2100,   mods: { cost: 0.97, welfare: 3 },         desc: 'Sectors cost 3% less · Welfare +3' },
+  { id: 'n4', branch: 'grn', name: 'Smart Mobility',           cost: 21000,   mods: { popGrowth: 1.2, welfare: 4 },     desc: 'Faster population growth · Welfare +4' },
+  { id: 'n5', branch: 'grn', name: 'Carbon Accounting',        cost: 2.8e5,    mods: { influence: 1.15 },                desc: 'Export influence ×1.15' },
+  { id: 'n6', branch: 'grn', name: 'Green Hydrogen',           cost: 4.2e6,   mods: { income: 1.3 },                    desc: 'All income ×1.3' },
+  { id: 'n7', branch: 'grn', name: 'Energy Storage',           cost: 5.6e7,   mods: { income: 1.5, offline: 0.1 },      desc: 'All income ×1.5 · Offline earnings +10%' },
 ];
 const BRANCHES = [
   { id: 'eco', name: 'Economy', icon: 'coins', tone: 'gold' },
@@ -1842,8 +1845,8 @@ function researchAvailable(n) {
   return i === 0 || !!state.research[prev[i - 1].id];
 }
 function rpRate() {
-  const base = 0.02 * totalOwned() + 0.05 * owned('egov') + 0.2 * owned('dc') + 0.4 * owned('opendata') + 0.8 * owned('cloud')
-    + 1.5 * owned('edu') + 3 * owned('ai') + 6 * owned('quantum') + 12 * owned('agency');
+  const base = 0.01 * totalOwned() + 0.05 * owned('egov') + 0.2 * owned('dc') + 0.5 * owned('opendata') + 1 * owned('cloud')
+    + 2 * owned('edu') + 4 * owned('ai') + 8 * owned('quantum') + 16 * owned('agency');
   return base * mods().research;
 }
 
@@ -1894,10 +1897,37 @@ function setPolicy(id, opt) {
   render();
 }
 
+// Research takes time: pay RP to start, one project at a time, progress continues offline.
+const RESEARCH_TIME = [10 * 60, 3600, 4 * 3600, 16 * 3600, 48 * 3600, 96 * 3600, 192 * 3600]; // by position in the branch
+function researchSeconds(n) {
+  const i = RESEARCH.filter(x => x.branch === n.branch).indexOf(n);
+  return RESEARCH_TIME[i] / mods().research;
+}
 function buyResearch(id) {
   const n = RESEARCH.find(x => x.id === id);
-  if (!n || !researchUnlocked() || !researchAvailable(n) || state.rp < n.cost) return;
+  if (!n || !researchUnlocked() || !researchAvailable(n) || state.rp < n.cost || state.researching) return;
   state.rp -= n.cost;
+  state.researching = { id, left: researchSeconds(n), total: researchSeconds(n) };
+  track('research_start', { id });
+  Sound.play('buy'); buzz(12);
+  toast(`Research started: ${n.name} (${dur(state.researching.left * 1000)})`, 'flask', 'cyan');
+  researchSig = '';
+  saveGame();
+  render();
+}
+
+// Advances the running project by dt seconds and completes it when the time is up.
+function progressResearch(dt) {
+  const r = state.researching;
+  if (!r) return;
+  r.left -= dt;
+  if (r.left <= 0) completeResearch(r.id);
+}
+
+function completeResearch(id) {
+  const n = RESEARCH.find(x => x.id === id);
+  state.researching = null;
+  if (!n || state.research[id]) return;
   state.research[id] = Date.now();
   track('research_done', { id, n: researchCount(), min: minutesPlayed() });
   discover(id);
@@ -1905,7 +1935,6 @@ function buyResearch(id) {
   toast(`Research complete: ${n.name} · new encyclopedia entry`, 'flask', 'cyan');
   researchSig = '';
   saveGame();
-  render();
 }
 
 let govTab = 'policies';
@@ -1942,19 +1971,29 @@ function renderResearch() {
   if (!unlocked) return;
   $('rpValue').textContent = `${fmt(state.rp)} RP`;
   $('rpRate').textContent = `+${fmt(rpRate())}/s`;
-  const sig = RESEARCH.map(n => `${n.id}${state.research[n.id] ? 'd' : researchAvailable(n) ? (state.rp >= n.cost ? 'a' : 'w') : 'l'}`).join('');
+  const run = state.researching;
+  const runRow = run && $('research').querySelector(`[data-running="${run.id}"]`);
+  if (runRow) {
+    runRow.querySelector('[data-f="left"]').textContent = dur(Math.max(0, run.left) * 1000);
+    runRow.querySelector('[data-f="bar"]').style.width = `${Math.min(100, (1 - run.left / run.total) * 100)}%`;
+  }
+  const sig = (run ? `R${run.id}|` : '') + RESEARCH.map(n => `${n.id}${state.research[n.id] ? 'd' : researchAvailable(n) ? (state.rp >= n.cost ? 'a' : 'w') : 'l'}`).join('');
   if (sig === researchSig) return;
   researchSig = sig;
   $('research').innerHTML = BRANCHES.map(b => `<div class="branch">
     <div class="branch-head">${icon(b.icon, 'ic-sm')}${b.name}</div>
     ${RESEARCH.filter(n => n.branch === b.id).map(n => {
-      const done = !!state.research[n.id], avail = researchAvailable(n), can = avail && state.rp >= n.cost;
-      const cls = done ? 'done' : (avail ? '' : 'locked');
+      const done = !!state.research[n.id], running = run && run.id === n.id;
+      const avail = researchAvailable(n) && !running, can = avail && !run && state.rp >= n.cost;
+      const cls = done ? 'done' : (avail || running ? '' : 'locked');
+      const time = dur(researchSeconds(n) * 1000);
       const btn = done ? `<button class="buy" disabled>${icon('check', 'ic-sm')}<small>Done</small></button>`
-        : `<button class="buy rp ${can ? 'can' : ''}" data-res="${n.id}" ${can ? '' : 'disabled'}>${avail ? 'Research' : 'Locked'}<small>${fmt(n.cost)} RP</small></button>`;
-      return `<div class="row node ${cls}">${tile(done ? 'check' : 'flask', done ? 'green' : b.tone)}
+        : running ? `<button class="buy" disabled>Running<small data-f="left">${dur(Math.max(0, run.left) * 1000)}</small></button>`
+        : `<button class="buy rp ${can ? 'can' : ''}" data-res="${n.id}" ${can ? '' : 'disabled'}>${!avail ? 'Locked' : run ? 'Lab busy' : 'Research'}<small>${fmt(n.cost)} RP · ${time}</small></button>`;
+      const sub = running ? `<span>${n.desc}</span><span class="meter"><i data-f="bar" style="width:${Math.min(100, (1 - run.left / run.total) * 100)}%"></i></span>` : `<span>${n.desc}</span>`;
+      return `<div class="row node ${cls}" ${running ? `data-running="${n.id}"` : ''}>${tile(done ? 'check' : 'flask', done ? 'green' : b.tone)}
         <div class="row-title"><span class="nm">${n.name}</span>${done ? infoBtn(n.id) : ''}</div>${btn}
-        <div class="row-sub"><span>${n.desc}</span></div></div>`;
+        <div class="row-sub">${sub}</div></div>`;
     }).join('')}</div>`).join('');
 }
 
@@ -2295,6 +2334,7 @@ function tick() {
   earn(incomePerSec() * dt);
   state.pop += (popTarget() - state.pop) * Math.min(1, dt * 0.05 * mods().popGrowth);
   if (researchUnlocked()) state.rp += rpRate() * dt;
+  progressResearch(dt);
   checkEra();
   if (game && now >= game.moveAt) moveBug();
   if (game) $('gameBar').style.width = state.attack ? `${Math.max(0, (state.attack.endsAt - now) / (state.attack.len || ATTACK_WINDOW)) * 100}%` : '0%';
@@ -2488,4 +2528,9 @@ setInterval(flushEvents, 15e3);
 track('session_start', { day: Math.floor((Date.now() - state.startedAt) / 86400e3), era: currentEra(), signedIn: !!readCloudMeta().uid });
 
 // Debug / test hook
-window.DN = { get state() { return state; }, flushEvents, walletMode, flushEarns, techIndex, techRank, openEntry, pendingQuizzes, libEntries, cloud, cloudResume, syncNow, isVip, addGems, incomePerSec, earn, render, showScreen, dailyStatus, mods, rpRate, currentEra, SECTORS, UPGRADES, RESEARCH };
+// Hooks for automated tests and tools/simulate.mjs (balance simulation).
+window.DN = { get state() { return state; }, set state(v) { state = v; },
+  sim: { buySector, buyUpgrade, buyResearch, buySecurity, costFor, sectorMult, globalMult, mods, rpRate, popTarget, welfare, totalOwned, owned,
+    researchAvailable, claimableInfluence, performPrestige, currentEra, checkEra, secCost, dailyAmount, DAILY, isUnlocked, availableUpgrades,
+    clickValue, earn, ERAS, SEC_MAX, OFFLINE_EFFICIENCY, OFFLINE_MAX_SEC, progressResearch, researchSeconds },
+  flushEvents, walletMode, flushEarns, techIndex, techRank, openEntry, pendingQuizzes, libEntries, cloud, cloudResume, syncNow, isVip, addGems, incomePerSec, earn, render, showScreen, dailyStatus, mods, rpRate, currentEra, SECTORS, UPGRADES, RESEARCH };

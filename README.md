@@ -60,9 +60,9 @@ The bottom tab bar has five screens:
 - **Population and welfare** grow with your facilities and multiply all income. Smart City has the biggest effect on welfare.
 - **World ranking (Tech Index)** moves from #195 to #1. It scores the whole nation: lifetime GDP, research, era, welfare, security and influence. Reaching #1 takes the final era and several technology exports. Tap the rank in the header to see the breakdown.
 - **Cyber attacks** happen every 1.5–2.5 minutes. Tap **Defend** to open a mini-game: catch the malware 5 times on a 3×3 grid before the timer runs out (12 s, or more with research). Winning gives 30 seconds of income. If you miss it, your defense level decides the outcome. A breach steals 10% of your GDP and halves income for 30 seconds.
-- **Technology export** resets the economy in exchange for Influence. Each point adds a permanent +10% to all income. Research and policies are kept.
+- **Technology export** resets the economy in exchange for Influence. Each export gives about 25 Influence per tenfold of GDP above $1B earned since the last export, and each point adds a permanent +5% to all income. Research and policies are kept.
 - **Policies** unlock at 5 E-Government portals. There are four areas (Tax Rate, Internet, Education, Trade), each with three options. Every option has a benefit and a cost, and changing one starts a 1-minute cooldown.
-- **Research** unlocks with the first Mobile Banking service. Facilities produce research points (RP). The tree has 42 permanent projects in six branches: Economy, Society, Security, Infrastructure, Science & AI, and Green Tech. Every project is named after a real technology, such as TCP/IP, Public Key Infrastructure, Transformers or Post-Quantum Cryptography.
+- **Research** unlocks with the first Mobile Banking service. Facilities produce research points (RP). A project costs RP and then takes time: 10 minutes for the first project in a branch, then 1 h, 4 h, 16 h, 2 days, 4 days and 8 days. The lab runs one project at a time, also while the player is away. The tree has 42 permanent projects in six branches: Economy, Society, Security, Infrastructure, Science & AI, and Green Tech. Every project is named after a real technology, such as TCP/IP, Public Key Infrastructure, Transformers or Post-Quantum Cryptography.
 - **Eras**: Connected → Information → Platform → Smart → AI → Quantum → Space. Each era needs a number of completed research projects plus one key sector from the era before. Each era unlocks new sectors and multiplies all income (×1.5 up to ×12).
 - **Tech Encyclopedia**: 66 cards, one for every sector and research project. Each card explains the technology, gives a real-world example (such as Estonia's X-Road, India's UPI, Kenya's M-Pesa or Azerbaijan's ASAN Xidmət) and a "Did you know?" fact, and ends with a 3-answer quiz worth +3 gems. Cards unlock as you build and research. Open them from the Nation screen or with the ⓘ button on a sector or research row. The content is in `content.js`.
 - **Encyclopedia pictures**: 65 of the 66 cards have a free-licensed photo (or, for abstract topics such as IPv6 or public key infrastructure, a diagram) from Wikimedia Commons. Author, license and a link to the source are shown under each picture. The images are 640 px WebP files in `images/library/` (about 3 MB in total), and the credits are in `images/library/credits.js`.
@@ -146,6 +146,33 @@ When a player is signed in, the server owns gems, VIP, Golden Economy, the Cyber
 - **Simulated purchases** go through `purchase_simulated`, limited to 2 per day. Before launch, replace it with store receipt validation.
 - On the first sign-in, the device's gems and items are imported once, with caps of 1,500 gems and VIP for at most 31 days.
 - Guests keep everything on the device, as before.
+
+## Balance simulation
+
+`tools/simulate.mjs` plays the real game code with simulated time. The bot plays a few short sessions a day, buys whatever pays back fastest, keeps the lab busy, claims the daily reward and exports when it pays off.
+
+```bash
+python3 -m http.server 8765 &
+node tools/simulate.mjs 75 4 15   # days, sessions per day, minutes per session
+```
+
+Results with the current balance (day the era is reached):
+
+| Era | Active player (4 × 15 min a day) | Casual player (2 × 10 min a day) |
+|---|---|---|
+| Information | 0.6 | 2.3 |
+| Platform | 1.8 | 5.3 |
+| Smart | 3.5 | 8.3 |
+| AI | 5.8 | 13.3 |
+| Quantum | 12.3 | 21.3 |
+| Space | 24.6 | 35.3 |
+
+The active bot reaches #4 in the world ranking after 60 days. Before this pass, it reached the last era in its first 15 minutes and #1 on day 2. The main changes:
+- research takes real time;
+- sector costs rise ×8 per tier while income rises ×5.5;
+- AI upgrades and sector upgrades are later and weaker;
+- tap multipliers no longer scale with income;
+- Influence grows logarithmically and gives +5% per point.
 
 ## Files
 
