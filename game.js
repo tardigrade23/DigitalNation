@@ -18,7 +18,7 @@ const DEBUFF_DURATION = 30e3;
 const SEC_MAX = 7;
 const DEFAULT_NATION = 'Digital Nation';
 const DEFAULT_PLAYER = { name: 'Leader', avatar: 'ai', tone: 'gold', flag: 0 };
-const DEFAULT_SETTINGS = { sound: true, vibration: true };
+const DEFAULT_SETTINGS = { sound: true, vibration: true, analytics: null }; // analytics: null until the player answers
 const DEFAULT_DAILY = { streak: 0, last: '', best: 0 };
 const DEFAULT_POLICIES = { tax: 1, net: 1, edu: 1, trade: 1 };
 const START_GEMS = 25;
@@ -205,6 +205,7 @@ function buySector(id) {
   state.sectors[id] = before + n;
   discover(id);
   Sound.play('buy'); buzz(12);
+  if (before === 0) track('sector_first', { id, min: minutesPlayed() });
   if (before === 0) toast(`${s.name} is online · new encyclopedia entry`, s.id, s);
   const hit = MILESTONES.filter(m => before < m && before + n >= m).pop();
   if (hit) toast(`${s.name} reached ${hit}: income ×2`, s.id, s);
@@ -242,14 +243,17 @@ function repelAttack() {
   state.attack = null;
   state.attacksRepelled++;
   scheduleAttack(Date.now());
+  track('attack', { result: 'defended' });
   Sound.play('defend'); buzz(20);
   toast(`Attack stopped. Reward: ${money(reward)}`, 'shield-check', 'green');
 }
 
 function resolveAttack(now) {
   state.attack = null;
+  const tried = !!game;
   if (game) closeGame();
   if (Math.random() < secChance()) {
+    track('attack', { result: 'auto_blocked', tried });
     state.attacksRepelled++;
     Sound.play('defend');
     toast('Auto-defense blocked the attack', 'shield-check', 'green');
@@ -258,6 +262,7 @@ function resolveAttack(now) {
     state.gdp -= stolen;
     state.debuffUntil = now + DEBUFF_DURATION;
     state.attacksLost++;
+    track('attack', { result: 'breach', tried });
     Sound.play('breach'); buzz(300);
     toast(`Breach! Hackers stole ${money(stolen)}`, 'alert', 'bad');
   }
@@ -300,6 +305,7 @@ function doPrestige() {
 function performPrestige() {
   const gain = claimableInfluence();
   if (gain < 1) return;
+  track('export', { gain, era: currentEra(), hours: Math.round(minutesPlayed() / 60) });
   const keep = {
     nation: state.nation, lifeEarned: state.lifeEarned,
     influence: state.influence + gain, prestiges: state.prestiges + 1,
@@ -836,6 +842,7 @@ let lastTab = 'nation';
 function showScreen(name) {
   screen = name;
   if (!['profile', 'shop', 'library'].includes(name)) lastTab = name;
+  if (name === 'shop' || name === 'library') track('screen_open', { name });
   for (const b of document.querySelectorAll('.tabbar button')) b.classList.toggle('on', b.dataset.screen === name);
   for (const s of document.querySelectorAll('.screen')) s.hidden = s.id !== `screen-${name}`;
   sectorSig = ''; upgSig = ''; achSig = '';
@@ -911,6 +918,7 @@ function checkAchievements(silent) {
     const [cur, target] = a.prog();
     if (cur >= target) {
       state.achievements[a.id] = Date.now();
+      if (!silent) track('achievement', { id: a.id });
       state.gems += ACH_GEMS;
       if (!silent) { toast(`Achievement: ${a.name} · +${ACH_GEMS} gems`, 'star', 'gold'); Sound.play('reward'); buzz([20, 40, 20]); }
     }
@@ -969,7 +977,7 @@ function renderProfile(now, rank) {
     </div>`).join('');
   }
   renderStats(now);
-  for (const [id, key] of [['setSound', 'sound'], ['setVibe', 'vibration']]) $(id).setAttribute('aria-checked', String(!!state.settings[key]));
+  for (const [id, key] of [['setSound', 'sound'], ['setVibe', 'vibration'], ['setStats', 'analytics']]) $(id).setAttribute('aria-checked', String(state.settings[key] === true));
 }
 
 /* ---------------- Accounts + cloud save (Supabase) ---------------- */
@@ -1056,6 +1064,7 @@ function adoptCloudSave(remote, message) {
 const isFreshSave = s => s.lifeEarned < 1000 && !s.prestiges && !s.vipUntil && !(s.owned && s.owned.golden);
 
 async function onSignedIn() {
+  track('sign_in', {});
   if (!cloud.user || cloud.busy) return;
   cloud.busy = true; cloud.ready = false; cloud.status = 'syncing'; renderAccount();
   try {
@@ -1360,6 +1369,7 @@ function answerQuiz(i) {
   if (!id || state.quiz[id] !== undefined) return;
   const ok = i === c.c;
   state.quiz[id] = ok ? 1 : 0;
+  track('quiz_answer', { id, ok });
   if (ok) { state.gems += QUIZ_GEMS; Sound.play('reward'); buzz([15, 30, 15]); }
   else { Sound.play('breach'); buzz(60); }
   renderQuiz();
@@ -1477,7 +1487,7 @@ function simulatedPurchase(title, price, onDone) {
 
 function buyPack(id) {
   const p = GEM_PACKS.find(x => x.id === id);
-  if (p) simulatedPurchase(`Buy ${fmt(p.gems)} gems?`, p.price, () => addGems(p.gems, 'Purchase'));
+  if (p) simulatedPurchase(`Buy ${fmt(p.gems)} gems?`, p.price, () => { track('purchase_sim', { product: p.id }); addGems(p.gems, 'Purchase'); });
 }
 
 function buyVip() {
@@ -1725,6 +1735,7 @@ function checkEra() {
   if (e > state.era) {
     state.era = e;
     state.gems += 25;
+    track('era_reached', { era: e, hours: Math.round(minutesPlayed() / 60) });
     Sound.play('reward'); buzz([30, 60, 30]);
     queueOverlay(() => showModal(`Welcome to the ${ERAS[e].name}`, `Your nation entered Era ${ROMAN[e]}. All income is now ×${ERAS[e].mult}, and you received 25 gems.`, { icon: 'flask', tone: 'cyan' }));
   }
@@ -1752,6 +1763,7 @@ function setPolicy(id, opt) {
   state.policies[id] = opt;
   state.policyChangedAt[id] = now;
   state.policyChanges++;
+  track('policy_change', { id, opt });
   const p = POLICIES.find(x => x.id === id);
   Sound.play('buy'); buzz(15);
   toast(`${p.name}: ${p.options[opt].label}`, 'egov', 'cyan');
@@ -1764,6 +1776,7 @@ function buyResearch(id) {
   if (!n || !researchUnlocked() || !researchAvailable(n) || state.rp < n.cost) return;
   state.rp -= n.cost;
   state.research[id] = Date.now();
+  track('research_done', { id, n: researchCount(), min: minutesPlayed() });
   discover(id);
   Sound.play('upgrade'); buzz([12, 40, 12]);
   toast(`Research complete: ${n.name} · new encyclopedia entry`, 'flask', 'cyan');
@@ -1884,6 +1897,68 @@ function closeGame() {
   if (!overlayOpen()) nextOverlay();
 }
 
+/* ---------------- Anonymous statistics (opt-in) ---------------- */
+
+// Sent only when the player agreed. Linked to a random ID, never to the email.
+const APP_VERSION = '0.9.0';
+const ANON_KEY = 'digitalnation_anon_id';
+const SESSION_ID = Math.random().toString(36).slice(2, 12);
+const eventQueue = [];
+
+function anonId() {
+  let id = null;
+  try { id = localStorage.getItem(ANON_KEY); } catch (e) { /* storage unavailable */ }
+  if (!id) {
+    id = Array.from(crypto.getRandomValues(new Uint8Array(12)), b => b.toString(16).padStart(2, '0')).join('');
+    try { localStorage.setItem(ANON_KEY, id); } catch (e) { /* storage unavailable */ }
+  }
+  return id;
+}
+const minutesPlayed = () => Math.round((Date.now() - state.startedAt) / 60000);
+
+function track(name, props = {}) {
+  if (state.settings.analytics !== true) return;
+  eventQueue.push({ anon_id: anonId(), name, props, session_id: SESSION_ID, app_version: APP_VERSION });
+  if (eventQueue.length > 200) eventQueue.splice(0, eventQueue.length - 200);
+  if (eventQueue.length >= 20) flushEvents();
+}
+
+let flushing = false;
+async function flushEvents() {
+  if (flushing || !eventQueue.length || !cloud.client || state.settings.analytics !== true) return;
+  flushing = true;
+  const batch = eventQueue.splice(0, 50);
+  try {
+    const { error } = await cloud.client.from('events').insert(batch);
+    if (error) throw error;
+  } catch (e) {
+    eventQueue.unshift(...batch); // try again later
+  }
+  flushing = false;
+}
+
+function setAnalytics(on) {
+  state.settings.analytics = !!on;
+  if (!on) eventQueue.length = 0;
+  saveGame();
+  render();
+  if (on) track('stats_on', {});
+}
+
+// Asked once, after the tutorial, only where statistics can be sent.
+let analyticsAsked = false;
+function maybeAskAnalytics() {
+  if (analyticsAsked || state.settings.analytics !== null || !cloud.client || overlayOpen()) return;
+  if (!COACH.filter(c => c.tut).every(c => state.coach[c.id])) return;
+  analyticsAsked = true;
+  queueOverlay(() => showModal('Help improve Digital Nation?',
+    'Share anonymous gameplay statistics, such as when you finish the tutorial or reach a new era. They are linked to a random ID, never to your email, and help us balance the game. You can change this any time in Profile → Settings.', {
+      icon: 'chart', tone: 'cyan', okText: 'Share stats', cancelText: 'No thanks',
+      onOk: () => setAnalytics(true),
+      onCancel: () => setAnalytics(false),
+    }));
+}
+
 /* ---------------- Sound + haptics ---------------- */
 
 const Sound = (() => {
@@ -1995,6 +2070,7 @@ function claimDaily() {
   const gems = (r.gems || 0) + (isVip() ? 10 : 0);
   state.gems += gems;
   state.daily = { streak: st.day, last: dayKey(), best: Math.max(state.daily.best, st.day) };
+  track('daily_claim', { day: st.day });
   saveGame();
   Sound.play('reward'); buzz([20, 40, 20]);
   toast(`Day ${st.day} reward: ${money(amount)}${gems ? ` · +${gems} gems` : ''}`, 'gift', 'rose');
@@ -2053,7 +2129,7 @@ function currentCoach() {
 let coachShown = '';
 function updateCoach() {
   let c = currentCoach();
-  while (c && c.until && c.until()) { state.coach[c.id] = 1; c = currentCoach(); }
+  while (c && c.until && c.until()) { state.coach[c.id] = 1; if (c.tut) track('tutorial_step', { step: c.id }); c = currentCoach(); }
   const bubble = $('coach'), ring = $('coachRing');
   const target = c && (!c.screen || c.screen === screen) && !overlayOpen() ? c.target() : null;
   if (!target || target.getClientRects().length === 0) { bubble.hidden = true; ring.hidden = true; return; }
@@ -2099,7 +2175,7 @@ function tick() {
   if (game && now >= game.moveAt) moveBug();
   if (game) $('gameBar').style.width = state.attack ? `${Math.max(0, (state.attack.endsAt - now) / (state.attack.len || ATTACK_WINDOW)) * 100}%` : '0%';
   updateAttack(now);
-  if (now - achTimer > 1000) { achTimer = now; checkAchievements(false); maybeAutoDaily(); }
+  if (now - achTimer > 1000) { achTimer = now; checkAchievements(false); maybeAutoDaily(); maybeAskAnalytics(); }
   render();
   if (now - skyTimer > (reduceMotion ? 3000 : 150)) { skyTimer = now; drawSkyline(); }
 }
@@ -2235,12 +2311,13 @@ function bindUI() {
   $('dailyClose').addEventListener('click', closeDaily);
   $('setSound').addEventListener('click', () => { state.settings.sound = !state.settings.sound; Sound.play('tap'); saveGame(); render(); });
   $('setVibe').addEventListener('click', () => { state.settings.vibration = !state.settings.vibration; buzz(30); saveGame(); render(); });
+  $('setStats').addEventListener('click', () => setAnalytics(state.settings.analytics !== true));
   $('replayTut').addEventListener('click', () => { for (const c of COACH) if (c.tut) delete state.coach[c.id]; coachShown = ''; showScreen('nation'); });
   $('coach').addEventListener('click', e => {
     const c = currentCoach();
     if (!c) return;
-    if (e.target.closest('[data-coach="skip"]')) { for (const x of COACH) if (x.tut) state.coach[x.id] = 1; saveGame(); }
-    else if (e.target.closest('[data-coach="ok"]')) { state.coach[c.id] = 1; saveGame(); }
+    if (e.target.closest('[data-coach="skip"]')) { track('tutorial_skip', { at: c.id }); for (const x of COACH) if (x.tut) state.coach[x.id] = 1; saveGame(); }
+    else if (e.target.closest('[data-coach="ok"]')) { state.coach[c.id] = 1; if (c.id === 't4') track('tutorial_done', { min: minutesPlayed() }); saveGame(); }
     updateCoach();
   });
   // Browsers only allow audio after a user gesture.
@@ -2262,7 +2339,7 @@ function bindUI() {
 
   window.addEventListener('resize', drawSkyline);
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) { saveGame(); cloudPause(); }
+    if (document.hidden) { saveGame(); cloudPause(); flushEvents(); }
     else { applyOffline(); lastTick = Date.now(); render(); maybeAutoDaily(); cloudResume(); }
   });
   window.addEventListener('beforeunload', saveGame);
@@ -2283,6 +2360,8 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawSkylin
 setInterval(tick, 100);
 setInterval(saveGame, 5000);
 setInterval(cloudTick, CLOUD_PUSH_EVERY);
+setInterval(flushEvents, 15e3);
+track('session_start', { day: Math.floor((Date.now() - state.startedAt) / 86400e3), era: currentEra(), signedIn: !!readCloudMeta().uid });
 
 // Debug / test hook
-window.DN = { get state() { return state; }, techIndex, techRank, openEntry, pendingQuizzes, libEntries, cloud, cloudResume, syncNow, isVip, addGems, incomePerSec, earn, render, showScreen, dailyStatus, mods, rpRate, currentEra, SECTORS, UPGRADES, RESEARCH };
+window.DN = { get state() { return state; }, flushEvents, techIndex, techRank, openEntry, pendingQuizzes, libEntries, cloud, cloudResume, syncNow, isVip, addGems, incomePerSec, earn, render, showScreen, dailyStatus, mods, rpRate, currentEra, SECTORS, UPGRADES, RESEARCH };

@@ -95,6 +95,33 @@ Players can play without an account. From **Profile → Save your progress** the
 2. **Emails → Magic Link** template: add `{{ .Token }}` so the email shows the 6-digit code next to the link.
 3. Before launch, set up custom SMTP (for example Resend). The built-in email service only sends a few emails per hour.
 
+## Anonymous statistics (opt-in)
+
+After the tutorial, players are asked once whether to share anonymous gameplay statistics. They can change this any time in Profile → Settings. Events are queued, sent in batches every 15 seconds and when the app goes to the background, and stored in `public.events`. They are linked to a random device ID, never to an email. The API only allows inserts, so nobody can read events through the app; read them in the Supabase SQL Editor.
+
+Events: `session_start`, `tutorial_step`, `tutorial_done`, `tutorial_skip`, `sector_first`, `research_done`, `era_reached`, `export`, `quiz_answer`, `daily_claim`, `achievement`, `attack`, `policy_change`, `screen_open`, `purchase_sim`, `sign_in`, `stats_on`.
+
+```sql
+-- How long it takes to reach each era (median hours)
+select props->>'era' as era, count(*) as players,
+       percentile_cont(0.5) within group (order by (props->>'hours')::numeric) as median_hours
+from events where name = 'era_reached' group by 1 order by 1;
+
+-- Day-1 retention: players with a session on the day after their first one
+with first as (select anon_id, min(created_at)::date as d0 from events group by 1)
+select count(*) as players,
+       count(*) filter (where exists (select 1 from events e where e.anon_id = f.anon_id
+                        and e.created_at::date = f.d0 + 1)) as came_back_next_day
+from first f;
+
+-- Quiz questions people get wrong most often
+select props->>'id' as card, count(*) as answers,
+       round(100.0 * avg(case when (props->>'ok')::boolean then 1 else 0 end)) as pct_correct
+from events where name = 'quiz_answer' group by 1 having count(*) >= 5 order by pct_correct;
+```
+
+`public.prune_events()` deletes statistics older than 12 months. Run it from the SQL Editor or a scheduled job.
+
 ## Monetization (prototype)
 
 Real-money purchases are **simulated** in the web build and clearly labeled, with a test-mode limit of 2 per day so the balance stays realistic. They will be connected to Google Play Billing and StoreKit (for example through RevenueCat) in the native build. Rewarded ads are a 3-second placeholder screen, to be replaced by AdMob.
