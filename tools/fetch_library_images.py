@@ -1,16 +1,24 @@
-"""Download one free-licensed photo or diagram per Tech Encyclopedia card.
+"""Free-licensed pictures for the Tech Encyclopedia, from Wikimedia.
 
-For every card, candidate Wikipedia articles are tried in order. The article's
-lead image is used only if Wikipedia reports it as free (pilicense=free) and
-Commons metadata does not mark it non-free. A 640 px thumbnail is saved to
-images/library/<id>.<ext>, and author + license go to images/library/credits.js,
-which the game shows under each picture.
+Modes (python3 tools/fetch_library_images.py <mode>):
+  lead     For every card, try candidate Wikipedia articles in order and use the
+           first free-licensed lead image (pilicense=free).
+  review   For the cards in REVIEW_QUERIES, search Wikimedia Commons for photos
+           and save up to 4 small candidates per card to images/library/_review/
+           with candidates.json, so a person can pick the best one.
+  apply    Download the files listed in tools/library_image_picks.json
+           ({"card": "File name.jpg"}), update credits.js, delete _review/.
+  optimize Re-encode every image in images/library as 640 px WebP (needs Pillow).
 
-Runs in GitHub Actions (see .github/workflows/library-images.yml), because the
-development sandbox cannot reach Wikimedia. Standard library only.
+Images whose Commons metadata says non-free are always rejected. Author,
+license and source go to images/library/credits.js, which the game shows under
+each picture. Runs in GitHub Actions (.github/workflows/library-images.yml),
+because the development sandbox cannot reach Wikimedia.
 """
 import html
+import io
 import json
+import sys
 import pathlib
 import re
 import time
@@ -20,6 +28,9 @@ import urllib.request
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 OUT = ROOT / 'images' / 'library'
 API = 'https://en.wikipedia.org/w/api.php'
+COMMONS = 'https://commons.wikimedia.org/w/api.php'
+REVIEW = OUT / '_review'
+PICKS = ROOT / 'tools' / 'library_image_picks.json'
 UA = 'DigitalNationGame/1.0 (educational game; https://github.com/tardigrade23/DigitalNation)'
 WIDTH = 640
 
@@ -101,9 +112,53 @@ CANDIDATES = {
 }
 
 
-def api(params):
+# Cards whose lead image was a logo, a diagram, off-topic or missing: Commons photo searches.
+REVIEW_QUERIES = {
+    'egov': ['ASAN xidmət', 'e-government service center citizens'],
+    'mbank': ['M-Pesa agent shop', 'mobile money phone Africa'],
+    'fintech': ['contactless payment terminal card', 'fintech startup office'],
+    'g5': ['5G antenna base station', '5G mast'],
+    'opendata': ['open data hackathon', 'open data day'],
+    'cloud': ['server racks data center aisle', 'cloud server hall'],
+    'pay': ['QR code payment shop', 'Pix QR code pagamento'],
+    'ehealth': ['doctor tablet electronic health record', 'hospital computer patient record'],
+    'auto': ['Waymo self-driving car street', 'autonomous vehicle lidar'],
+    'biotech': ['biotechnology laboratory pipette', 'DNA sequencing laboratory'],
+    'space': ['Starlink user terminal dish', 'Starlink satellites night sky'],
+    'fusion': ['ITER tokamak construction', 'JET tokamak interior'],
+    'ai': ['AlphaGo Lee Sedol', 'artificial intelligence robot exhibition'],
+    'e4': ['Ethereum conference Devcon', 'blockchain cryptocurrency mining'],
+    'e5': ['mobile banking app smartphone', 'online banking laptop'],
+    'e6': ['stock exchange trading floor', 'digital asset blockchain'],
+    'e7': ['electronic invoice', 'receipt invoice paper'],
+    's2': ['Khan Academy', 'student laptop online learning'],
+    's3': ['electronic signature tablet', 'signing document stylus tablet'],
+    's4': ['rural internet access village computer', 'fiber broadband installation'],
+    'c1': ['firewall appliance network', 'network security appliance rack'],
+    'c2': ['cyber security operations center', 'CERT cybersecurity team'],
+    'c3': ['HTTPS padlock browser', 'smart card reader certificate'],
+    'c4': ['security key two-factor authentication', 'YubiKey'],
+    'c6': ['IBM Quantum System One', 'quantum computer cryostat'],
+    'c7': ['tape library backup', 'backup hard drives'],
+    'i2': ['network router cables', 'internet router rack'],
+    'i5': ['cell tower edge computing', 'factory automation sensors'],
+    'i6': ['smart meter electricity', 'electricity substation'],
+    'a1': ['IBM 701', 'Arthur Samuel checkers'],
+    'a2': ['data visualization wall control room', 'big data dashboard screens'],
+    'a3': ['GPU server cluster', 'NVIDIA GPU'],
+    'a4': ['GPU supercomputer AI training', 'large language model'],
+    'a5': ['Peter Shor', 'quantum processor chip'],
+    'a6': ['IBM TrueNorth', 'neuromorphic chip'],
+    'a7': ['AI Safety Summit Bletchley Park', 'Bletchley Park'],
+    'n1': ['data center cooling', 'free cooling data centre'],
+    'n5': ['factory chimney emissions', 'smokestack pollution'],
+    'n6': ['hydrogen electrolyzer', 'hydrogen fuel station'],
+    'n7': ['battery energy storage system container', 'grid battery storage'],
+}
+
+def api(params, endpoint=None):
     params = {**params, 'format': 'json', 'formatversion': '2'}
-    req = urllib.request.Request(API + '?' + urllib.parse.urlencode(params), headers={'User-Agent': UA})
+    req = urllib.request.Request((endpoint or API) + '?' + urllib.parse.urlencode(params), headers={'User-Agent': UA})
     with urllib.request.urlopen(req, timeout=30) as r:
         return json.load(r)
 
@@ -147,7 +202,41 @@ def download(url, dest):
         dest.write_bytes(r.read())
 
 
-def main():
+def load_credits():
+    path = OUT / 'credits.js'
+    if not path.exists():
+        return {}
+    text = path.read_text(encoding='utf-8')
+    body = text[text.index('=') + 1:].strip().rstrip(';')
+    return json.loads(body) if body else {}
+
+
+def save_credits(credits, report):
+    credits = dict(sorted(credits.items()))
+    js = ('// Generated by tools/fetch_library_images.py. Do not edit by hand.\n'
+          '// Free-licensed images from Wikimedia Commons / Wikipedia, with author and license.\n'
+          'const LIBRARY_IMAGES = ' + json.dumps(credits, indent=2, ensure_ascii=False) + ';\n')
+    (OUT / 'credits.js').write_text(js, encoding='utf-8')
+    (OUT / 'REPORT.txt').write_text('\n'.join(report) + '\n', encoding='utf-8')
+    print('\n'.join(report))
+    print(f'{len(credits)} cards have an image')
+
+
+def save_image(card, info, credits, article=''):
+    ext = pathlib.Path(urllib.parse.urlparse(info['thumb']).path).suffix.lower() or '.jpg'
+    if ext not in ('.jpg', '.jpeg', '.png', '.gif', '.webp'):
+        ext = '.png'
+    for old in OUT.glob(card + '.*'):
+        old.unlink()
+    dest = OUT / (card + ext)
+    download(info['thumb'], dest)
+    credits[card] = {
+        'src': f'images/library/{card}{ext}', 'article': article, 'file': info['file'],
+        'artist': info['artist'], 'license': info['license'], 'licenseUrl': info['licenseUrl'], 'source': info['source'],
+    }
+
+
+def mode_lead():
     OUT.mkdir(parents=True, exist_ok=True)
     credits, used, report = {}, set(), []
     for card, titles in CANDIDATES.items():
@@ -169,34 +258,123 @@ def main():
             report.append(f'{card}: no free image found')
             continue
         title, name, info = chosen
-        ext = pathlib.Path(urllib.parse.urlparse(info['thumb']).path).suffix.lower() or '.jpg'
-        if ext not in ('.jpg', '.jpeg', '.png', '.gif', '.webp'):
-            ext = '.png'
-        for old in OUT.glob(card + '.*'):
-            old.unlink()
-        dest = OUT / (card + ext)
-        download(info['thumb'], dest)
+        info['file'] = name
+        save_image(card, info, credits, title)
         used.add(name)
-        credits[card] = {
-            'src': f'images/library/{card}{ext}',
-            'article': title,
-            'file': name,
-            'artist': info['artist'],
-            'license': info['license'],
-            'licenseUrl': info['licenseUrl'],
-            'source': info['source'],
-        }
         report.append(f'{card}: {title} -> {name} ({info["license"]})')
         time.sleep(0.3)
+    save_credits(credits, report)
 
-    js = ('// Generated by tools/fetch_library_images.py. Do not edit by hand.\n'
-          '// Free-licensed images from Wikimedia Commons / Wikipedia, with author and license.\n'
-          'const LIBRARY_IMAGES = ' + json.dumps(credits, indent=2, ensure_ascii=False) + ';\n')
-    (OUT / 'credits.js').write_text(js, encoding='utf-8')
-    (OUT / 'REPORT.txt').write_text('\n'.join(report) + '\n', encoding='utf-8')
+
+def commons_search(query, limit=8):
+    data = api({'action': 'query', 'generator': 'search', 'gsrnamespace': 6, 'gsrsearch': query + ' filetype:bitmap',
+                'gsrlimit': limit, 'prop': 'imageinfo', 'iiprop': 'url|extmetadata|size', 'iiurlwidth': 240}, COMMONS)
+    pages = sorted(data.get('query', {}).get('pages', []), key=lambda p: p.get('index', 0))
+    out = []
+    for page in pages:
+        if 'imageinfo' not in page:
+            continue
+        info = page['imageinfo'][0]
+        meta = info.get('extmetadata', {})
+        license_name = plain(meta.get('LicenseShortName', {}).get('value', ''), 60)
+        nonfree = str(meta.get('NonFree', {}).get('value', '')).lower() in ('true', '1', 'yes')
+        if nonfree or not license_name or re.search(r'fair use|non-free', license_name, re.I):
+            continue
+        if info.get('width', 0) < 800 or info.get('height', 0) < 450:
+            continue
+        out.append({'file': page['title'].removeprefix('File:'), 'thumb': info.get('thumburl'),
+                    'artist': plain(meta.get('Artist', {}).get('value', '')) or 'Unknown author', 'license': license_name})
+    return out
+
+
+def mode_review():
+    REVIEW.mkdir(parents=True, exist_ok=True)
+    report, found = [], {}
+    for card, queries in REVIEW_QUERIES.items():
+        picks, seen = [], set()
+        for q in queries:
+            try:
+                taken = 0
+                for c in commons_search(q):
+                    if c['file'] in seen or taken >= 3:
+                        continue
+                    seen.add(c['file'])
+                    picks.append(c)
+                    taken += 1
+            except Exception as exc:
+                report.append(f'{card}: search error "{q}": {exc}')
+            time.sleep(0.3)
+        picks = picks[:4]
+        for i, c in enumerate(picks):
+            try:
+                ext = pathlib.Path(urllib.parse.urlparse(c['thumb']).path).suffix.lower() or '.jpg'
+                download(c['thumb'], REVIEW / f'{card}_{i}{ext}')
+                c['thumbFile'] = f'{card}_{i}{ext}'
+            except Exception as exc:
+                report.append(f'{card}: download error {c["file"]}: {exc}')
+            time.sleep(0.2)
+        found[card] = picks
+        report.append(f'{card}: {len(picks)} candidates')
+    (REVIEW / 'candidates.json').write_text(json.dumps(found, indent=2, ensure_ascii=False), encoding='utf-8')
+    (REVIEW / 'REPORT.txt').write_text('\n'.join(report) + '\n', encoding='utf-8')
     print('\n'.join(report))
-    print(f'{len(credits)} of {len(CANDIDATES)} cards have an image')
+
+
+def mode_apply():
+    picks = json.loads(PICKS.read_text(encoding='utf-8'))
+    credits, report = load_credits(), []
+    for card, name in picks.items():
+        if not name:  # an empty pick removes the card's image
+            for old in OUT.glob(card + '.*'):
+                old.unlink()
+            credits.pop(card, None)
+            report.append(f'{card}: image removed')
+            continue
+        try:
+            info = file_info(name)
+            if not info:
+                report.append(f'{card}: {name} rejected (not free or missing)')
+                continue
+            info['file'] = name
+            save_image(card, info, credits, 'Wikimedia Commons')
+            report.append(f'{card}: {name} ({info["license"]})')
+        except Exception as exc:
+            report.append(f'{card}: error {name}: {exc}')
+        time.sleep(0.3)
+    if REVIEW.exists():
+        for f in REVIEW.iterdir():
+            f.unlink()
+        REVIEW.rmdir()
+    save_credits(credits, report)
+
+
+def mode_optimize():
+    from PIL import Image  # installed by the workflow
+    credits, report = load_credits(), []
+    for card, c in credits.items():
+        src = ROOT / c['src']
+        if not src.exists():
+            continue
+        im = Image.open(src)
+        if im.mode in ('RGBA', 'LA', 'P'):
+            im = im.convert('RGBA')
+            bg = Image.new('RGB', im.size, (255, 255, 255))
+            bg.paste(im, mask=im.split()[-1])
+            im = bg
+        else:
+            im = im.convert('RGB')
+        if im.width > WIDTH:
+            im = im.resize((WIDTH, round(im.height * WIDTH / im.width)), Image.LANCZOS)
+        dest = OUT / f'{card}.webp'
+        before = src.stat().st_size
+        im.save(dest, 'WEBP', quality=78, method=6)
+        if src != dest:
+            src.unlink()
+        c['src'] = f'images/library/{card}.webp'
+        report.append(f'{card}: {before // 1024} KB -> {dest.stat().st_size // 1024} KB')
+    save_credits(credits, report)
 
 
 if __name__ == '__main__':
-    main()
+    mode = sys.argv[1] if len(sys.argv) > 1 else 'lead'
+    {'lead': mode_lead, 'review': mode_review, 'apply': mode_apply, 'optimize': mode_optimize}[mode]()

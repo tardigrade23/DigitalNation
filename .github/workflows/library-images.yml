@@ -1,9 +1,18 @@
 name: Fetch encyclopedia images
 
-# Downloads free-licensed images for the Tech Encyclopedia from Wikimedia
-# and commits them to images/library. Run it by hand from the Actions tab.
+# Downloads free-licensed images for the Tech Encyclopedia from Wikimedia and
+# commits them to images/library. Run it by hand from the Actions tab.
+#   lead    first free lead image of candidate Wikipedia articles
+#   review  photo candidates for weak cards, saved to images/library/_review
+#   apply   download tools/library_image_picks.json, then convert all to WebP
 on:
   workflow_dispatch:
+    inputs:
+      mode:
+        description: What to run
+        type: choice
+        options: [review, apply, lead]
+        default: review
 
 permissions:
   contents: write
@@ -14,17 +23,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download images and credits
-        run: python3 tools/fetch_library_images.py
+      - name: Install Pillow (for WebP conversion)
+        run: python3 -m pip install --quiet Pillow
+
+      - name: Run
+        run: |
+          python3 tools/fetch_library_images.py "${{ inputs.mode }}"
+          if [ "${{ inputs.mode }}" != "review" ]; then
+            python3 tools/fetch_library_images.py optimize
+          fi
 
       - name: Commit changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add images/library
+          git add -A images/library
           if git diff --cached --quiet; then
             echo "No changes"
             exit 0
           fi
-          git commit -m "Update encyclopedia images from Wikimedia Commons"
+          git commit -m "Encyclopedia images: ${{ inputs.mode }} run"
           git push
