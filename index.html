@@ -167,6 +167,17 @@
           <svg class="ic ic-sm muted-ic"><use href="#i-chevron"/></svg>
         </button>
 
+        <button id="missionsCard" class="card goal">
+          <span class="tile tile-green"><svg class="ic"><use href="#i-target"/></svg></span>
+          <span class="goal-body">
+            <span class="eyebrow">Missions</span>
+            <span id="missionsCardText" class="card-title">0 of 3 done today</span>
+            <span class="meter meter-green"><i id="missionsBar"></i></span>
+          </span>
+          <span id="missionsDot" class="dot-live" hidden></span>
+          <svg class="ic ic-sm muted-ic"><use href="#i-chevron"/></svg>
+        </button>
+
         <button id="dailyCard" class="card goal">
           <span class="tile tile-rose"><svg class="ic"><use href="#i-gift"/></svg></span>
           <span class="goal-body">
@@ -532,6 +543,22 @@
       </form>
       <p id="authError" class="auth-error" role="alert" hidden></p>
       <button id="authClose" class="btn btn-ghost" type="button">Not now</button>
+    </div>
+  </div>
+
+  <div id="missions" class="modal" hidden>
+    <div class="modal-box missions-box" role="dialog" aria-modal="true" aria-labelledby="missionsTitle">
+      <span class="tile tile-green tile-lg modal-icon"><svg class="ic"><use href="#i-target"/></svg></span>
+      <h3 id="missionsTitle">Missions</h3>
+      <div class="mission-group">
+        <div class="mission-group-head"><span class="eyebrow">Today</span><span id="missionsDayLeft" class="muted small"></span></div>
+        <div id="missionsDaily" class="mission-list"></div>
+      </div>
+      <div class="mission-group">
+        <div class="mission-group-head"><span class="eyebrow">This week</span><span id="missionsWeekLeft" class="muted small"></span></div>
+        <div id="missionsWeekly" class="mission-list"></div>
+      </div>
+      <button id="missionsClose" class="btn btn-primary wide">Close</button>
     </div>
   </div>
 

@@ -115,6 +115,7 @@ function defaultState() {
     settings: { ...DEFAULT_SETTINGS }, daily: { ...DEFAULT_DAILY }, coach: {},
     rp: 0, research: {}, policies: { ...DEFAULT_POLICIES }, policyChangedAt: {}, era: 0,
     policyChanges: 0, gamesWon: 0,
+    stats: { built: 0, upgrades: 0, researchStarted: 0 }, missions: { day: '', list: [], week: '', weekly: null },
     gems: START_GEMS, vipUntil: 0, shieldUntil: 0, owned: { golden: false, flags: [], tones: [] }, adGems: { day: '', n: 0 },
     v: SAVE_VERSION, library: {}, quiz: {}, warps: { day: '', n: 0 }, simBuys: { day: '', n: 0 },
   };
@@ -203,6 +204,7 @@ function buySector(id) {
   const before = owned(id);
   state.gdp -= cost;
   state.sectors[id] = before + n;
+  state.stats.built += n;
   discover(id);
   Sound.play('buy'); buzz(12);
   if (before === 0) track('sector_first', { id, min: minutesPlayed() });
@@ -216,6 +218,7 @@ function buyUpgrade(id) {
   if (!u || state.upgrades[id] || !u.unlocked() || state.gdp < u.cost) return;
   state.gdp -= u.cost;
   state.upgrades[id] = true;
+  state.stats.upgrades++;
   Sound.play('upgrade'); buzz([12, 40, 12]);
   toast(`${u.name} activated`, u.icon, u);
 }
@@ -316,7 +319,7 @@ function performPrestige() {
     policyChanges: state.policyChanges, gamesWon: state.gamesWon,
     gems: state.gems, vipUntil: state.vipUntil, shieldUntil: state.shieldUntil, owned: state.owned, adGems: state.adGems,
     v: state.v, library: state.library, quiz: state.quiz, warps: state.warps, simBuys: state.simBuys, pendingEarns: state.pendingEarns,
-    researching: state.researching,
+    researching: state.researching, stats: state.stats, missions: state.missions,
   };
   state = Object.assign(defaultState(), keep);
   sectorSig = ''; upgSig = '';
@@ -391,6 +394,7 @@ function money(n) { return '$' + fmt(n); }
 function dur(ms) {
   const s = Math.max(0, Math.ceil(ms / 1000));
   const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+  if (h >= 48) return `${Math.floor(h / 24)}d ${h % 24}h`;
   if (h) return `${h}h ${m}m`;
   if (m) return `${m}m ${sec}s`;
   return `${sec}s`;
@@ -425,6 +429,8 @@ function normalizeSave(saved) {
   for (const k of ['library', 'quiz']) if (!s[k] || typeof s[k] !== 'object') s[k] = {};
   if (!Array.isArray(s.pendingEarns)) s.pendingEarns = [];
   if (!s.researching || typeof s.researching !== 'object') s.researching = null;
+  s.stats = Object.assign({ built: 0, upgrades: 0, researchStarted: 0 }, saved && saved.stats);
+  if (!s.missions || typeof s.missions !== 'object') s.missions = { day: '', list: [], week: '', weekly: null };
   if (saved && !saved.v) s.v = 1;
   // Players from before the tutorial existed skip it.
   if (!saved || typeof saved.coach !== 'object' || !saved.coach) s.coach = saved ? { t1: 1, t2: 1, t3: 1, t4: 1 } : {};
@@ -810,6 +816,10 @@ function render() {
     $('libraryCardText').textContent = found ? `${found} of ${libEntries().length} discovered${waiting ? ` · ${waiting} quiz${waiting > 1 ? 'zes' : ''} waiting` : ''}` : 'Discover how digital nations work';
     $('libraryCardDot').hidden = !waiting;
     $('dailyCardDot').hidden = !daily.ready;
+    const ms = missionSummary();
+    $('missionsCardText').textContent = ms.text;
+    $('missionsBar').style.width = `${ms.pct}%`;
+    $('missionsDot').hidden = !ms.claimable;
     $('dailyCardText').textContent = daily.ready ? `Day ${daily.day} reward is ready` : `Next reward in ${dur(msToMidnight())}`;
     const g = nextGoal();
     $('goalText').textContent = g.cost ? `${g.text} · ${money(g.cost)}` : g.text;
@@ -1985,6 +1995,7 @@ function buyResearch(id) {
   if (!n || !researchUnlocked() || !researchAvailable(n) || state.rp < n.cost || state.researching) return;
   state.rp -= n.cost;
   state.researching = { id, left: researchSeconds(n), total: researchSeconds(n) };
+  state.stats.researchStarted++;
   track('research_start', { id });
   Sound.play('buy'); buzz(12);
   toast(`Research started: ${n.name} (${dur(state.researching.left * 1000)})`, 'flask', 'cyan');
@@ -2254,9 +2265,111 @@ function buzz(pattern) {
 /* ---------------- Overlays (modal + daily) queue ---------------- */
 
 const overlayQueue = [];
-function overlayOpen() { return !$('modal').hidden || !$('daily').hidden || !$('cyberGame').hidden || !$('adOverlay').hidden || !$('auth').hidden || !$('learn').hidden; }
+function overlayOpen() { return !$('missions').hidden || !$('modal').hidden || !$('daily').hidden || !$('cyberGame').hidden || !$('adOverlay').hidden || !$('auth').hidden || !$('learn').hidden; }
 function queueOverlay(fn) { if (overlayOpen()) overlayQueue.push(fn); else fn(); }
 function nextOverlay() { const fn = overlayQueue.shift(); if (fn) fn(); updateCoach(); }
+
+/* ---------------- Daily and weekly missions ---------------- */
+
+// Each mission compares a lifetime counter with its value when the mission was handed out.
+const MISSION_GEMS = 5, WEEKLY_GEMS = 25;
+const MISSIONS = [
+  { id: 'tap',      icon: 'coins',  text: t => `Collect taxes ${t} times`,                          metric: () => state.clicks,          target: () => 150 },
+  { id: 'build',    icon: 'smart',  text: t => `Build ${t} facilities`,                             metric: () => state.stats.built,     target: () => Math.max(10, Math.round(totalOwned() * 0.03) * 5) },
+  { id: 'earn',     icon: 'coin',   text: t => `Earn ${money(t)} GDP`,                              metric: () => state.lifeEarned,      target: () => Math.max(1000, incomePerSec(false) * 1800) },
+  { id: 'upgrade',  icon: 'up',     text: t => `Buy ${t} upgrade${t > 1 ? 's' : ''}`,               metric: () => state.stats.upgrades,  target: () => 2, when: () => availableUpgrades().length > 0 },
+  { id: 'research', icon: 'flask',  text: () => 'Start a research project',                         metric: () => state.stats.researchStarted, target: () => 1, when: () => researchUnlocked() },
+  { id: 'quiz',     icon: 'book',   text: t => `Answer ${t} encyclopedia quiz${t > 1 ? 'zes' : ''} correctly`, metric: () => quizCorrect(), target: () => Math.min(2, pendingQuizzes().length), when: () => pendingQuizzes().length > 0 },
+  { id: 'defend',   icon: 'shield', text: t => `Stop ${t} cyber attacks`,                           metric: () => state.attacksRepelled, target: () => 2, when: () => incomePerSec(false) >= 5 },
+  { id: 'minigame', icon: 'bug',    text: () => 'Win the cyber mini-game',                          metric: () => state.gamesWon,        target: () => 1, when: () => incomePerSec(false) >= 5 },
+  { id: 'policy',   icon: 'egov',   text: () => 'Change a national policy',                         metric: () => state.policyChanges,   target: () => 1, when: () => policiesUnlocked() },
+];
+const WEEKLY_MISSIONS = [
+  { id: 'w_research', icon: 'flask',  text: t => `Start ${t} research projects`,        metric: () => state.stats.researchStarted, target: () => 3, when: () => researchUnlocked() },
+  { id: 'w_build',    icon: 'smart',  text: t => `Build ${t} facilities`,               metric: () => state.stats.built,     target: () => Math.max(60, Math.round(totalOwned() * 0.06) * 5) },
+  { id: 'w_quiz',     icon: 'book',   text: t => `Answer ${t} quizzes correctly`,       metric: () => quizCorrect(),         target: () => Math.min(6, pendingQuizzes().length), when: () => pendingQuizzes().length >= 3 },
+  { id: 'w_defend',   icon: 'shield', text: t => `Stop ${t} cyber attacks`,             metric: () => state.attacksRepelled, target: () => 8, when: () => incomePerSec(false) >= 5 },
+  { id: 'w_earn',     icon: 'coin',   text: t => `Earn ${money(t)} GDP`,                metric: () => state.lifeEarned,      target: () => Math.max(1e5, incomePerSec(false) * 36000) },
+];
+
+function weekKey(d = new Date()) {
+  const m = new Date(d.getFullYear(), d.getMonth(), d.getDate() - ((d.getDay() + 6) % 7)); // Monday
+  return dayKey(m);
+}
+function msToMonday() { const d = new Date(); const m = new Date(d.getFullYear(), d.getMonth(), d.getDate() + (7 - ((d.getDay() + 6) % 7))); return m - d; }
+function hashStr(str) { let h = 0; for (const ch of str) h = (h * 31 + ch.charCodeAt(0)) | 0; return h; }
+function pickMissions(pool, seedKey, count) {
+  const eligible = pool.filter(m => !m.when || m.when());
+  const r = rng(hashStr(seedKey)), picked = [];
+  const left = eligible.slice();
+  while (picked.length < count && left.length) picked.push(left.splice(Math.floor(r() * left.length), 1)[0]);
+  return picked.map(m => ({ id: m.id, base: m.metric(), target: Math.max(1, Math.round(m.target())), claimed: false }));
+}
+const missionDef = id => MISSIONS.find(m => m.id === id) || WEEKLY_MISSIONS.find(m => m.id === id);
+function missionProgress(ms) { const d = missionDef(ms.id); return d ? Math.max(0, Math.min(ms.target, d.metric() - ms.base)) : 0; }
+const missionDone = ms => missionProgress(ms) >= ms.target;
+
+function updateMissions() {
+  const tutorialDone = COACH.filter(c => c.tut).every(c => state.coach[c.id]);
+  if (!tutorialDone) return;
+  const M = state.missions;
+  if (M.day !== dayKey()) { M.day = dayKey(); M.list = pickMissions(MISSIONS, M.day, 3); }
+  if (M.week !== weekKey()) { M.week = weekKey(); M.weekly = pickMissions(WEEKLY_MISSIONS, 'w' + M.week, 1)[0] || null; }
+  for (const ms of [...M.list, M.weekly].filter(Boolean)) {
+    if (!ms.notified && !ms.claimed && missionDone(ms)) {
+      ms.notified = true;
+      toast(`Mission complete: ${missionDef(ms.id).text(ms.target)}`, 'target', 'green');
+      Sound.play('reward');
+    }
+  }
+  if (!$('missions').hidden) renderMissions();
+}
+
+function missionSummary() {
+  const M = state.missions, list = M.list || [];
+  const done = list.filter(m => m.claimed || missionDone(m)).length;
+  const claimable = [...list, M.weekly].filter(Boolean).some(m => !m.claimed && missionDone(m));
+  return { text: list.length ? `${done} of ${list.length} done today` : 'Finish the tutorial to get missions', pct: list.length ? (done / list.length) * 100 : 0, claimable };
+}
+
+function renderMissions() {
+  const M = state.missions;
+  const row = (ms, weekly) => {
+    const d = missionDef(ms.id), p = missionProgress(ms), done = p >= ms.target;
+    const reward = weekly ? `+${WEEKLY_GEMS} gems · 1 h of income` : `+${MISSION_GEMS} gems · 15 min of income`;
+    const btn = ms.claimed ? `<button class="btn" disabled>${icon('check', 'ic-sm')}</button>`
+      : `<button class="btn ${done ? 'btn-gold' : ''}" data-claim="${ms.id}" ${done ? '' : 'disabled'}>Claim</button>`;
+    const prog = d.id === 'earn' || d.id === 'w_earn' ? `${money(p)} / ${money(ms.target)}` : `${fmt(p)} / ${fmt(ms.target)}`;
+    return `<div class="mission ${ms.claimed ? 'claimed' : ''}">${tile(d.icon, weekly ? 'violet' : 'green')}
+      <span class="mission-text">${d.text(ms.target)}</span>${btn}
+      <span class="mission-sub"><span class="meter"><i style="width:${(p / ms.target) * 100}%"></i></span><span class="mission-count">${prog}</span><span class="mission-reward">${reward}</span></span></div>`;
+  };
+  $('missionsDaily').innerHTML = (M.list || []).map(ms => row(ms, false)).join('') || '<div class="empty">Finish the tutorial to get missions.</div>';
+  $('missionsWeekly').innerHTML = M.weekly ? row(M.weekly, true) : '';
+  $('missionsDayLeft').textContent = `New in ${dur(msToMidnight())}`;
+  $('missionsWeekLeft').textContent = `New in ${dur(msToMonday())}`;
+}
+
+function showMissions() { updateMissions(); renderMissions(); $('missions').hidden = false; updateCoach(); }
+function closeMissions() { $('missions').hidden = true; if (!overlayOpen()) nextOverlay(); }
+
+function claimMission(id) {
+  const M = state.missions;
+  const weekly = M.weekly && M.weekly.id === id;
+  const ms = weekly ? M.weekly : (M.list || []).find(m => m.id === id);
+  if (!ms || ms.claimed || !missionDone(ms)) return;
+  ms.claimed = true;
+  const income = incomePerSec(false) * (weekly ? 3600 : 900);
+  earn(income);
+  if (weekly) gemEarn('weekly', M.week, WEEKLY_GEMS);
+  else gemEarn('mission', `${M.day}:${id}`, MISSION_GEMS);
+  track('mission_claim', { id, weekly });
+  Sound.play('reward'); buzz([15, 30, 15]);
+  toast(`+${weekly ? WEEKLY_GEMS : MISSION_GEMS} gems and ${money(income)}`, 'target', 'green');
+  saveGame();
+  renderMissions();
+  render();
+}
 
 /* ---------------- Daily reward ---------------- */
 
@@ -2416,7 +2529,7 @@ function tick() {
   if (game && now >= game.moveAt) moveBug();
   if (game) $('gameBar').style.width = state.attack ? `${Math.max(0, (state.attack.endsAt - now) / (state.attack.len || ATTACK_WINDOW)) * 100}%` : '0%';
   updateAttack(now);
-  if (now - achTimer > 1000) { achTimer = now; checkAchievements(false); maybeAutoDaily(); maybeAskAnalytics(); }
+  if (now - achTimer > 1000) { achTimer = now; updateMissions(); checkAchievements(false); maybeAutoDaily(); maybeAskAnalytics(); }
   render();
   if (now - skyTimer > (reduceMotion ? 3000 : 150)) { skyTimer = now; drawSkyline(); }
 }
@@ -2550,6 +2663,9 @@ function bindUI() {
     if (b) pickFlag(Number(b.dataset.flag));
   });
   $('dailyCard').addEventListener('click', () => queueOverlay(showDaily));
+  $('missionsCard').addEventListener('click', () => queueOverlay(showMissions));
+  $('missionsClose').addEventListener('click', closeMissions);
+  $('missions').addEventListener('click', e => { const b = e.target.closest('[data-claim]'); if (b) claimMission(b.dataset.claim); });
   $('dailyClaim').addEventListener('click', claimDaily);
   $('dailyClose').addEventListener('click', closeDaily);
   $('setSound').addEventListener('click', () => { state.settings.sound = !state.settings.sound; Sound.play('tap'); saveGame(); render(); });

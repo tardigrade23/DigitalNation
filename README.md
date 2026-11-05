@@ -122,6 +122,10 @@ from events where name = 'quiz_answer' group by 1 having count(*) >= 5 order by 
 
 `public.prune_events()` deletes statistics older than 12 months. Run it from the SQL Editor or a scheduled job.
 
+## Missions
+
+Every day the player gets 3 missions, and every week (starting Monday) 1 bigger mission. They are picked from templates that fit the player's stage: taps, building, earning, upgrades, research, quizzes, cyber defense, the minigame and policies. Targets scale with the nation; for example, "earn GDP" asks for 30 minutes of current income. Rewards: +5 gems and 15 minutes of income per daily mission, and +25 gems and 1 hour of income for the weekly one. For signed-in players the server checks them (`mission`: at most 3 a day; `weekly`: once a week; see `supabase/migrations/20261106090000_missions_rewards.sql`).
+
 ## Player leaderboard
 
 Govern → **Leaders** ranks real players by Tech Index (top 50, plus your own position if you are lower). Signed-in players' entries (nation, leader, flag, score, era) are written to `public.leaderboard` when they sync, at most every 5 minutes. Anyone can read the table; each player can write only their own row. Scores are reported by the game client, so they can be faked by a determined cheater; before a public launch, move the score calculation to the server or add plausibility checks.
