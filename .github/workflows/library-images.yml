@@ -1,0 +1,30 @@
+name: Fetch encyclopedia images
+
+# Downloads free-licensed images for the Tech Encyclopedia from Wikimedia
+# and commits them to images/library. Run it by hand from the Actions tab.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download images and credits
+        run: python3 tools/fetch_library_images.py
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add images/library
+          if git diff --cached --quiet; then
+            echo "No changes"
+            exit 0
+          fi
+          git commit -m "Update encyclopedia images from Wikimedia Commons"
+          git push
