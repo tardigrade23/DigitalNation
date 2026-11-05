@@ -315,7 +315,7 @@ function performPrestige() {
     research: state.research, policies: state.policies, era: state.era,
     policyChanges: state.policyChanges, gamesWon: state.gamesWon,
     gems: state.gems, vipUntil: state.vipUntil, shieldUntil: state.shieldUntil, owned: state.owned, adGems: state.adGems,
-    v: state.v, library: state.library, quiz: state.quiz, warps: state.warps, simBuys: state.simBuys,
+    v: state.v, library: state.library, quiz: state.quiz, warps: state.warps, simBuys: state.simBuys, pendingEarns: state.pendingEarns,
   };
   state = Object.assign(defaultState(), keep);
   sectorSig = ''; upgSig = '';
@@ -422,6 +422,7 @@ function normalizeSave(saved) {
   // Saves from before gems existed get gems for the achievements they already earned.
   if (saved && saved.gems === undefined) s.gems = START_GEMS + 10 * Object.keys(s.achievements).length;
   for (const k of ['library', 'quiz']) if (!s[k] || typeof s[k] !== 'object') s[k] = {};
+  if (!Array.isArray(s.pendingEarns)) s.pendingEarns = [];
   if (saved && !saved.v) s.v = 1;
   // Players from before the tutorial existed skip it.
   if (!saved || typeof saved.coach !== 'object' || !saved.coach) s.coach = saved ? { t1: 1, t2: 1, t3: 1, t4: 1 } : {};
@@ -919,7 +920,7 @@ function checkAchievements(silent) {
     if (cur >= target) {
       state.achievements[a.id] = Date.now();
       if (!silent) track('achievement', { id: a.id });
-      state.gems += ACH_GEMS;
+      gemEarn('achievement', a.id, ACH_GEMS);
       if (!silent) { toast(`Achievement: ${a.name} · +${ACH_GEMS} gems`, 'star', 'gold'); Sound.play('reward'); buzz([20, 40, 20]); }
     }
   }
@@ -1014,7 +1015,7 @@ function initCloud() {
     const user = session ? session.user : null;
     const changed = (user && user.id) !== (cloud.user && cloud.user.id);
     cloud.user = user;
-    if (!user) { cloud.ready = false; cloud.status = 'off'; }
+    if (!user) { cloud.ready = false; cloud.status = 'off'; cloud.walletReady = false; cloud.wallet = null; }
     // Supabase recommends not awaiting other calls inside this callback.
     if (user && changed) setTimeout(onSignedIn, 0);
     renderAccount();
@@ -1053,6 +1054,7 @@ function adoptCloudSave(remote, message) {
   sectorSig = ''; upgSig = ''; achSig = ''; identitySig = ''; shopSig = ''; researchSig = ''; coachShown = '';
   policiesBuilt = false;
   markSynced(remote.updated_at);
+  if (cloud.wallet) applyWallet(cloud.wallet); // gems and items always come from the server wallet
   buildPickers();
   saveGame();
   applyOffline();
@@ -1088,6 +1090,7 @@ async function onSignedIn() {
   }
   cloud.busy = false;
   renderAccount();
+  connectWallet();
 }
 
 function askWhichSave(remote) {
@@ -1095,9 +1098,9 @@ function askWhichSave(remote) {
   const acct = `Your account: ${money(remote.progress)} lifetime GDP, saved ${ago(new Date(remote.updated_at).getTime())}.`;
   queueOverlay(() => showModal('Which nation do you want to keep?', `${local}\n${acct}\n\nThe other one will be replaced.`, {
     icon: 'cloud', tone: 'cyan', okText: 'Use account', cancelText: 'Use this device',
-    onOk: () => { adoptCloudSave(remote, 'Loaded your nation from your account'); renderAccount(); },
+    onOk: () => { adoptCloudSave(remote, 'Loaded your nation from your account'); renderAccount(); connectWallet(); },
     onCancel: async () => {
-      try { await pushSave(); toast('This device\'s nation is now saved to your account', 'cloud', 'cyan'); }
+      try { await pushSave(); connectWallet(); toast('This device\'s nation is now saved to your account', 'cloud', 'cyan'); }
       catch (e) { cloud.status = 'error'; }
       renderAccount();
     },
@@ -1121,7 +1124,7 @@ async function runSync(message) {
 }
 
 // Every 30 s while the game is visible.
-function cloudTick() { if (cloud.user && !document.hidden) runSync(); }
+function cloudTick() { if (cloud.user && !document.hidden) { runSync(); flushEarns(); } }
 // Leaving the app: upload right away so another device can continue.
 function cloudPause() {
   if (!cloud.user || !cloud.ready || cloud.busy) return;
@@ -1144,7 +1147,7 @@ function askDeleteAccount() {
         if (error) throw error;
         await cloud.client.auth.signOut().catch(() => {});
         writeCloudMeta({});
-        cloud.user = null; cloud.ready = false; cloud.status = 'off'; cloud.lastSync = 0;
+        cloud.user = null; cloud.ready = false; cloud.status = 'off'; cloud.lastSync = 0; cloud.walletReady = false; cloud.wallet = null;
         renderAccount();
         showModal('Account deleted', 'Your account and its cloud data are gone. Your progress on this device is still here; use "Reset progress on this device" if you want to remove it too.', { icon: 'check', tone: 'green' });
       } catch (e) {
@@ -1159,7 +1162,7 @@ async function signOut() {
   if (cloud.ready) { try { await pushSave(); } catch (e) { /* keep local copy */ } }
   await cloud.client.auth.signOut().catch(() => {});
   writeCloudMeta({});
-  cloud.user = null; cloud.ready = false; cloud.status = 'off'; cloud.lastSync = 0;
+  cloud.user = null; cloud.ready = false; cloud.status = 'off'; cloud.lastSync = 0; cloud.walletReady = false; cloud.wallet = null;
   toast('Signed out. Your progress stays on this device.', 'logout', 'cyan');
   renderAccount();
 }
@@ -1370,7 +1373,7 @@ function answerQuiz(i) {
   const ok = i === c.c;
   state.quiz[id] = ok ? 1 : 0;
   track('quiz_answer', { id, ok });
-  if (ok) { state.gems += QUIZ_GEMS; Sound.play('reward'); buzz([15, 30, 15]); }
+  if (ok) { gemEarn('quiz', id, QUIZ_GEMS); Sound.play('reward'); buzz([15, 30, 15]); }
   else { Sound.play('breach'); buzz(60); }
   renderQuiz();
   if (!ok) {
@@ -1422,6 +1425,95 @@ function renderLibrary() {
   }).join('');
 }
 
+/* ---------------- Server wallet (signed-in players) ---------------- */
+
+// Signed in: the server owns gems, VIP and premium items (public.wallets).
+// Guests: everything stays on the device, as before.
+const walletMode = () => !!(cloud.user && cloud.walletReady);
+
+async function walletRpc(fn, args = {}) {
+  const { data, error } = await cloud.client.rpc(fn, args);
+  if (error) throw error;
+  return data;
+}
+
+function applyWallet(w) {
+  if (!w) return;
+  cloud.wallet = w;
+  const day = dayKey();
+  state.gems = w.gems;
+  state.vipUntil = w.vipUntil ? Date.parse(w.vipUntil) : 0;
+  state.shieldUntil = Math.max(state.shieldUntil || 0, w.shieldUntil ? Date.parse(w.shieldUntil) : 0);
+  state.owned.golden = !!w.golden;
+  state.owned.flags = (w.flags || []).map(Number);
+  state.owned.tones = [...(w.tones || [])];
+  state.warps = { day, n: w.warpsToday || 0 };
+  state.adGems = { day, n: Math.max(adGemsUsed(), w.adsToday || 0) };
+  state.simBuys = { day, n: w.buysToday || 0 };
+  identitySig = ''; shopSig = '';
+}
+
+function walletError(e) {
+  const m = String((e && e.message) || e || '');
+  const text = /insufficient_gems/.test(m) ? 'You do not have enough gems for this.'
+    : /limit_reached/.test(m) ? 'You reached today\'s limit for this. It resets at midnight (UTC).'
+    : /already_owned/.test(m) ? 'You already own this.'
+    : /fetch|network|failed/i.test(m) ? 'Connect to the internet to use gems while you are signed in.'
+    : 'The server could not complete this. Please try again.';
+  showModal('Not completed', text, { icon: 'gem', tone: 'violet' });
+  refreshWallet();
+}
+
+// Free gems: added right away on screen, confirmed by the server.
+// Offline earnings wait in state.pendingEarns and are sent later.
+function gemEarn(reason, ref, amount) {
+  if (!walletMode()) { state.gems += amount; return; }
+  state.gems += amount;
+  state.pendingEarns = state.pendingEarns || [];
+  state.pendingEarns.push({ reason, ref: String(ref || ''), amount });
+  flushEarns();
+}
+
+let earning = false;
+async function flushEarns() {
+  if (earning || !walletMode() || !(state.pendingEarns || []).length) return;
+  earning = true;
+  while (state.pendingEarns.length) {
+    const e = state.pendingEarns[0];
+    try {
+      const w = await walletRpc('wallet_earn', { p_reason: e.reason, p_ref: e.ref, p_amount: e.amount });
+      state.pendingEarns.shift();
+      if (!state.pendingEarns.length) applyWallet(w);
+    } catch (err) {
+      const m = String(err && err.message || '');
+      if (/fetch|network|failed/i.test(m)) break; // offline: keep it for later
+      state.pendingEarns.shift(); // refused (limit or already granted): drop it
+      if (!state.pendingEarns.length) await refreshWallet();
+    }
+  }
+  earning = false;
+  saveGame();
+  render();
+}
+
+async function refreshWallet() {
+  if (!cloud.user) return;
+  try { applyWallet(await walletRpc('wallet_get')); render(); } catch (e) { /* offline */ }
+}
+
+// First wallet call on a device: brings over what the device had (the server caps it).
+async function connectWallet() {
+  try {
+    const local = { gems: state.gems, golden: state.owned.golden, flags: state.owned.flags, tones: state.owned.tones, vipUntil: state.vipUntil };
+    const w = await walletRpc('wallet_get', { p_local: local });
+    cloud.walletReady = true;
+    applyWallet(w);
+    state.pendingEarns = [];
+    saveGame();
+    render();
+  } catch (e) { cloud.walletReady = false; }
+}
+
 /* ---------------- Gems, shop, VIP, ads ---------------- */
 
 const ACH_GEMS = 10;
@@ -1451,15 +1543,16 @@ const toneOwned = k => !TONE_PRICES[k] || state.owned.tones.includes(k);
 const adGemsUsed = () => (state.adGems.day === dayKey() ? state.adGems.n : 0);
 const adGemsLeft = () => AD_GEMS_PER_DAY - adGemsUsed();
 
-function addGems(n, reason) {
-  state.gems += n;
+function addGems(n, reason, serverEarn = null) {
+  if (serverEarn) gemEarn(serverEarn.reason, serverEarn.ref, n);
+  else state.gems += n;
   Sound.play('reward'); buzz([15, 30, 15]);
   toast(`+${n} gems${reason ? ` · ${reason}` : ''}`, 'gem', 'violet');
   saveGame();
   render();
 }
 
-function spendGems(n, label, onDone) {
+function spendGems(n, label, onDone, item) {
   if (state.gems < n) {
     showModal('Not enough gems', `You need ${fmt(n)} gems for ${label}. You have ${fmt(state.gems)}.`, {
       icon: 'gem', tone: 'violet', okText: 'Get gems', onOk: () => { showScreen('shop'); },
@@ -1468,12 +1561,42 @@ function spendGems(n, label, onDone) {
   }
   showModal(`Buy ${label}?`, `This costs ${fmt(n)} gems. You have ${fmt(state.gems)}.`, {
     icon: 'gem', tone: 'violet', okText: `Spend ${fmt(n)} gems`,
-    onOk: () => { state.gems -= n; onDone(); Sound.play('upgrade'); saveGame(); shopSig = ''; render(); },
+    onOk: async () => {
+      if (walletMode()) {
+        // The server checks the price, the balance and any limits, then answers with the new wallet.
+        try {
+          const w = await walletRpc('wallet_spend', { p_item: item });
+          onDone();
+          applyWallet(w);
+        } catch (e) { walletError(e); return; }
+      } else {
+        state.gems -= n;
+        onDone();
+      }
+      track('gem_spend', { item, cost: n });
+      Sound.play('upgrade'); saveGame(); shopSig = ''; render();
+    },
   });
 }
 
 // Real-money purchases are simulated in the web prototype.
-function simulatedPurchase(title, price, onDone) {
+function simulatedPurchase(title, price, onDone, product) {
+  if (walletMode()) {
+    showModal(title, `Price: ${price}\nPrototype: no money is charged. The store version will use Google Play and App Store billing.`, {
+      icon: 'gem', tone: 'violet', okText: 'Buy (simulated)',
+      onOk: async () => {
+        try {
+          const w = await walletRpc('purchase_simulated', { p_product: product });
+          applyWallet(w);
+          track('purchase_sim', { product });
+          Sound.play('reward'); buzz([20, 40, 20]);
+          toast(product === 'vip' ? 'VIP active for 30 days' : 'Gems added to your account', product === 'vip' ? 'crown' : 'gem', 'violet');
+          saveGame(); identitySig = ''; shopSig = ''; render();
+        } catch (e) { walletError(e); }
+      },
+    });
+    return;
+  }
   if (simBuysUsed() >= SIM_BUYS_PER_DAY) {
     showModal('Test purchase limit reached', `The prototype allows ${SIM_BUYS_PER_DAY} simulated purchases per day, so the game balance stays realistic. Try again tomorrow.`, { icon: 'gem', tone: 'violet' });
     return;
@@ -1487,7 +1610,7 @@ function simulatedPurchase(title, price, onDone) {
 
 function buyPack(id) {
   const p = GEM_PACKS.find(x => x.id === id);
-  if (p) simulatedPurchase(`Buy ${fmt(p.gems)} gems?`, p.price, () => { track('purchase_sim', { product: p.id }); addGems(p.gems, 'Purchase'); });
+  if (p) simulatedPurchase(`Buy ${fmt(p.gems)} gems?`, p.price, () => { track('purchase_sim', { product: p.id }); addGems(p.gems, 'Purchase'); }, p.id);
 }
 
 function buyVip() {
@@ -1496,7 +1619,7 @@ function buyVip() {
     Sound.play('reward'); buzz([20, 40, 20]);
     toast('VIP active for 30 days', 'crown', 'gold');
     saveGame(); identitySig = ''; render();
-  });
+  }, 'vip');
 }
 
 function buyWarp(h) {
@@ -1511,7 +1634,7 @@ function buyWarp(h) {
     earn(amount);
     state.warps = { day: dayKey(), n: warpsUsed() + 1 };
     toast(`Time warp: +${money(amount)}`, 'clock', 'cyan');
-  });
+  }, `warp_${h}`);
 }
 
 function buyShopBoost(id) {
@@ -1522,25 +1645,25 @@ function buyShopBoost(id) {
     if (id === 'shield') { state.shieldUntil = Math.max(Date.now(), state.shieldUntil) + 24 * 3600e3; state.attack = null; }
     if (id === 'grant') state.rp += Math.max(200, rpRate() * 3600);
     toast(`${b.name} activated`, b.icon, b.tone);
-  });
+  }, id);
 }
 
 function pickFlag(i) {
   if (flagOwned(i)) { state.player.flag = i; saveGame(); shopSig = ''; render(); return; }
   spendGems(FLAG_PRICES[i], `the ${FLAG_NAMES[i]} flag`, () => {
-    state.owned.flags.push(i);
+    if (!state.owned.flags.includes(i)) state.owned.flags.push(i);
     state.player.flag = i;
     buildPickers();
-  });
+  }, `flag_${i}`);
 }
 
 function pickTone(k) {
   if (toneOwned(k)) { state.player.tone = k; saveGame(); buildPickers(); render(); return; }
   spendGems(TONE_PRICES[k], `the ${k} avatar color`, () => {
-    state.owned.tones.push(k);
+    if (!state.owned.tones.includes(k)) state.owned.tones.push(k);
     state.player.tone = k;
     buildPickers();
-  });
+  }, `tone_${k}`);
 }
 
 // Rewarded-ad placeholder: VIP players skip it.
@@ -1734,7 +1857,7 @@ function checkEra() {
   const e = currentEra();
   if (e > state.era) {
     state.era = e;
-    state.gems += 25;
+    gemEarn('era', String(e), 25);
     track('era_reached', { era: e, hours: Math.round(minutesPlayed() / 60) });
     Sound.play('reward'); buzz([30, 60, 30]);
     queueOverlay(() => showModal(`Welcome to the ${ERAS[e].name}`, `Your nation entered Era ${ROMAN[e]}. All income is now ×${ERAS[e].mult}, and you received 25 gems.`, { icon: 'flask', tone: 'cyan' }));
@@ -1884,7 +2007,7 @@ function hitCell(i, el) {
   if (game.hits >= GAME_HITS) {
     closeGame();
     state.gamesWon++;
-    state.gems += 2;
+    gemEarn('minigame', '', 2);
     repelAttack();
     render();
     return;
@@ -2068,7 +2191,8 @@ function claimDaily() {
   const r = DAILY[st.day - 1];
   if (r.boost) state.boostUntil = Math.max(Date.now(), state.boostUntil) + r.boost * 60e3;
   const gems = (r.gems || 0) + (isVip() ? 10 : 0);
-  state.gems += gems;
+  if (r.gems) gemEarn('daily', dayKey(), r.gems);
+  if (isVip()) gemEarn('vip_daily', dayKey(), 10);
   state.daily = { streak: st.day, last: dayKey(), best: Math.max(state.daily.best, st.day) };
   track('daily_claim', { day: st.day });
   saveGame();
@@ -2214,7 +2338,7 @@ function bindUI() {
   }
   $('shopBack').addEventListener('click', () => showScreen(lastTab));
   $('vipBtn').addEventListener('click', buyVip);
-  $('adGemsBtn').addEventListener('click', () => { if (adGemsLeft() > 0) watchAd(() => { state.adGems = { day: dayKey(), n: adGemsUsed() + 1 }; addGems(5, 'Ad reward'); }); });
+  $('adGemsBtn').addEventListener('click', () => { if (adGemsLeft() > 0) watchAd(() => { state.adGems = { day: dayKey(), n: adGemsUsed() + 1 }; addGems(5, 'Ad reward', { reason: 'ad', ref: '' }); }); });
   $('gemPacks').addEventListener('click', e => { const b = e.target.closest('[data-pack]'); if (b) buyPack(b.dataset.pack); });
   $('warps').addEventListener('click', e => { const b = e.target.closest('[data-warp]'); if (b) buyWarp(Number(b.dataset.warp)); });
   $('shopBoosts').addEventListener('click', e => { const b = e.target.closest('[data-sboost]'); if (b) buyShopBoost(b.dataset.sboost); });
@@ -2364,4 +2488,4 @@ setInterval(flushEvents, 15e3);
 track('session_start', { day: Math.floor((Date.now() - state.startedAt) / 86400e3), era: currentEra(), signedIn: !!readCloudMeta().uid });
 
 // Debug / test hook
-window.DN = { get state() { return state; }, flushEvents, techIndex, techRank, openEntry, pendingQuizzes, libEntries, cloud, cloudResume, syncNow, isVip, addGems, incomePerSec, earn, render, showScreen, dailyStatus, mods, rpRate, currentEra, SECTORS, UPGRADES, RESEARCH };
+window.DN = { get state() { return state; }, flushEvents, walletMode, flushEarns, techIndex, techRank, openEntry, pendingQuizzes, libEntries, cloud, cloudResume, syncNow, isVip, addGems, incomePerSec, earn, render, showScreen, dailyStatus, mods, rpRate, currentEra, SECTORS, UPGRADES, RESEARCH };

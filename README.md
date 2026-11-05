@@ -138,6 +138,15 @@ Real-money purchases are **simulated** in the web build and clearly labeled, wit
 - **Cosmetics**: 4 premium flags and 3 premium avatar colors (100–250 gems). Buy them in the Shop, or tap a locked item in Profile.
 - **VIP ($4.99 / month)**: no ads, full offline earnings for up to 24 h, +10 gems with every daily reward, and a gold avatar ring with a VIP badge.
 
+### Server-side gems (signed-in players)
+
+When a player is signed in, the server owns gems, VIP, Golden Economy, the Cyber Shield and premium cosmetics (`public.wallets`). Every change is written to `public.gem_ledger`.
+- **Earning** goes through `wallet_earn`, which fixes the amounts and limits: achievements, quizzes and eras are paid once each; daily rewards, minigame wins and ads are capped per UTC day. Gems appear on screen right away; if the device is offline, they wait in `pendingEarns` and are sent later.
+- **Spending** goes through `wallet_spend`, which uses the server's price list and the limit of 3 warps per day. If the balance shown on screen was edited by hand, the server refuses and the real balance is restored.
+- **Simulated purchases** go through `purchase_simulated`, limited to 2 per day. Before launch, replace it with store receipt validation.
+- On the first sign-in, the device's gems and items are imported once, with caps of 1,500 gems and VIP for at most 31 days.
+- Guests keep everything on the device, as before.
+
 ## Files
 
 - `index.html`: app shell, the SVG icon sprite, and the screens
