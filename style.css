@@ -540,6 +540,8 @@ main { padding-block: 16px; padding-left: var(--gutter-l); padding-right: var(--
 .ad-box .meter i { transition: none; }
 
 /* Account */
+a.kv-btn { color: inherit; text-decoration: none; }
+.danger-text { color: var(--bad); }
 .account-card { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .account-body { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
 #accountTitle { overflow-wrap: anywhere; }

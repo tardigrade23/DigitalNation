@@ -87,6 +87,9 @@ Players can play without an account. From **Profile → Save your progress** the
 - `vendor/supabase.js` is supabase-js 2.45.4, served locally so the game works offline and does not depend on a CDN.
 - The single-file claude.ai build leaves accounts out, because that host blocks requests to Supabase.
 
+- **Account deletion**: Profile → *Delete my account* (type DELETE to confirm) calls `public.delete_my_account()`. This server function deletes the signed-in user and, by cascade, all of their rows. Progress stored on the device is kept, and *Reset progress on this device* removes it.
+- **Legal pages**: `privacy.html` and `terms.html`, linked from Profile → About. Before launch, replace the GitHub issues contact with a real support email.
+
 **One-time Supabase dashboard settings** (Authentication section):
 1. **URL Configuration**: set *Site URL* to `https://tardigrade23.github.io/DigitalNation/` and add it under *Redirect URLs*.
 2. **Emails → Magic Link** template: add `{{ .Token }}` so the email shows the 6-digit code next to the link.

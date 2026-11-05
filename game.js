@@ -1122,6 +1122,29 @@ function cloudPause() {
 function cloudResume() { return runSync(); }
 function syncNow() { return runSync('Synced'); }
 
+// Deletes the account and its cloud data on the server. Progress on this device stays,
+// so the player can keep playing as a guest or reset it separately.
+function askDeleteAccount() {
+  if (!cloud.user) return;
+  showModal('Delete your account?', `This permanently deletes ${cloud.user.email} and everything saved to it on our server: your cloud save, gems and purchases. It cannot be undone.\n\nType DELETE to confirm.`, {
+    icon: 'trash', tone: 'bad', input: '', okText: 'Delete account',
+    onOk: async value => {
+      if (String(value).trim().toUpperCase() !== 'DELETE') { toast('Type DELETE to confirm', 'alert', 'bad'); return; }
+      try {
+        const { error } = await cloud.client.rpc('delete_my_account');
+        if (error) throw error;
+        await cloud.client.auth.signOut().catch(() => {});
+        writeCloudMeta({});
+        cloud.user = null; cloud.ready = false; cloud.status = 'off'; cloud.lastSync = 0;
+        renderAccount();
+        showModal('Account deleted', 'Your account and its cloud data are gone. Your progress on this device is still here; use "Reset progress on this device" if you want to remove it too.', { icon: 'check', tone: 'green' });
+      } catch (e) {
+        showModal('Could not delete the account', `${friendlyAuthError(e)} Nothing was deleted.`, { icon: 'alert', tone: 'bad' });
+      }
+    },
+  });
+}
+
 async function signOut() {
   if (!cloud.client) return;
   if (cloud.ready) { try { await pushSave(); } catch (e) { /* keep local copy */ } }
@@ -1141,12 +1164,14 @@ function renderAccount() {
     btn.hidden = true; actions.hidden = true;
     return;
   }
+  $('deleteAccount').hidden = !cloud.user;
   if (!cloud.user) {
     title.textContent = 'Save your progress';
     text.textContent = 'Sign in with your email to keep your nation safe and play on any device.';
     btn.hidden = false; actions.hidden = true;
     return;
   }
+  $('deleteAccount').hidden = false;
   title.textContent = cloud.user.email || 'Signed in';
   text.textContent = {
     syncing: 'Syncing…',
@@ -2143,6 +2168,7 @@ function bindUI() {
   $('modalCancel').addEventListener('click', () => closeModal(false));
   $('accountBtn').addEventListener('click', openAuth);
   $('syncNow').addEventListener('click', () => syncNow());
+  $('deleteAccount').addEventListener('click', askDeleteAccount);
   $('signOut').addEventListener('click', () => {
     showModal('Sign out?', 'Your progress stays on this device and in your account. Sign in again any time to keep syncing.', {
       icon: 'logout', tone: 'cyan', okText: 'Sign out', onOk: signOut,
