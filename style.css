@@ -565,6 +565,7 @@ main { padding-block: 16px; padding-left: var(--gutter-l); padding-right: var(--
 .lib-state.done { color: var(--good); }
 .lib-state.miss { color: var(--muted); }
 .modal-box.learn-box { width: min(420px, 100%); max-height: calc(100vh - 32px); overflow-y: auto; text-align: left; align-items: stretch; }
+.modal-box.learn-box > * { flex-shrink: 0; } /* scroll instead of squashing the picture */
 .learn-figure { margin: -22px -22px 0; background: var(--surface-2); border-radius: 20px 20px 0 0; overflow: hidden; }
 .learn-figure img { display: block; width: 100%; max-width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: #DDE3EA; }
 .learn-figure figcaption { padding: 6px 12px; font-size: 11px; line-height: 1.4; color: var(--muted); }
