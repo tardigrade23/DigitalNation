@@ -22,19 +22,42 @@ const DEFAULT_SETTINGS = { sound: true, vibration: true };
 const DEFAULT_DAILY = { streak: 0, last: '', best: 0 };
 const DEFAULT_POLICIES = { tax: 1, net: 1, edu: 1, trade: 1 };
 const START_GEMS = 25;
+const SAVE_VERSION = 2; // 2: 24 sectors, 42 research, 7 eras, encyclopedia
 
 // c1/c2: icon tile gradient
+// era: the era in which the sector becomes available (see ERAS).
 const SECTORS = [
-  { id: 'isp',     name: 'Internet Provider',  base: 15,     inc: 0.5,   c1: '#5AB8FF', c2: '#2563C9' },
-  { id: 'egov',    name: 'E-Government',       base: 100,    inc: 4,     c1: '#7FD1C7', c2: '#1F8A7E' },
-  { id: 'mbank',   name: 'Mobile Banking',     base: 1100,   inc: 20,    c1: '#FFB86B', c2: '#D9681C' },
-  { id: 'fintech', name: 'Fintech Hub',        base: 12e3,   inc: 100,   c1: '#6EE29C', c2: '#1E9A5A' },
-  { id: 'dc',      name: 'Data Center',        base: 130e3,  inc: 550,   c1: '#8FA3FF', c2: '#3B4FCF' },
-  { id: 'g5',      name: '5G Network',         base: 1.4e6,  inc: 3000,  c1: '#FF8FAB', c2: '#C23A63' },
-  { id: 'smart',   name: 'Smart City',         base: 2e7,    inc: 18e3,  c1: '#F7C75B', c2: '#C7800F' },
-  { id: 'ai',      name: 'AI Lab',             base: 3.3e8,  inc: 110e3, c1: '#C29BFF', c2: '#6A3FD6' },
-  { id: 'quantum', name: 'Quantum Computing',  base: 5.1e9,  inc: 700e3, c1: '#5EF0E0', c2: '#138A9C' },
-  { id: 'space',   name: 'Satellite Internet', base: 7.5e10, inc: 5e6,   c1: '#B5C3D9', c2: '#4A5A75' },
+  // Era I · Connected
+  { id: 'isp',      era: 0, name: 'Internet Provider',    base: 15,     inc: 0.5,   c1: '#5AB8FF', c2: '#2563C9' },
+  { id: 'egov',     era: 0, name: 'E-Government',         base: 100,    inc: 4,     c1: '#7FD1C7', c2: '#1F8A7E' },
+  { id: 'mbank',    era: 0, name: 'Mobile Banking',       base: 1100,   inc: 20,    c1: '#FFB86B', c2: '#D9681C' },
+  { id: 'fiber',    era: 0, name: 'Fiber Backbone',       base: 6000,   inc: 60,    c1: '#9BE7FF', c2: '#1B8DB8' },
+  { id: 'fintech',  era: 0, name: 'Fintech Hub',          base: 12e3,   inc: 100,   c1: '#6EE29C', c2: '#1E9A5A' },
+  { id: 'dc',       era: 0, name: 'Data Center',          base: 130e3,  inc: 550,   c1: '#8FA3FF', c2: '#3B4FCF' },
+  // Era II · Information
+  { id: 'digid',    era: 1, name: 'Digital ID',           base: 6e5,    inc: 1500,  c1: '#FFD27A', c2: '#B9770E' },
+  { id: 'g5',       era: 1, name: '5G Network',           base: 1.4e6,  inc: 3000,  c1: '#FF8FAB', c2: '#C23A63' },
+  { id: 'opendata', era: 1, name: 'Open Data Portal',     base: 5e6,    inc: 8000,  c1: '#A7F3D0', c2: '#0F8F6B' },
+  // Era III · Platform
+  { id: 'cloud',    era: 2, name: 'Cloud Platform',       base: 1.2e7,  inc: 15e3,  c1: '#BAE6FD', c2: '#3A7BD5' },
+  { id: 'pay',      era: 2, name: 'Instant Payments',     base: 4e7,    inc: 40e3,  c1: '#FDE68A', c2: '#D97706' },
+  { id: 'ehealth',  era: 2, name: 'E-Health',             base: 1.2e8,  inc: 90e3,  c1: '#FFA8B8', c2: '#D23B5E' },
+  // Era IV · Smart
+  { id: 'iot',      era: 3, name: 'IoT Network',          base: 3.3e8,  inc: 2e5,   c1: '#99F6E4', c2: '#0E9384' },
+  { id: 'smart',    era: 3, name: 'Smart City',           base: 9e8,    inc: 4.5e5, c1: '#F7C75B', c2: '#C7800F' },
+  { id: 'edu',      era: 3, name: 'E-Education',          base: 2.5e9,  inc: 1e6,   c1: '#C4B5FD', c2: '#6D4AD6' },
+  // Era V · AI
+  { id: 'ai',       era: 4, name: 'AI Lab',               base: 7e9,    inc: 2.4e6, c1: '#C29BFF', c2: '#6A3FD6' },
+  { id: 'robotics', era: 4, name: 'Robotics',             base: 2e10,   inc: 5.5e6, c1: '#CBD5E1', c2: '#566683' },
+  { id: 'auto',     era: 4, name: 'Autonomous Transport', base: 6e10,   inc: 1.2e7, c1: '#93C5FD', c2: '#2457C5' },
+  // Era VI · Quantum
+  { id: 'chip',     era: 5, name: 'Semiconductor Fab',    base: 1.8e11, inc: 2.8e7, c1: '#FCD34D', c2: '#8A6A12' },
+  { id: 'quantum',  era: 5, name: 'Quantum Computing',    base: 5.5e11, inc: 6.5e7, c1: '#5EF0E0', c2: '#138A9C' },
+  { id: 'biotech',  era: 5, name: 'Biotech Lab',          base: 1.7e12, inc: 1.5e8, c1: '#86EFAC', c2: '#1F8A4C' },
+  // Era VII · Space
+  { id: 'space',    era: 6, name: 'Satellite Internet',   base: 5e12,   inc: 3.5e8, c1: '#B5C3D9', c2: '#4A5A75' },
+  { id: 'fusion',   era: 6, name: 'Fusion Power',         base: 1.6e13, inc: 8e8,   c1: '#FDBA74', c2: '#C2410C' },
+  { id: 'agency',   era: 6, name: 'Space Agency',         base: 5e13,   inc: 2e9,   c1: '#A5B4FC', c2: '#3730A3' },
 ];
 
 const UPGRADES = [];
@@ -93,6 +116,7 @@ function defaultState() {
     rp: 0, research: {}, policies: { ...DEFAULT_POLICIES }, policyChangedAt: {}, era: 0,
     policyChanges: 0, gamesWon: 0,
     gems: START_GEMS, vipUntil: 0, shieldUntil: 0, owned: { golden: false, flags: [], tones: [] }, adGems: { day: '', n: 0 },
+    v: SAVE_VERSION, library: {}, quiz: {}, warps: { day: '', n: 0 }, simBuys: { day: '', n: 0 },
   };
 }
 
@@ -166,7 +190,8 @@ function maxAffordable(s) {
 
 function purchaseCount(s) { return buyAmt === 'max' ? Math.max(1, maxAffordable(s)) : buyAmt; }
 
-function isUnlocked(i) { return i === 0 || owned(SECTORS[i - 1].id) > 0 || owned(SECTORS[i].id) > 0; }
+function eraAllows(s) { return (s.era || 0) <= currentEra(); }
+function isUnlocked(i) { return owned(SECTORS[i].id) > 0 || (eraAllows(SECTORS[i]) && (i === 0 || owned(SECTORS[i - 1].id) > 0)); }
 
 function buySector(id) {
   const i = SECTORS.findIndex(s => s.id === id);
@@ -178,8 +203,9 @@ function buySector(id) {
   const before = owned(id);
   state.gdp -= cost;
   state.sectors[id] = before + n;
+  discover(id);
   Sound.play('buy'); buzz(12);
-  if (before === 0) toast(`${s.name} is online`, s.id, s);
+  if (before === 0) toast(`${s.name} is online · new encyclopedia entry`, s.id, s);
   const hit = MILESTONES.filter(m => before < m && before + n >= m).pop();
   if (hit) toast(`${s.name} reached ${hit}: income ×2`, s.id, s);
 }
@@ -283,6 +309,7 @@ function performPrestige() {
     research: state.research, policies: state.policies, era: state.era,
     policyChanges: state.policyChanges, gamesWon: state.gamesWon,
     gems: state.gems, vipUntil: state.vipUntil, shieldUntil: state.shieldUntil, owned: state.owned, adGems: state.adGems,
+    v: state.v, library: state.library, quiz: state.quiz, warps: state.warps, simBuys: state.simBuys,
   };
   state = Object.assign(defaultState(), keep);
   sectorSig = ''; upgSig = '';
@@ -293,9 +320,28 @@ function performPrestige() {
 
 /* ---------------- Rank ---------------- */
 
+// Tech Index: the world ranking weighs the whole nation, not just money.
+const TECH_INDEX_TOP = 720; // score needed for #1
+function techIndex() {
+  const parts = [
+    { label: 'Economy', detail: `${money(state.lifeEarned)} lifetime GDP`, pts: 10 * Math.log10(Math.max(1, state.lifeEarned)), max: 200 },
+    { label: 'Research', detail: `${researchCount()} of ${RESEARCH.length} projects`, pts: 5 * researchCount(), max: 5 * RESEARCH.length },
+    { label: 'Era', detail: ERAS[currentEra()].name, pts: 25 * currentEra(), max: 25 * (ERAS.length - 1) },
+    { label: 'Welfare', detail: `${Math.round(welfare())}%`, pts: 0.4 * welfare(), max: 40 },
+    { label: 'Security', detail: `Defense level ${state.secLevel}`, pts: 4 * state.secLevel, max: 4 * SEC_MAX },
+    { label: 'Influence', detail: `${state.influence} points`, pts: 2 * Math.min(state.influence, 50), max: 100 },
+  ];
+  parts.forEach(p => { p.pts = Math.min(p.max, p.pts); });
+  return { parts, score: parts.reduce((a, p) => a + p.pts, 0) };
+}
 function techRank() {
-  const r = 195 - Math.floor(Math.log10(Math.max(1, state.lifeEarned)) * 10);
+  const r = 195 - Math.floor((techIndex().score / TECH_INDEX_TOP) * 194);
   return Math.max(1, Math.min(195, r));
+}
+function showTechIndex() {
+  const { parts, score } = techIndex();
+  const lines = parts.map(p => `${p.label}: ${Math.round(p.pts)} / ${p.max} · ${p.detail}`).join('\n');
+  showModal(`Tech Index ${Math.round(score)} · #${techRank()}`, `The world ranking looks at your whole nation:\n\n${lines}\n\n${Math.round(TECH_INDEX_TOP)} points takes you to #1.`, { icon: 'trophy', tone: 'gold' });
 }
 
 function rankTitle(r) {
@@ -309,7 +355,9 @@ function rankTitle(r) {
 
 function nextGoal() {
   for (const s of SECTORS) {
-    if (!owned(s.id)) return { text: `Unlock ${s.name}`, cost: s.base };
+    if (owned(s.id)) continue;
+    if (!eraAllows(s)) break;
+    return { text: `Unlock ${s.name}`, cost: s.base * mods().cost };
   }
   let best = null;
   for (const s of SECTORS) {
@@ -367,6 +415,8 @@ function normalizeSave(saved) {
   s.owned = Object.assign({ golden: false, flags: [], tones: [] }, saved && saved.owned);
   // Saves from before gems existed get gems for the achievements they already earned.
   if (saved && saved.gems === undefined) s.gems = START_GEMS + 10 * Object.keys(s.achievements).length;
+  for (const k of ['library', 'quiz']) if (!s[k] || typeof s[k] !== 'object') s[k] = {};
+  if (saved && !saved.v) s.v = 1;
   // Players from before the tutorial existed skip it.
   if (!saved || typeof saved.coach !== 'object' || !saved.coach) s.coach = saved ? { t1: 1, t2: 1, t3: 1, t4: 1 } : {};
   return s;
@@ -589,12 +639,14 @@ function drawSkyline() {
 
 let sectorSig = '';
 function buildSectors() {
+  // Every available or owned sector, plus the first locked one as a teaser.
   const visible = [];
+  let teaser = false;
   for (let i = 0; i < SECTORS.length; i++) {
-    visible.push(i);
-    if (!isUnlocked(i)) break; // one locked teaser
+    if (isUnlocked(i)) visible.push(i);
+    else if (!teaser) { visible.push(i); teaser = true; }
   }
-  const sig = visible.map(i => `${i}:${isUnlocked(i)}`).join(',');
+  const sig = visible.map(i => `${i}:${isUnlocked(i)}`).join(',') + `|${currentEra()}`;
   if (sig === sectorSig) return;
   sectorSig = sig;
   $('sectors').innerHTML = visible.map(i => {
@@ -603,11 +655,11 @@ function buildSectors() {
       return `<div class="row locked">${tile('lock', null, 'tile-locked')}
         <div class="row-title"><span class="nm">${s.name}</span></div>
         <button class="buy" disabled>Locked<small>${money(s.base)}</small></button>
-        <div class="row-sub">Build one ${SECTORS[i - 1].name} to unlock</div></div>`;
+        <div class="row-sub">${eraAllows(s) ? `Build one ${SECTORS[i - 1].name} to unlock` : `Arrives in the ${ERAS[s.era].name} (Era ${ROMAN[s.era]})`}</div></div>`;
     }
     return `<div class="row" data-id="${s.id}">
       ${tile(s.id, s)}
-      <div class="row-title"><span class="nm">${s.name}</span><span class="count" data-f="owned"></span></div>
+      <div class="row-title"><span class="nm">${s.name}</span><span class="count" data-f="owned"></span>${infoBtn(s.id)}</div>
       <button class="buy" data-buy="${s.id}"><span data-f="label"></span><small data-f="cost"></small></button>
       <div class="row-sub"><span data-f="meta"></span><span class="meter"><i data-f="prog"></i></span></div>
     </div>`;
@@ -693,6 +745,8 @@ function renderStats(now) {
     ['Current era', ERAS[currentEra()].name],
     ['Cyber mini-games won', state.gamesWon],
     ['Gems', fmt(state.gems)],
+    ['Tech Index', `${Math.round(techIndex().score)} / ${TECH_INDEX_TOP}`],
+    ['Encyclopedia', `${discoveredIds().length} / ${libEntries().length} · ${quizCorrect()} quizzes correct`],
     ['Time played', dur(now - state.startedAt)],
   ];
   $('statsList').innerHTML = rows.map(([k, v]) => `<div class="kv"><span>${k}</span><b>${v}</b></div>`).join('');
@@ -741,6 +795,9 @@ function render() {
     $('tapValue').textContent = `+${money(clickValue())} per tap`;
     $('buildingCount').textContent = `${totalOwned()} facilities`;
     $('eraChip').textContent = ERAS[currentEra()].name;
+    const found = discoveredIds().length, waiting = pendingQuizzes().length;
+    $('libraryCardText').textContent = found ? `${found} of ${libEntries().length} discovered${waiting ? ` · ${waiting} quiz${waiting > 1 ? 'zes' : ''} waiting` : ''}` : 'Discover how digital nations work';
+    $('libraryCardDot').hidden = !waiting;
     $('dailyCardDot').hidden = !daily.ready;
     $('dailyCardText').textContent = daily.ready ? `Day ${daily.day} reward is ready` : `Next reward in ${dur(msToMidnight())}`;
     const g = nextGoal();
@@ -769,6 +826,8 @@ function render() {
     renderProfile(now, r);
   } else if (screen === 'shop') {
     renderShop(now);
+  } else if (screen === 'library') {
+    renderLibrary();
   }
   updateCoach();
 }
@@ -776,7 +835,7 @@ function render() {
 let lastTab = 'nation';
 function showScreen(name) {
   screen = name;
-  if (name !== 'profile' && name !== 'shop') lastTab = name;
+  if (!['profile', 'shop', 'library'].includes(name)) lastTab = name;
   for (const b of document.querySelectorAll('.tabbar button')) b.classList.toggle('on', b.dataset.screen === name);
   for (const s of document.querySelectorAll('.screen')) s.hidden = s.id !== `screen-${name}`;
   sectorSig = ''; upgSig = ''; achSig = '';
@@ -839,7 +898,11 @@ const ACHIEVEMENTS = [
   { id: 'policy',  icon: 'egov',         name: 'Policy Maker',         desc: 'Change a national policy',       prog: () => [state.policyChanges, 1] },
   { id: 'think',   icon: 'flask',        name: 'Think Tank',           desc: 'Complete 6 research projects',   prog: () => [researchCount(), 6] },
   { id: 'hacker',  icon: 'bug',          name: 'Firewall Hero',        desc: 'Win the cyber mini-game 5 times', prog: () => [state.gamesWon, 5] },
-  { id: 'quantumEra', icon: 'quantum',   name: 'Quantum Leap',         desc: 'Reach the Quantum Era',          prog: () => [currentEra(), 3] },
+  { id: 'quantumEra', icon: 'quantum',   name: 'Quantum Leap',         desc: 'Reach the Quantum Era',          prog: () => [currentEra(), 5] },
+  { id: 'spaceAge', icon: 'rocket',      name: 'Space Age',            desc: 'Reach the Space Era',            prog: () => [currentEra(), 6] },
+  { id: 'curious', icon: 'book',         name: 'Curious Mind',         desc: 'Answer 10 quiz questions correctly', prog: () => [quizCorrect(), 10] },
+  { id: 'scholar', icon: 'book',         name: 'Scholar',              desc: 'Answer 40 quiz questions correctly', prog: () => [quizCorrect(), 40] },
+  { id: 'collector', icon: 'star',       name: 'Encyclopedist',        desc: 'Discover 50 encyclopedia entries', prog: () => [discoveredIds().length, 50] },
 ];
 
 function checkAchievements(silent) {
@@ -977,6 +1040,8 @@ const remoteChanged = remote => !!remote && remote.updated_at !== readCloudMeta(
 
 function adoptCloudSave(remote, message) {
   state = normalizeSave(remote.data);
+  postLoad();
+  sectorSig = '';
   sectorSig = ''; upgSig = ''; achSig = ''; identitySig = ''; shopSig = ''; researchSig = ''; coachShown = '';
   policiesBuilt = false;
   markSynced(remote.updated_at);
@@ -1180,6 +1245,135 @@ function registerServiceWorker() {
   window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => { /* unsupported host */ }); });
 }
 
+/* ---------------- Tech Encyclopedia + quizzes ---------------- */
+
+const QUIZ_GEMS = 3;
+const LIB = typeof LIBRARY === 'object' ? LIBRARY : {};
+
+function libEntries() {
+  const sectors = SECTORS.map(s => ({ id: s.id, group: 'Sectors', kind: `Sector · ${ERAS[s.era].name}`, name: s.name, icon: s.id, tone: s, how: 'Build it to discover' }));
+  const research = RESEARCH.map(n => {
+    const b = BRANCHES.find(x => x.id === n.branch);
+    return { id: n.id, group: b.name, kind: `Research · ${b.name}`, name: n.name, icon: b.icon, tone: b.tone, how: 'Research it to discover' };
+  });
+  return [...sectors, ...research].filter(e => LIB[e.id]);
+}
+const libEntry = id => libEntries().find(e => e.id === id);
+const discoveredIds = () => Object.keys(state.library).filter(id => LIB[id]);
+const pendingQuizzes = () => discoveredIds().filter(id => state.quiz[id] === undefined);
+const quizCorrect = () => Object.values(state.quiz).filter(v => v === 1).length;
+
+function discover(id) {
+  if (!LIB[id] || state.library[id]) return;
+  state.library[id] = Date.now();
+  libSig = '';
+}
+
+// Runs after any save is loaded (local or cloud): fills in the encyclopedia and
+// moves older saves to the new era system without a "new era" popup.
+function postLoad() {
+  for (const s of SECTORS) if (owned(s.id) > 0) discover(s.id);
+  for (const n of RESEARCH) if (state.research[n.id]) discover(n.id);
+  if ((state.v || 1) < SAVE_VERSION) { state.era = currentEra(); state.v = SAVE_VERSION; }
+}
+
+// Same shuffled answer order every time for a given entry.
+function quizOrder(id) {
+  let h = 0;
+  for (const ch of id) h = (h * 31 + ch.charCodeAt(0)) | 0;
+  const r = rng(h), order = [0, 1, 2];
+  for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
+  return order;
+}
+
+let entryOpen = null;
+function openEntry(id) {
+  const e = libEntry(id), c = LIB[id];
+  if (!e || !c || !state.library[id] || overlayOpen()) return;
+  entryOpen = id;
+  $('learnTile').innerHTML = tile(e.icon, e.tone);
+  $('learnKind').textContent = e.kind;
+  $('learnTitle').textContent = e.name;
+  $('learnWhat').textContent = c.what;
+  $('learnReal').textContent = c.real;
+  $('learnFact').textContent = c.fact;
+  $('quizQ').textContent = c.q;
+  renderQuiz();
+  $('learn').hidden = false;
+  $('learn').querySelector('.learn-box').scrollTop = 0;
+  updateCoach();
+}
+
+function renderQuiz() {
+  const id = entryOpen, c = LIB[id], answered = state.quiz[id];
+  $('quizLabel').textContent = answered === undefined ? `Quick quiz · +${QUIZ_GEMS} gems` : 'Quick quiz';
+  $('quizOpts').innerHTML = quizOrder(id).map(i => {
+    const cls = answered === undefined ? '' : (i === c.c ? 'right' : '');
+    return `<button data-opt="${i}" class="${cls}" ${answered === undefined ? '' : 'disabled'}>${esc(c.a[i])}</button>`;
+  }).join('');
+  const res = $('quizResult');
+  res.hidden = answered === undefined;
+  if (answered === 1) res.textContent = `Correct! +${QUIZ_GEMS} gems`;
+  if (answered === 0) res.textContent = `The right answer is: ${c.a[c.c]}`;
+  res.style.color = answered === 1 ? 'var(--good)' : 'var(--muted)';
+}
+
+function answerQuiz(i) {
+  const id = entryOpen, c = LIB[id];
+  if (!id || state.quiz[id] !== undefined) return;
+  const ok = i === c.c;
+  state.quiz[id] = ok ? 1 : 0;
+  if (ok) { state.gems += QUIZ_GEMS; Sound.play('reward'); buzz([15, 30, 15]); }
+  else { Sound.play('breach'); buzz(60); }
+  renderQuiz();
+  if (!ok) {
+    const picked = $('quizOpts').querySelector(`[data-opt="${i}"]`);
+    if (picked) picked.classList.add('wrong');
+    $('quizResult').textContent = `Not quite. The right answer is: ${c.a[c.c]}`;
+  }
+  libSig = '';
+  saveGame();
+  render();
+}
+
+function closeEntry() {
+  entryOpen = null;
+  $('learn').hidden = true;
+  if (!overlayOpen()) nextOverlay();
+}
+
+const infoBtn = id => (LIB[id] ? `<button class="info-btn" data-learn="${id}" aria-label="Learn about this">${icon('info', 'ic-sm')}</button>` : '');
+
+let libSig = '';
+function renderLibrary() {
+  const all = libEntries(), found = discoveredIds().length, waiting = pendingQuizzes().length;
+  $('libCount').textContent = `${found} of ${all.length} discovered`;
+  $('libQuiz').textContent = waiting
+    ? `${waiting} quiz${waiting > 1 ? 'zes' : ''} waiting · +${QUIZ_GEMS} gems each · ${quizCorrect()} answered correctly`
+    : `Build sectors and finish research to discover entries. ${quizCorrect()} quizzes answered correctly.`;
+  $('libBar').style.width = `${(found / all.length) * 100}%`;
+  const sig = `${found}|${Object.keys(state.quiz).length}`;
+  if (sig === libSig) return;
+  libSig = sig;
+  const groups = [...new Set(all.map(e => e.group))];
+  $('library').innerHTML = groups.map(g => {
+    const items = all.filter(e => e.group === g);
+    const groupIcon = g === 'Sectors' ? 'grid' : BRANCHES.find(b => b.name === g).icon;
+    return `<div class="branch"><div class="branch-head">${icon(groupIcon, 'ic-sm')}${g}</div>${items.map(e => {
+      const known = !!state.library[e.id], q = state.quiz[e.id];
+      if (!known) {
+        return `<div class="row lib-row locked">${tile('lock', null, 'tile-locked')}<div class="row-title"><span class="nm">???</span></div>
+          <span></span><div class="row-sub"><span>${e.how}</span></div></div>`;
+      }
+      const stateTag = q === undefined ? `<span class="lib-state quiz">Quiz +${QUIZ_GEMS}</span>`
+        : (q === 1 ? `<span class="lib-state done">${icon('check', 'ic-xs')} Learned</span>` : '<span class="lib-state miss">Read</span>');
+      return `<button class="row lib-row" data-learn="${e.id}">${tile(e.icon, e.tone)}
+        <div class="row-title"><span class="nm">${e.name}</span></div>${stateTag}
+        <div class="row-sub"><span>${e.kind}</span></div></button>`;
+    }).join('')}</div>`;
+  }).join('');
+}
+
 /* ---------------- Gems, shop, VIP, ads ---------------- */
 
 const ACH_GEMS = 10;
@@ -1190,7 +1384,11 @@ const GEM_PACKS = [
   { id: 'p3', gems: 1200, price: '$9.99',  tag: 'Popular' },
   { id: 'p4', gems: 2500, price: '$19.99', tag: 'Best value' },
 ];
-const WARPS = [{ h: 1, cost: 40 }, { h: 4, cost: 120 }, { h: 24, cost: 500 }];
+const WARPS = [{ h: 1, cost: 40 }, { h: 2, cost: 70 }, { h: 4, cost: 120 }];
+const WARPS_PER_DAY = 3;
+const SIM_BUYS_PER_DAY = 2; // prototype test mode: keeps the economy testable
+const warpsUsed = () => (state.warps && state.warps.day === dayKey() ? state.warps.n : 0);
+const simBuysUsed = () => (state.simBuys && state.simBuys.day === dayKey() ? state.simBuys.n : 0);
 const SHOP_BOOSTS = [
   { id: 'golden', icon: 'coins', tone: 'gold', name: 'Golden Economy', desc: 'Permanent ×2 income. Kept forever, even after exports.', cost: 1500 },
   { id: 'shield', icon: 'shield-check', tone: 'green', name: 'Cyber Shield', desc: 'No cyber attacks for 24 hours.', cost: 150 },
@@ -1228,6 +1426,12 @@ function spendGems(n, label, onDone) {
 
 // Real-money purchases are simulated in the web prototype.
 function simulatedPurchase(title, price, onDone) {
+  if (simBuysUsed() >= SIM_BUYS_PER_DAY) {
+    showModal('Test purchase limit reached', `The prototype allows ${SIM_BUYS_PER_DAY} simulated purchases per day, so the game balance stays realistic. Try again tomorrow.`, { icon: 'gem', tone: 'violet' });
+    return;
+  }
+  const done = onDone;
+  onDone = () => { state.simBuys = { day: dayKey(), n: simBuysUsed() + 1 }; done(); };
   showModal(title, `Price: ${price}\nPrototype: no money is charged. The store version will use Google Play and App Store billing.`, {
     icon: 'gem', tone: 'violet', okText: 'Buy (simulated)', onOk: onDone,
   });
@@ -1250,9 +1454,14 @@ function buyVip() {
 function buyWarp(h) {
   const w = WARPS.find(x => x.h === h);
   if (!w) return;
+  if (warpsUsed() >= WARPS_PER_DAY) {
+    showModal('Time warps used up', `You can use ${WARPS_PER_DAY} time warps per day. They recharge at midnight.`, { icon: 'clock', tone: 'cyan' });
+    return;
+  }
   const amount = incomePerSec(false) * h * 3600;
   spendGems(w.cost, `a ${h}-hour time warp (${money(amount)})`, () => {
     earn(amount);
+    state.warps = { day: dayKey(), n: warpsUsed() + 1 };
     toast(`Time warp: +${money(amount)}`, 'clock', 'cyan');
   });
 }
@@ -1318,15 +1527,17 @@ function renderShop(now) {
   $('adGemsBtn').textContent = isVip() ? 'Claim' : 'Watch';
 
   const ips = incomePerSec(false);
-  const sig = [state.gems, fmt(ips), state.owned.golden, state.owned.flags.join(), state.owned.tones.join(), state.player.flag, state.player.tone, Math.floor(state.shieldUntil / 60e3), fmt(rpRate())].join('|');
+  const sig = [state.gems, warpsUsed(), fmt(ips), state.owned.golden, state.owned.flags.join(), state.owned.tones.join(), state.player.flag, state.player.tone, Math.floor(state.shieldUntil / 60e3), fmt(rpRate())].join('|');
   if (sig === shopSig) return;
   shopSig = sig;
   if (!$('gemPacks').children.length) {
     $('gemPacks').innerHTML = GEM_PACKS.map(p => `<button class="pack" data-pack="${p.id}">
       ${p.tag ? `<span class="tag">${p.tag}</span>` : ''}${icon('gem')}<b>${fmt(p.gems)}</b><span class="price">${p.price}</span></button>`).join('');
   }
+  const warpsLeft = WARPS_PER_DAY - warpsUsed();
+  $('warpInfo').textContent = `Get hours of income instantly, at the full rate. ${warpsLeft} of ${WARPS_PER_DAY} left today.`;
   $('warps').innerHTML = WARPS.map(w => {
-    const can = state.gems >= w.cost;
+    const can = state.gems >= w.cost && warpsLeft > 0;
     return `<div class="row">${tile('clock', 'cyan')}
       <div class="row-title"><span class="nm">${w.h} hour${w.h > 1 ? 's' : ''} of income</span></div>
       <button class="buy gem ${can ? 'can' : ''}" data-warp="${w.h}">Warp<small>${gemCost(w.cost)}</small></button>
@@ -1372,31 +1583,74 @@ const POLICIES = [
 ];
 
 const RESEARCH = [
-  { id: 'e1', branch: 'eco', name: 'Digital Taxes',         cost: 20,   mods: { tap: 2 },                  desc: 'Tap power ×2' },
-  { id: 'e2', branch: 'eco', name: 'E-Commerce',            cost: 120,  mods: { income: 1.25 },            desc: 'All income ×1.25' },
-  { id: 'e3', branch: 'eco', name: 'Digital Currency',      cost: 700,  mods: { income: 1.5 },             desc: 'All income ×1.5' },
-  { id: 'e4', branch: 'eco', name: 'Smart Contracts',       cost: 4000, mods: { cost: 0.9 },               desc: 'Sectors cost 10% less' },
-  { id: 's1', branch: 'soc', name: 'E-Health',              cost: 30,   mods: { welfare: 5 },              desc: 'Welfare +5' },
-  { id: 's2', branch: 'soc', name: 'Online Learning',       cost: 150,  mods: { research: 1.25 },          desc: 'Research points ×1.25' },
-  { id: 's3', branch: 'soc', name: 'Digital Identity',      cost: 800,  mods: { popGrowth: 1.5, welfare: 5 }, desc: 'Population grows 50% faster · Welfare +5' },
-  { id: 's4', branch: 'soc', name: 'Universal Connectivity', cost: 4500, mods: { welfare: 10, income: 1.1 }, desc: 'Welfare +10 · All income ×1.1' },
-  { id: 'c1', branch: 'sec', name: 'Firewalls',             cost: 25,   mods: { defense: 0.1 },            desc: 'Auto-defense +10%' },
-  { id: 'c2', branch: 'sec', name: 'Threat Intelligence',   cost: 130,  mods: { window: 5 },               desc: '+5 seconds to respond to attacks' },
-  { id: 'c3', branch: 'sec', name: 'AI Defense Grid',       cost: 750,  mods: { defense: 0.15 },           desc: 'Auto-defense +15%' },
-  { id: 'c4', branch: 'sec', name: 'Quantum Encryption',    cost: 4200, mods: { breach: 0.5 },             desc: 'Breaches steal half as much' },
+  // Economy
+  { id: 'e1', branch: 'eco', name: 'Digital Taxes',            cost: 20,     mods: { tap: 2 },                         desc: 'Tap power ×2' },
+  { id: 'e2', branch: 'eco', name: 'E-Commerce',               cost: 120,    mods: { income: 1.25 },                   desc: 'All income ×1.25' },
+  { id: 'e3', branch: 'eco', name: 'Digital Currency (CBDC)',  cost: 700,    mods: { income: 1.5 },                    desc: 'All income ×1.5' },
+  { id: 'e4', branch: 'eco', name: 'Smart Contracts',          cost: 4000,   mods: { cost: 0.9 },                      desc: 'Sectors cost 10% less' },
+  { id: 'e5', branch: 'eco', name: 'Open Banking',             cost: 25e3,   mods: { income: 1.5 },                    desc: 'All income ×1.5' },
+  { id: 'e6', branch: 'eco', name: 'Tokenization',             cost: 15e4,   mods: { cost: 0.85 },                     desc: 'Sectors cost 15% less' },
+  { id: 'e7', branch: 'eco', name: 'Real-Time Economy',        cost: 9e5,    mods: { income: 2 },                      desc: 'All income ×2' },
+  // Society
+  { id: 's1', branch: 'soc', name: 'Electronic Health Records', cost: 30,    mods: { welfare: 5 },                     desc: 'Welfare +5' },
+  { id: 's2', branch: 'soc', name: 'Online Learning',          cost: 150,    mods: { research: 1.25 },                 desc: 'Research points ×1.25' },
+  { id: 's3', branch: 'soc', name: 'e-Signatures',             cost: 800,    mods: { popGrowth: 1.5, welfare: 5 },     desc: 'Population grows 50% faster · Welfare +5' },
+  { id: 's4', branch: 'soc', name: 'Universal Connectivity',   cost: 4500,   mods: { welfare: 10, income: 1.1 },       desc: 'Welfare +10 · All income ×1.1' },
+  { id: 's5', branch: 'soc', name: 'Internet Voting',          cost: 27e3,   mods: { welfare: 5, influence: 1.15 },    desc: 'Welfare +5 · Export influence ×1.15' },
+  { id: 's6', branch: 'soc', name: 'Telemedicine',             cost: 16e4,   mods: { welfare: 8, popGrowth: 1.3 },     desc: 'Welfare +8 · Faster population growth' },
+  { id: 's7', branch: 'soc', name: 'Digital Literacy',         cost: 95e4,   mods: { research: 1.5, defense: 0.05 },   desc: 'Research ×1.5 · Auto-defense +5%' },
+  // Security
+  { id: 'c1', branch: 'sec', name: 'Firewalls',                cost: 25,     mods: { defense: 0.1 },                   desc: 'Auto-defense +10%' },
+  { id: 'c2', branch: 'sec', name: 'Threat Intelligence',      cost: 130,    mods: { window: 5 },                      desc: '+5 seconds to respond to attacks' },
+  { id: 'c3', branch: 'sec', name: 'Public Key Infrastructure', cost: 750,   mods: { defense: 0.1 },                   desc: 'Auto-defense +10%' },
+  { id: 'c4', branch: 'sec', name: 'Zero Trust',               cost: 4200,   mods: { defense: 0.1 },                   desc: 'Auto-defense +10%' },
+  { id: 'c5', branch: 'sec', name: 'AI Threat Detection',      cost: 26e3,   mods: { defense: 0.1, window: 3 },        desc: 'Auto-defense +10% · +3 seconds to respond' },
+  { id: 'c6', branch: 'sec', name: 'Post-Quantum Cryptography', cost: 15e4,  mods: { breach: 0.5 },                    desc: 'Breaches steal half as much' },
+  { id: 'c7', branch: 'sec', name: 'Cyber Resilience',         cost: 9e5,    mods: { breach: 0.6, defense: 0.05 },     desc: 'Breach damage ×0.6 · Auto-defense +5%' },
+  // Infrastructure
+  { id: 'i1', branch: 'inf', name: 'TCP/IP',                   cost: 40,     mods: { income: 1.1 },                    desc: 'All income ×1.1' },
+  { id: 'i2', branch: 'inf', name: 'IPv6',                     cost: 220,    mods: { income: 1.15 },                   desc: 'All income ×1.15' },
+  { id: 'i3', branch: 'inf', name: 'Virtualization',           cost: 1100,   mods: { cost: 0.95 },                     desc: 'Sectors cost 5% less' },
+  { id: 'i4', branch: 'inf', name: 'Internet Exchange Points', cost: 6000,   mods: { income: 1.25 },                   desc: 'All income ×1.25' },
+  { id: 'i5', branch: 'inf', name: 'Edge Computing',           cost: 35e3,   mods: { income: 1.3 },                    desc: 'All income ×1.3' },
+  { id: 'i6', branch: 'inf', name: 'Smart Grid',               cost: 2e5,    mods: { income: 1.3, welfare: 3 },        desc: 'All income ×1.3 · Welfare +3' },
+  { id: 'i7', branch: 'inf', name: 'Digital Twin',             cost: 11e5,   mods: { cost: 0.9 },                      desc: 'Sectors cost 10% less' },
+  // Science & AI
+  { id: 'a1', branch: 'sci', name: 'Machine Learning',         cost: 60,     mods: { research: 1.2 },                  desc: 'Research points ×1.2' },
+  { id: 'a2', branch: 'sci', name: 'Big Data',                 cost: 300,    mods: { income: 1.15 },                   desc: 'All income ×1.15' },
+  { id: 'a3', branch: 'sci', name: 'Deep Learning',            cost: 1500,   mods: { research: 1.3 },                  desc: 'Research points ×1.3' },
+  { id: 'a4', branch: 'sci', name: 'Transformers (LLMs)',      cost: 8000,   mods: { tap: 3, research: 1.2 },          desc: 'Tap power ×3 · Research ×1.2' },
+  { id: 'a5', branch: 'sci', name: 'Quantum Algorithms',       cost: 45e3,   mods: { research: 1.5 },                  desc: 'Research points ×1.5' },
+  { id: 'a6', branch: 'sci', name: 'Neuromorphic Chips',       cost: 25e4,   mods: { income: 1.5 },                    desc: 'All income ×1.5' },
+  { id: 'a7', branch: 'sci', name: 'AI Alignment',             cost: 13e5,   mods: { income: 2, welfare: 5 },          desc: 'All income ×2 · Welfare +5' },
+  // Green tech
+  { id: 'n1', branch: 'grn', name: 'Efficient Data Centers',   cost: 50,     mods: { income: 1.05, welfare: 2 },       desc: 'All income ×1.05 · Welfare +2' },
+  { id: 'n2', branch: 'grn', name: 'Renewable Power',          cost: 260,    mods: { cost: 0.95, welfare: 3 },         desc: 'Sectors cost 5% less · Welfare +3' },
+  { id: 'n3', branch: 'grn', name: 'E-Waste Recycling',        cost: 1300,   mods: { cost: 0.97, welfare: 3 },         desc: 'Sectors cost 3% less · Welfare +3' },
+  { id: 'n4', branch: 'grn', name: 'Smart Mobility',           cost: 7000,   mods: { popGrowth: 1.2, welfare: 4 },     desc: 'Faster population growth · Welfare +4' },
+  { id: 'n5', branch: 'grn', name: 'Carbon Accounting',        cost: 4e4,    mods: { influence: 1.15 },                desc: 'Export influence ×1.15' },
+  { id: 'n6', branch: 'grn', name: 'Green Hydrogen',           cost: 22e4,   mods: { income: 1.3 },                    desc: 'All income ×1.3' },
+  { id: 'n7', branch: 'grn', name: 'Energy Storage',           cost: 12e5,   mods: { income: 1.5, offline: 0.1 },      desc: 'All income ×1.5 · Offline earnings +10%' },
 ];
 const BRANCHES = [
   { id: 'eco', name: 'Economy', icon: 'coins', tone: 'gold' },
   { id: 'soc', name: 'Society', icon: 'users', tone: 'rose' },
-  { id: 'sec', name: 'Security', icon: 'shield', tone: 'green' },
+  { id: 'sec', name: 'Security', icon: 'shield', tone: 'bad' },
+  { id: 'inf', name: 'Infrastructure', icon: 'iot', tone: 'cyan' },
+  { id: 'sci', name: 'Science & AI', icon: 'ai', tone: 'violet' },
+  { id: 'grn', name: 'Green Tech', icon: 'leaf', tone: 'green' },
 ];
+// need: research projects completed · sector: must own one (it belongs to the previous era)
 const ERAS = [
   { name: 'Connected Era',   need: 0,  mult: 1 },
-  { name: 'Information Era', need: 4,  mult: 1.5 },
-  { name: 'AI Era',          need: 8,  mult: 2.25, sector: 'ai' },
-  { name: 'Quantum Era',     need: 12, mult: 3.5,  sector: 'quantum' },
+  { name: 'Information Era', need: 4,  mult: 1.5,  sector: 'dc' },
+  { name: 'Platform Era',    need: 10, mult: 2.25, sector: 'opendata' },
+  { name: 'Smart Era',       need: 16, mult: 3.5,  sector: 'ehealth' },
+  { name: 'AI Era',          need: 22, mult: 5,    sector: 'smart' },
+  { name: 'Quantum Era',     need: 30, mult: 8,    sector: 'robotics' },
+  { name: 'Space Era',       need: 38, mult: 12,   sector: 'quantum' },
 ];
-const ROMAN = ['I', 'II', 'III', 'IV'];
+const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'];
 
 const MULT_KEYS = ['income', 'tap', 'research', 'popGrowth', 'cost', 'breach', 'influence'];
 function mods() {
@@ -1417,7 +1671,8 @@ function researchAvailable(n) {
   return i === 0 || !!state.research[prev[i - 1].id];
 }
 function rpRate() {
-  const base = 0.02 * totalOwned() + 0.2 * owned('dc') + 1 * owned('ai') + 5 * owned('quantum') + 0.05 * owned('egov');
+  const base = 0.02 * totalOwned() + 0.05 * owned('egov') + 0.2 * owned('dc') + 0.4 * owned('opendata') + 0.8 * owned('cloud')
+    + 1.5 * owned('edu') + 3 * owned('ai') + 6 * owned('quantum') + 12 * owned('agency');
   return base * mods().research;
 }
 
@@ -1471,8 +1726,9 @@ function buyResearch(id) {
   if (!n || !researchUnlocked() || !researchAvailable(n) || state.rp < n.cost) return;
   state.rp -= n.cost;
   state.research[id] = Date.now();
+  discover(id);
   Sound.play('upgrade'); buzz([12, 40, 12]);
-  toast(`Research complete: ${n.name}`, 'flask', 'cyan');
+  toast(`Research complete: ${n.name} · new encyclopedia entry`, 'flask', 'cyan');
   researchSig = '';
   saveGame();
   render();
@@ -1523,7 +1779,7 @@ function renderResearch() {
       const btn = done ? `<button class="buy" disabled>${icon('check', 'ic-sm')}<small>Done</small></button>`
         : `<button class="buy rp ${can ? 'can' : ''}" data-res="${n.id}" ${can ? '' : 'disabled'}>${avail ? 'Research' : 'Locked'}<small>${fmt(n.cost)} RP</small></button>`;
       return `<div class="row node ${cls}">${tile(done ? 'check' : 'flask', done ? 'green' : b.tone)}
-        <div class="row-title"><span class="nm">${n.name}</span></div>${btn}
+        <div class="row-title"><span class="nm">${n.name}</span>${done ? infoBtn(n.id) : ''}</div>${btn}
         <div class="row-sub"><span>${n.desc}</span></div></div>`;
     }).join('')}</div>`).join('');
 }
@@ -1539,7 +1795,7 @@ function renderEra() {
     return;
   }
   const n = researchCount();
-  const needSector = next.sector && owned(next.sector) === 0 ? ` and build a ${SECTORS.find(s => s.id === next.sector).name}` : '';
+  const needSector = next.sector && owned(next.sector) === 0 ? ` and build ${/^[AEIOU]/.test(SECTORS.find(s => s.id === next.sector).name) ? 'an' : 'a'} ${SECTORS.find(s => s.id === next.sector).name}` : '';
   $('eraNext').textContent = `Complete ${next.need} research projects${needSector} to reach the ${next.name} (×${next.mult})`;
   $('eraBar').style.width = `${Math.min(100, (n / next.need) * 100)}%`;
 }
@@ -1646,7 +1902,7 @@ function buzz(pattern) {
 /* ---------------- Overlays (modal + daily) queue ---------------- */
 
 const overlayQueue = [];
-function overlayOpen() { return !$('modal').hidden || !$('daily').hidden || !$('cyberGame').hidden || !$('adOverlay').hidden || !$('auth').hidden; }
+function overlayOpen() { return !$('modal').hidden || !$('daily').hidden || !$('cyberGame').hidden || !$('adOverlay').hidden || !$('auth').hidden || !$('learn').hidden; }
 function queueOverlay(fn) { if (overlayOpen()) overlayQueue.push(fn); else fn(); }
 function nextOverlay() { const fn = overlayQueue.shift(); if (fn) fn(); updateCoach(); }
 
@@ -1740,6 +1996,8 @@ const COACH = [
     text: 'You have <b>gems</b>! Spend them in the shop on time warps, boosts and premium flags.', until: () => screen === 'shop' },
   { id: 'tipAccount', when: () => cloudAvailable() && !cloud.user && state.lifeEarned >= 1e5, target: () => $('profileBtn'),
     text: 'Your nation is growing. <b>Sign in</b> from your profile to keep it safe and play on any device.', until: () => screen === 'profile' || !!cloud.user },
+  { id: 'tipLearn', when: () => pendingQuizzes().length > 0, screen: 'nation', target: () => $('libraryCard'),
+    text: 'New <b>encyclopedia</b> entries! Learn how real digital nations work and answer quizzes for gems.', until: () => screen === 'library' },
   { id: 'tipExport', when: () => claimableInfluence() >= 1, target: () => tabBtn('global'),
     text: 'You can now <b>export technology</b> for permanent Influence.', until: () => screen === 'global' },
 ];
@@ -1828,6 +2086,18 @@ function bindUI() {
   });
   $('boost').addEventListener('click', () => { if (Date.now() >= state.boostReadyAt) watchAd(() => { activateBoost(); render(); }); });
   $('gemBtn').addEventListener('click', () => showScreen('shop'));
+  $('rankBtn').addEventListener('click', showTechIndex);
+  $('libraryCard').addEventListener('click', () => showScreen('library'));
+  $('libraryBack').addEventListener('click', () => showScreen(lastTab));
+  $('learnClose').addEventListener('click', closeEntry);
+  $('quizOpts').addEventListener('click', e => { const b = e.target.closest('[data-opt]'); if (b) answerQuiz(Number(b.dataset.opt)); });
+  // "i" buttons on sector and research rows, and rows in the encyclopedia
+  for (const id of ['sectors', 'research', 'library']) {
+    $(id).addEventListener('click', e => {
+      const b = e.target.closest('[data-learn]');
+      if (b) { e.stopPropagation(); openEntry(b.dataset.learn); }
+    });
+  }
   $('shopBack').addEventListener('click', () => showScreen(lastTab));
   $('vipBtn').addEventListener('click', buyVip);
   $('adGemsBtn').addEventListener('click', () => { if (adGemsLeft() > 0) watchAd(() => { state.adGems = { day: dayKey(), n: adGemsUsed() + 1 }; addGems(5, 'Ad reward'); }); });
@@ -1959,6 +2229,7 @@ function bindUI() {
   window.addEventListener('beforeunload', saveGame);
 }
 
+postLoad();
 bindUI();
 buildPickers();
 checkAchievements(true);
@@ -1975,4 +2246,4 @@ setInterval(saveGame, 5000);
 setInterval(cloudTick, CLOUD_PUSH_EVERY);
 
 // Debug / test hook
-window.DN = { get state() { return state; }, cloud, cloudResume, syncNow, isVip, addGems, incomePerSec, earn, render, showScreen, dailyStatus, mods, rpRate, currentEra, SECTORS, UPGRADES, RESEARCH };
+window.DN = { get state() { return state; }, techIndex, techRank, openEntry, pendingQuizzes, libEntries, cloud, cloudResume, syncNow, isVip, addGems, incomePerSec, earn, render, showScreen, dailyStatus, mods, rpRate, currentEra, SECTORS, UPGRADES, RESEARCH };

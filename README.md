@@ -48,7 +48,7 @@ The bottom tab bar has five screens:
 | Screen | What's on it |
 |---|---|
 | **Nation** | Capital skyline that grows as you build, **Collect Taxes** tap button, population, welfare, influence, defense, next goal, and the 2× income boost |
-| **Sectors** | 10 sectors, from Internet Provider to Satellite Internet. Buy ×1 / ×10 / ×100 / Max. Income doubles at 25, 50, 100, 200… owned |
+| **Sectors** | 24 sectors in 7 eras, from Internet Provider to Space Agency. A sector appears once your nation reaches its era. Buy ×1 / ×10 / ×100 / Max. Income doubles at 25, 50, 100, 200… owned |
 | **Upgrades** | Sector boosts, AI upgrades that multiply all income, and tax (tap power) upgrades |
 | **Security** | Defense level, auto-defense chance, and attack history |
 | **Govern** | Era progress, plus three tabs: **Policies**, **Research** and **Export** (prestige) |
@@ -58,12 +58,13 @@ The bottom tab bar has five screens:
 
 - **GDP** is the main currency. You earn it from sectors every second and from taps.
 - **Population and welfare** grow with your facilities and multiply all income. Smart City has the biggest effect on welfare.
-- **Tech ranking** moves from #195 to #1 based on the GDP you have earned in total.
+- **World ranking (Tech Index)** moves from #195 to #1. It scores the whole nation: lifetime GDP, research, era, welfare, security and influence. Reaching #1 takes the final era and several technology exports. Tap the rank in the header to see the breakdown.
 - **Cyber attacks** happen every 1.5–2.5 minutes. Tap **Defend** to open a mini-game: catch the malware 5 times on a 3×3 grid before the timer runs out (12 s, or more with research). Winning gives 30 seconds of income. If you miss it, your defense level decides the outcome. A breach steals 10% of your GDP and halves income for 30 seconds.
 - **Technology export** resets the economy in exchange for Influence. Each point adds a permanent +10% to all income. Research and policies are kept.
 - **Policies** unlock at 5 E-Government portals. There are four areas (Tax Rate, Internet, Education, Trade), each with three options. Every option has a benefit and a cost, and changing one starts a 1-minute cooldown.
-- **Research** unlocks with the first Mobile Banking service. Facilities produce research points (RP), and Data Centers, AI Labs and Quantum Computers produce the most. The tree has 12 permanent projects in three branches: Economy, Society and Security.
-- **Eras**: Connected → Information (4 research) → AI (8 research + an AI Lab) → Quantum (12 research + Quantum Computing). Each era multiplies all income: ×1.5, ×2.25, ×3.5.
+- **Research** unlocks with the first Mobile Banking service. Facilities produce research points (RP). The tree has 42 permanent projects in six branches: Economy, Society, Security, Infrastructure, Science & AI, and Green Tech. Every project is named after a real technology, such as TCP/IP, Public Key Infrastructure, Transformers or Post-Quantum Cryptography.
+- **Eras**: Connected → Information → Platform → Smart → AI → Quantum → Space. Each era needs a number of completed research projects plus one key sector from the era before. Each era unlocks new sectors and multiplies all income (×1.5 up to ×12).
+- **Tech Encyclopedia**: 66 cards, one for every sector and research project. Each card explains the technology, gives a real-world example (such as Estonia's X-Road, India's UPI, Kenya's M-Pesa or Azerbaijan's ASAN Xidmət) and a "Did you know?" fact, and ends with a 3-answer quiz worth +3 gems. Cards unlock as you build and research. Open them from the Nation screen or with the ⓘ button on a sector or research row. The content is in `content.js`.
 - **Offline income**: while you're away, you earn 50% of your normal income for up to 8 hours.
 - **2× boost**: a stand-in for a rewarded ad.
 - **Tutorial**: four guided steps for new players (tap, open Sectors, build, passive income), then one-time tips for the first cyber attack, the first affordable upgrade, and the first technology export. It can be replayed from Profile → Settings.
@@ -90,13 +91,13 @@ Players can play without an account. From **Profile → Save your progress** the
 
 ## Monetization (prototype)
 
-Real-money purchases are **simulated** in the web build and clearly labeled. They will be connected to Google Play Billing and StoreKit (for example through RevenueCat) in the native build. Rewarded ads are a 3-second placeholder screen, to be replaced by AdMob.
+Real-money purchases are **simulated** in the web build and clearly labeled, with a test-mode limit of 2 per day so the balance stays realistic. They will be connected to Google Play Billing and StoreKit (for example through RevenueCat) in the native build. Rewarded ads are a 3-second placeholder screen, to be replaced by AdMob.
 
 - **Gems** (premium currency). New players start with 25.
   - Free sources: +10 per achievement, daily reward days 3/5/7 (+5/+10/+20), +25 per new era, +2 per cyber mini-game win, and +5 per rewarded ad (5 per day).
   - Saves from before gems existed get gems for the achievements they already earned.
 - **Gem packs**: 100 ($0.99), 550 ($4.99), 1,200 ($9.99), 2,500 ($19.99).
-- **Time Warp**: 1 h / 4 h / 24 h of income for 40 / 120 / 500 gems.
+- **Time Warp**: 1 h / 2 h / 4 h of income for 40 / 70 / 120 gems, at most 3 per day.
 - **Boosts**:
   - Golden Economy: permanent ×2 income, kept after exports, 1,500 gems.
   - Cyber Shield: no attacks for 24 h, 150 gems.
@@ -107,6 +108,7 @@ Real-money purchases are **simulated** in the web build and clearly labeled. The
 ## Files
 
 - `index.html`: app shell, the SVG icon sprite, and the screens
+- `content.js`: Tech Encyclopedia cards and quizzes
 - `style.css`: visual design, built phone-first and safe-area aware
 - `game.js`: game logic, rendering, the canvas skyline, and cloud sync. The balance constants are at the top (`SECTORS`, `COST_GROWTH`, `PRESTIGE_DIVISOR` and others)
 - `tools/build_single_file.py`: bundles the three files into one HTML page. PWA tags are left out
