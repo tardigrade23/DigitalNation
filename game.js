@@ -116,6 +116,7 @@ function defaultState() {
     rp: 0, research: {}, policies: { ...DEFAULT_POLICIES }, policyChangedAt: {}, era: 0,
     policyChanges: 0, gamesWon: 0,
     stats: { built: 0, upgrades: 0, researchStarted: 0 }, missions: { day: '', list: [], week: '', weekly: null },
+    events: { next: 0, seen: {}, log: [] }, eventEffects: [],
     gems: START_GEMS, vipUntil: 0, shieldUntil: 0, owned: { golden: false, flags: [], tones: [] }, adGems: { day: '', n: 0 },
     v: SAVE_VERSION, library: {}, quiz: {}, warps: { day: '', n: 0 }, simBuys: { day: '', n: 0 },
   };
@@ -319,7 +320,7 @@ function performPrestige() {
     policyChanges: state.policyChanges, gamesWon: state.gamesWon,
     gems: state.gems, vipUntil: state.vipUntil, shieldUntil: state.shieldUntil, owned: state.owned, adGems: state.adGems,
     v: state.v, library: state.library, quiz: state.quiz, warps: state.warps, simBuys: state.simBuys, pendingEarns: state.pendingEarns,
-    researching: state.researching, stats: state.stats, missions: state.missions,
+    researching: state.researching, stats: state.stats, missions: state.missions, events: state.events, eventEffects: state.eventEffects,
   };
   state = Object.assign(defaultState(), keep);
   sectorSig = ''; upgSig = '';
@@ -431,6 +432,8 @@ function normalizeSave(saved) {
   if (!s.researching || typeof s.researching !== 'object') s.researching = null;
   s.stats = Object.assign({ built: 0, upgrades: 0, researchStarted: 0 }, saved && saved.stats);
   if (!s.missions || typeof s.missions !== 'object') s.missions = { day: '', list: [], week: '', weekly: null };
+  s.events = Object.assign({ next: 0, seen: {}, log: [] }, saved && saved.events);
+  if (!Array.isArray(s.eventEffects)) s.eventEffects = [];
   if (saved && !saved.v) s.v = 1;
   // Players from before the tutorial existed skip it.
   if (!saved || typeof saved.coach !== 'object' || !saved.coach) s.coach = saved ? { t1: 1, t2: 1, t3: 1, t4: 1 } : {};
@@ -786,6 +789,7 @@ function render() {
   const fx = [];
   if (now < state.boostUntil) fx.push(`<span class="chip good">${icon('bolt', 'ic-xs')}2× income · ${dur(state.boostUntil - now)}</span>`);
   if (now < state.shieldUntil) fx.push(`<span class="chip good">${icon('shield-check', 'ic-xs')}Cyber Shield · ${dur(state.shieldUntil - now)}</span>`);
+  for (const e of state.eventEffects || []) if (e.until > now) fx.push(`<span class="chip ${e.good ? 'good' : 'bad'}">${icon(e.icon, 'ic-xs')}${esc(e.label)} · ${dur(e.until - now)}</span>`);
   if (now < state.debuffUntil) fx.push(`<span class="chip bad">${icon('alert', 'ic-xs')}Breach −50% · ${dur(state.debuffUntil - now)}</span>`);
   $('effects').innerHTML = fx.join('');
   $('attack').hidden = !state.attack;
@@ -1919,6 +1923,8 @@ function mods() {
   const apply = src => { for (const [k, v] of Object.entries(src)) { if (MULT_KEYS.includes(k)) m[k] *= v; else m[k] += v; } };
   for (const p of POLICIES) apply(p.options[state.policies[p.id] ?? 1].mods);
   for (const n of RESEARCH) if (state.research[n.id]) apply(n.mods);
+  const now = Date.now();
+  for (const e of state.eventEffects || []) if (e.until > now) apply(e.mods);
   return m;
 }
 
@@ -2265,7 +2271,7 @@ function buzz(pattern) {
 /* ---------------- Overlays (modal + daily) queue ---------------- */
 
 const overlayQueue = [];
-function overlayOpen() { return !$('missions').hidden || !$('modal').hidden || !$('daily').hidden || !$('cyberGame').hidden || !$('adOverlay').hidden || !$('auth').hidden || !$('learn').hidden; }
+function overlayOpen() { return !$('nationEvent').hidden || !$('missions').hidden || !$('modal').hidden || !$('daily').hidden || !$('cyberGame').hidden || !$('adOverlay').hidden || !$('auth').hidden || !$('learn').hidden; }
 function queueOverlay(fn) { if (overlayOpen()) overlayQueue.push(fn); else fn(); }
 function nextOverlay() { const fn = overlayQueue.shift(); if (fn) fn(); updateCoach(); }
 
@@ -2369,6 +2375,84 @@ function claimMission(id) {
   saveGame();
   renderMissions();
   render();
+}
+
+/* ---------------- National events ---------------- */
+
+// A real-world situation with 2-3 choices, every 25-45 minutes of play
+// (and soon after coming back from a long break). Effects are temporary.
+const EVENTS = typeof NATIONAL_EVENTS === 'object' ? NATIONAL_EVENTS : [];
+const EVENT_FIRST = 15 * 60e3, EVENT_GAP = [25 * 60e3, 45 * 60e3];
+let eventOpen = null;
+
+function scheduleNextEvent(now, first) {
+  state.events.next = now + (first ? EVENT_FIRST : EVENT_GAP[0] + Math.random() * (EVENT_GAP[1] - EVENT_GAP[0]));
+}
+
+function maybeNationalEvent(now) {
+  if (!EVENTS.length || eventOpen || overlayOpen() || document.hidden) return;
+  if (!COACH.filter(c => c.tut).every(c => state.coach[c.id]) || incomePerSec(false) < 1) return;
+  if (!state.events.next) { scheduleNextEvent(now, true); return; }
+  if (now < state.events.next) return;
+  // prefer events seen least often, never the same one twice in a row
+  const last = state.events.log.length ? state.events.log[state.events.log.length - 1].id : null;
+  const pool = EVENTS.filter(e => e.id !== last);
+  const least = Math.min(...pool.map(e => state.events.seen[e.id] || 0));
+  const options = pool.filter(e => (state.events.seen[e.id] || 0) === least);
+  const ev = options[Math.floor(Math.random() * options.length)];
+  scheduleNextEvent(now, false);
+  queueOverlay(() => showNationalEvent(ev));
+}
+
+function choiceSummary(c) {
+  const parts = [];
+  if (c.cost) parts.push(`<span class="down">Costs ${c.cost} min of income</span>`);
+  if (c.gain) parts.push(`<span class="up">+${c.gain} min of income</span>`);
+  const fx = c.mods && Object.keys(c.mods).length ? fmtMods(c.mods) : '';
+  const len = c.minutes >= 60 ? `${Math.floor(c.minutes / 60)} h${c.minutes % 60 ? ` ${c.minutes % 60} min` : ''}` : `${c.minutes} min`;
+  if (fx) parts.push(`${fx} <span class="muted">for ${len}</span>`);
+  return parts.length ? parts.join(' · ') : '<span class="muted">No effect</span>';
+}
+
+function showNationalEvent(ev) {
+  eventOpen = ev;
+  const ips = incomePerSec(false);
+  $('eventTile').innerHTML = tile(ev.icon, 'gold');
+  $('eventTitle').textContent = ev.title;
+  $('eventSituation').textContent = ev.situation;
+  $('eventReal').textContent = ev.real;
+  $('eventChoices').innerHTML = ev.choices.map((c, i) => {
+    const affordable = !c.cost || state.gdp >= ips * c.cost * 60;
+    return `<button data-choice="${i}" ${affordable ? '' : 'disabled'}><b>${esc(c.label)}</b><span class="policy-effect">${choiceSummary(c)}${affordable ? '' : ' · <span class="down">not enough GDP</span>'}</span></button>`;
+  }).join('');
+  $('nationEvent').hidden = false;
+  $('nationEvent').querySelector('.event-box').scrollTop = 0;
+  Sound.play('alarm');
+  updateCoach();
+}
+
+function chooseEvent(i) {
+  const ev = eventOpen, c = ev && ev.choices[i];
+  if (!c) return;
+  const ips = incomePerSec(false);
+  if (c.cost) { const cost = ips * c.cost * 60; if (state.gdp < cost) return; state.gdp -= cost; }
+  if (c.gain) earn(ips * c.gain * 60);
+  if (c.mods && Object.keys(c.mods).length && c.minutes) {
+    const good = Object.entries(c.mods).every(([k, v]) => (['welfare', 'defense', 'window', 'offline'].includes(k) ? v >= 0 : k === 'breach' ? v <= 1 : v >= 1));
+    state.eventEffects = state.eventEffects.filter(e => e.until > Date.now());
+    state.eventEffects.push({ mods: c.mods, until: Date.now() + c.minutes * 60e3, label: ev.title, icon: ev.icon, good });
+  }
+  state.events.seen[ev.id] = (state.events.seen[ev.id] || 0) + 1;
+  state.events.log.push({ id: ev.id, choice: i, at: Date.now() });
+  if (state.events.log.length > 30) state.events.log.shift();
+  track('event_choice', { id: ev.id, choice: i });
+  eventOpen = null;
+  $('nationEvent').hidden = true;
+  Sound.play('buy');
+  toast(`${ev.title}: ${c.label}`, ev.icon, 'gold');
+  saveGame();
+  render();
+  if (!overlayOpen()) nextOverlay();
 }
 
 /* ---------------- Daily reward ---------------- */
@@ -2529,7 +2613,7 @@ function tick() {
   if (game && now >= game.moveAt) moveBug();
   if (game) $('gameBar').style.width = state.attack ? `${Math.max(0, (state.attack.endsAt - now) / (state.attack.len || ATTACK_WINDOW)) * 100}%` : '0%';
   updateAttack(now);
-  if (now - achTimer > 1000) { achTimer = now; updateMissions(); checkAchievements(false); maybeAutoDaily(); maybeAskAnalytics(); }
+  if (now - achTimer > 1000) { achTimer = now; updateMissions(); maybeNationalEvent(now); checkAchievements(false); maybeAutoDaily(); maybeAskAnalytics(); }
   render();
   if (now - skyTimer > (reduceMotion ? 3000 : 150)) { skyTimer = now; drawSkyline(); }
 }
@@ -2665,6 +2749,7 @@ function bindUI() {
   $('dailyCard').addEventListener('click', () => queueOverlay(showDaily));
   $('missionsCard').addEventListener('click', () => queueOverlay(showMissions));
   $('missionsClose').addEventListener('click', closeMissions);
+  $('eventChoices').addEventListener('click', e => { const b = e.target.closest('[data-choice]'); if (b) chooseEvent(Number(b.dataset.choice)); });
   $('missions').addEventListener('click', e => { const b = e.target.closest('[data-claim]'); if (b) claimMission(b.dataset.claim); });
   $('dailyClaim').addEventListener('click', claimDaily);
   $('dailyClose').addEventListener('click', closeDaily);
@@ -2699,7 +2784,7 @@ function bindUI() {
   window.addEventListener('resize', drawSkyline);
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) { saveGame(); cloudPause(); flushEvents(); }
-    else { applyOffline(); lastTick = Date.now(); render(); maybeAutoDaily(); cloudResume(); }
+    else { const away = Date.now() - state.lastSave; applyOffline(); lastTick = Date.now(); render(); maybeAutoDaily(); cloudResume(); if (away > 2 * 3600e3) state.events.next = Math.min(state.events.next, Date.now() + 10e3); }
   });
   window.addEventListener('beforeunload', saveGame);
 }
@@ -2724,7 +2809,7 @@ track('session_start', { day: Math.floor((Date.now() - state.startedAt) / 86400e
 
 // Debug / test hook
 // Hooks for automated tests and tools/simulate.mjs (balance simulation).
-window.DN = { get state() { return state; }, set state(v) { state = v; },
+window.DN = { get state() { return state; }, set state(v) { state = v; }, showNationalEvent, EVENTS,
   sim: { buySector, buyUpgrade, buyResearch, buySecurity, costFor, sectorMult, globalMult, mods, rpRate, popTarget, welfare, totalOwned, owned,
     researchAvailable, claimableInfluence, performPrestige, currentEra, checkEra, secCost, dailyAmount, DAILY, isUnlocked, availableUpgrades,
     clickValue, earn, ERAS, SEC_MAX, OFFLINE_EFFICIENCY, OFFLINE_MAX_SEC, progressResearch, researchSeconds },

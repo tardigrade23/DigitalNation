@@ -632,6 +632,17 @@ button.rank-pill { cursor: pointer; }
 .mission.claimed { opacity: .6; }
 .mission-reward { font-size: 12px; color: var(--violet); font-weight: 700; }
 
+/* National events */
+.modal-box.event-box { width: min(420px, 100%); max-height: calc(100vh - 32px); overflow-y: auto; text-align: left; align-items: stretch; }
+.modal-box.event-box > * { flex-shrink: 0; }
+.modal-box.event-box p { margin: 4px 0 0; color: var(--text); line-height: 1.55; white-space: normal; }
+.event-choices { display: flex; flex-direction: column; gap: 8px; }
+.event-choices button { display: flex; flex-direction: column; gap: 4px; text-align: left; padding: 12px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line); }
+.event-choices button:not(:disabled):hover { border-color: var(--gold); }
+.event-choices button:disabled { opacity: .45; cursor: not-allowed; }
+.event-choices b { font-size: 15px; }
+.event-choices .policy-effect { font-size: 12px; }
+
 /* Tab bar */
 .tabbar {
   position: fixed;

@@ -421,3 +421,133 @@ const LIBRARY = {
     q: 'What does grid energy storage do?', a: ['Saves electricity until it is needed', 'Produces coal', 'Stores computer data'], c: 0,
   },
 };
+
+/* =========================================================
+ * National events: real-world situations with a choice.
+ *   situation: what happens in the player's nation
+ *   real: the real event it is based on (keep it conservative)
+ *   choices: label, effect in words, cost/gain in minutes of income,
+ *            temporary modifiers (same keys as policies) for `minutes`
+ * ========================================================= */
+const NATIONAL_EVENTS = [
+  {
+    id: 'ddos', icon: 'shield', title: 'Wave of cyber attacks',
+    situation: 'Government, bank and news websites are flooded with traffic and keep going offline.',
+    real: 'In April and May 2007, Estonia was hit by weeks of cyber attacks on government, bank and media websites. In 2008, NATO opened its Cooperative Cyber Defence Centre of Excellence in Tallinn.',
+    choices: [
+      { label: 'Create a national cyber defense unit', cost: 10, mods: { defense: 0.15 }, minutes: 120 },
+      { label: 'Ask allied countries for help', mods: { defense: 0.1, influence: 1.05 }, minutes: 60 },
+      { label: 'Take services offline until it passes', mods: { income: 0.7 }, minutes: 20 },
+    ],
+  },
+  {
+    id: 'schools', icon: 'edu', title: 'Schools must close',
+    situation: 'A fast-spreading illness forces every school in the country to close for weeks.',
+    real: 'When schools closed during the COVID-19 pandemic in 2020, more than 1.5 billion students worldwide were affected, and many countries moved lessons online almost overnight (UNESCO).',
+    choices: [
+      { label: 'Move all lessons online', cost: 15, mods: { research: 1.3 }, minutes: 120 },
+      { label: 'Fund telemedicine and support families', cost: 10, mods: { welfare: 10 }, minutes: 120 },
+      { label: 'Wait for the situation to improve', mods: { welfare: -10, research: 0.8 }, minutes: 60 },
+    ],
+  },
+  {
+    id: 'chips', icon: 'chip', title: 'Global chip shortage',
+    situation: 'Factories around the world cannot get enough computer chips, and prices are rising fast.',
+    real: 'From 2020 to 2023, a global semiconductor shortage slowed the production of cars, consoles and electronics, and several governments funded new chip factories.',
+    choices: [
+      { label: 'Fund a domestic chip factory', cost: 20, mods: { income: 1.1 }, minutes: 240 },
+      { label: 'Buy and stockpile chips now', cost: 5, minutes: 0 },
+      { label: 'Wait for prices to fall', mods: { income: 0.85 }, minutes: 30 },
+    ],
+  },
+  {
+    id: 'ransom', icon: 'alert', title: 'Ransomware in hospitals',
+    situation: 'Hospital computers are locked, and the attackers demand a ransom to unlock them.',
+    real: 'In May 2017, the WannaCry ransomware infected hundreds of thousands of computers worldwide and disrupted parts of the UK\'s National Health Service. Authorities usually advise victims not to pay, because payment funds criminals and does not guarantee recovery.',
+    choices: [
+      { label: 'Restore from backups and patch every system', cost: 10, mods: { breach: 0.5 }, minutes: 120 },
+      { label: 'Pay the ransom', cost: 30, mods: { defense: -0.1 }, minutes: 60 },
+      { label: 'Run hospitals on paper for a while', mods: { welfare: -8, income: 0.9 }, minutes: 30 },
+    ],
+  },
+  {
+    id: 'cable', icon: 'fiber', title: 'Undersea cable cut',
+    situation: 'A ship\'s anchor has damaged the main undersea internet cable to your country.',
+    real: 'In 2008, damage to undersea cables in the Mediterranean Sea disrupted internet access for millions of people in the Middle East and South Asia. Most traffic between continents travels through such cables.',
+    choices: [
+      { label: 'Reroute traffic through satellites', cost: 5, minutes: 0 },
+      { label: 'Build a second cable route', cost: 30, mods: { income: 1.1 }, minutes: 240 },
+      { label: 'Wait for the repair ship', mods: { income: 0.7 }, minutes: 15 },
+    ],
+  },
+  {
+    id: 'privacy', icon: 'digid', title: 'Data leak scandal',
+    situation: 'A popular app secretly sold its users\' personal data, and citizens are angry.',
+    real: 'The EU\'s General Data Protection Regulation (GDPR) took effect in May 2018. It gives people rights over their personal data and allows large fines for companies that misuse it.',
+    choices: [
+      { label: 'Pass a strong data protection law', mods: { welfare: 8, income: 0.95 }, minutes: 120 },
+      { label: 'Fine the company', gain: 10, mods: { welfare: -3 }, minutes: 60 },
+      { label: 'Ignore it', mods: { welfare: -10 }, minutes: 120 },
+    ],
+  },
+  {
+    id: 'storm', icon: 'space', title: 'Solar storm',
+    situation: 'A strong geomagnetic storm is about to hit Earth and could damage satellites and power grids.',
+    real: 'In February 2022, SpaceX lost dozens of newly launched Starlink satellites after a geomagnetic storm increased atmospheric drag. In 1859, the Carrington Event caused telegraph systems to fail around the world.',
+    choices: [
+      { label: 'Put satellites and the grid in safe mode', mods: { income: 0.9 }, minutes: 30 },
+      { label: 'Harden key infrastructure', cost: 15, minutes: 0 },
+      { label: 'Carry on as normal', mods: { income: 0.7 }, minutes: 30 },
+    ],
+  },
+  {
+    id: 'talent', icon: 'users', title: 'Tech talent is leaving',
+    situation: 'Young engineers are moving abroad for better jobs.',
+    real: 'In 2014, Estonia launched e-Residency, a digital identity that lets people anywhere in the world start and run an Estonian company online.',
+    choices: [
+      { label: 'Launch an e-Residency program', cost: 15, mods: { income: 1.15, influence: 1.05 }, minutes: 120 },
+      { label: 'Fund university scholarships', cost: 10, mods: { research: 1.25 }, minutes: 120 },
+      { label: 'Do nothing', mods: { research: 0.8 }, minutes: 60 },
+    ],
+  },
+  {
+    id: 'vote', icon: 'egov', title: 'Election day',
+    situation: 'A national election is coming, and citizens ask to vote online.',
+    real: 'Estonia was the first country to allow internet voting in nationwide elections, starting with local elections in 2005. Online voters can change their vote during the voting period.',
+    choices: [
+      { label: 'Offer secure internet voting', mods: { welfare: 10, defense: -0.1 }, minutes: 120 },
+      { label: 'Keep paper ballots only', minutes: 0 },
+      { label: 'Run a small online pilot', cost: 5, mods: { welfare: 5 }, minutes: 120 },
+    ],
+  },
+  {
+    id: 'deepfake', icon: 'ai', title: 'Deepfakes go viral',
+    situation: 'Fake AI-made videos of national leaders are spreading on social media.',
+    real: 'Ahead of elections in 2024, several countries saw AI-generated fake audio and video of politicians. Many governments responded with media literacy campaigns and rules for labelling AI-made content.',
+    choices: [
+      { label: 'Start a media literacy campaign', cost: 10, mods: { welfare: 5, defense: 0.05 }, minutes: 120 },
+      { label: 'Require labels on AI-made content', mods: { welfare: 8, income: 0.97 }, minutes: 120 },
+      { label: 'Ignore it', mods: { welfare: -8 }, minutes: 60 },
+    ],
+  },
+  {
+    id: 'heat', icon: 'fusion', title: 'Heatwave strains the grid',
+    situation: 'Record temperatures push electricity demand to its limit.',
+    real: 'Heatwaves raise electricity demand for cooling. Smart grids can ask devices to use less power at peak times, which is called demand response.',
+    choices: [
+      { label: 'Use smart demand response', cost: 10, mods: { income: 1.05 }, minutes: 120 },
+      { label: 'Schedule rolling blackouts', mods: { income: 0.8, welfare: -5 }, minutes: 20 },
+      { label: 'Import power from neighbors', cost: 20, minutes: 0 },
+    ],
+  },
+  {
+    id: 'boom', icon: 'pay', title: 'Payments boom',
+    situation: 'A new instant payment app is spreading fast, and banks want it slowed down.',
+    real: 'India\'s Unified Payments Interface (UPI), launched in 2016, grew to billions of payments a month within a few years and is now used by shops of every size.',
+    choices: [
+      { label: 'Let it grow with light regulation', mods: { income: 1.2, defense: -0.05 }, minutes: 60 },
+      { label: 'License it with strict security rules', mods: { income: 1.1, defense: 0.05 }, minutes: 60 },
+      { label: 'Protect the banks and block it', mods: { income: 0.9 }, minutes: 30 },
+    ],
+  },
+];
