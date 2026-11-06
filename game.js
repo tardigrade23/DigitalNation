@@ -1036,6 +1036,8 @@ function initCloud() {
     if (!user) { cloud.ready = false; cloud.status = 'off'; cloud.walletReady = false; cloud.wallet = null; }
     // Supabase recommends not awaiting other calls inside this callback.
     if (user && changed) setTimeout(onSignedIn, 0);
+    // Signed in from the email link in another tab: close the waiting sheet here too.
+    if (user && !$('auth').hidden) closeAuth();
     renderAccount();
   });
 }
@@ -1250,11 +1252,11 @@ async function submitEmail() {
     if (error) throw error;
     cloud.email = email;
     showAuthStep('code');
-    $('authSentText').textContent = `We sent an email to ${email}. Enter the code from it, or tap the sign-in link in the email.`;
+    $('authSentText').textContent = `We sent an email to ${email}. Open it on this device and tap the sign-in link — this screen updates by itself. Can't find it? Check Spam.`;
   } catch (e) {
     authError(friendlyAuthError(e));
   }
-  btn.disabled = false; btn.textContent = 'Send sign-in code';
+  btn.disabled = false; btn.textContent = 'Email me a sign-in link';
 }
 
 let verifying = false;
