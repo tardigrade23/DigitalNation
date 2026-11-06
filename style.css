@@ -740,3 +740,18 @@ button.rank-pill { cursor: pointer; }
 .ti-body { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; }
 .chip-btn { cursor: pointer; font: inherit; }
 .chip-btn:active { transform: scale(.96); }
+
+/* Language picker */
+.lang-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 4px 0 12px; max-height: 55vh; overflow-y: auto; }
+.lang-list button { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 10px 12px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line); text-align: start; }
+.lang-list button b { font-size: 15px; }
+.lang-list button span { font-size: 12px; color: var(--muted); }
+.lang-list button.on { border-color: var(--cyan, #4CC9F0); box-shadow: 0 0 0 1px var(--cyan, #4CC9F0) inset; }
+[dir="rtl"] .ic use[href="#i-chevron"], [dir="rtl"] .ic use[href="#i-back"] { transform: scaleX(-1); transform-origin: center; transform-box: fill-box; }
+
+/* Long translations: keep tab labels on one line */
+.tabbar button span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tabbar button { min-width: 0; }
+/* Right-to-left languages: keep amounts like "+$1.2K/s" readable */
+[dir="rtl"] .ips-pill, [dir="rtl"] .buy small, [dir="rtl"] .gem-pill, [dir="rtl"] .rank-pill, [dir="rtl"] .kv b, [dir="rtl"] .lb-score { direction: ltr; unicode-bidi: isolate; }
+[dir="rtl"] .row-sub > span, [dir="rtl"] .chip, [dir="rtl"] .goal-text, [dir="rtl"] .muted.small { unicode-bidi: plaintext; }

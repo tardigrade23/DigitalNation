@@ -5,7 +5,7 @@
  * - Google Fonts: cache-first.
  * Bump CACHE_VERSION when the list of precached files changes.
  */
-const CACHE_VERSION = 'dn-v8';
+const CACHE_VERSION = 'dn-v10';
 const APP_CACHE = `${CACHE_VERSION}-app`;
 const FONT_CACHE = 'dn-fonts';
 
@@ -14,6 +14,7 @@ const PRECACHE = [
   'index.html',
   'style.css',
   'game.js',
+  'i18n.js',
   'manifest.webmanifest',
   'icons/favicon.svg',
   'icons/icon-192.png',

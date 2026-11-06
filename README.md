@@ -186,13 +186,27 @@ The active bot reaches #4 in the world ranking after 60 days. Before this pass, 
 - tap multipliers no longer scale with income;
 - Influence grows logarithmically and gives +5% per point.
 
+## Languages
+
+The game is available in 12 languages: English, Azerbaijani, Turkish, Russian, Spanish, Portuguese, French, German, Arabic (right to left), Hindi, Indonesian and Chinese. Everything is translated, including the encyclopedia, quizzes and national events. The legal pages (`privacy.html`, `terms.html`) stay in English.
+
+- On first launch the game picks the browser's language when it is supported, otherwise English. Players change it in Profile → ⚙ Settings → Language; the page reloads in the new language and progress is kept.
+- `i18n.js` holds the runtime. English text is the key: code calls `t('Defense upgraded to level {n}', { n })`, and static text in `index.html` is translated when the page starts. `Text|context` keys (for example `Upgrades|tab`) give the same English word a different, shorter translation.
+- Translations live in `i18n/<code>.json` (English → translation). The game loads the generated `lang/<code>.js` for the chosen language only.
+- After changing any English text, run:
+  - `node tools/i18n.mjs extract` to collect all strings into `i18n/en.json` (needs Playwright, as for the tests);
+  - `node tools/i18n.mjs check` to list missing translations and broken `{placeholders}` per language;
+  - `node tools/i18n.mjs build` to regenerate `lang/*.js`.
+
 ## Files
 
 - `index.html`: app shell, the SVG icon sprite, and the screens
 - `content.js`: Tech Encyclopedia cards and quizzes
 - `style.css`: visual design, built phone-first and safe-area aware
 - `game.js`: game logic, rendering, the canvas skyline, and cloud sync. The balance constants are at the top (`SECTORS`, `COST_GROWTH`, `PRESTIGE_DIVISOR` and others)
-- `tools/build_single_file.py`: bundles the three files into one HTML page. PWA tags are left out
+- `i18n.js`, `i18n/*.json`, `lang/*.js`: translations (see Languages)
+- `tools/i18n.mjs`: extracts, checks and builds translations
+- `tools/build_single_file.py`: bundles everything, all languages included, into one HTML page. PWA tags are left out
 
 ## Next steps
 

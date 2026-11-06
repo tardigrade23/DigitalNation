@@ -21,6 +21,9 @@ keep = [m.group(0) for m in re.finditer(r'<title>.*?</title>|<meta name="(?:clau
 body = re.search(r'<body>(.*)</body>', html, re.S).group(1)
 # The artifact host blocks requests to Supabase, so accounts are left out of the single-file build.
 body = body.replace('<script src="vendor/supabase.js"></script>\n', '')
+i18n = (root / 'i18n.js').read_text(encoding='utf-8')
+langs = ''.join((f.read_text(encoding='utf-8') + '\n') for f in sorted((root / 'lang').glob('*.js')))
+body = body.replace('<script src="i18n.js"></script>', '<script>\nwindow.DN_LANGS_INLINE = true;\n' + i18n + '\n' + langs + '</script>')
 body = body.replace('<script src="content.js"></script>', '<script>\n' + content + '\n</script>')
 # Image paths stay relative; publish images/library/* next to the page to show them.
 body = body.replace('<script src="images/library/credits.js"></script>', '<script>\n' + credits + '\n</script>')

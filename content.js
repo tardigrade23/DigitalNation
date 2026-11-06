@@ -551,3 +551,16 @@ const NATIONAL_EVENTS = [
     ],
   },
 ];
+
+// Translate the cards and events once, before the game reads them (see i18n.js).
+(function translateContent() {
+  if (typeof I18N !== 'object' || I18N.lang === 'en') return;
+  for (const e of Object.values(LIBRARY)) {
+    for (const k of ['what', 'real', 'fact', 'q']) if (e[k]) e[k] = t(e[k]);
+    e.a = e.a.map(x => t(x));
+  }
+  for (const ev of NATIONAL_EVENTS) {
+    for (const k of ['title', 'situation', 'real']) ev[k] = t(ev[k]);
+    for (const c of ev.choices) c.label = t(c.label);
+  }
+})();

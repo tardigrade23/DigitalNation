@@ -27,8 +27,8 @@ jobs:
       - name: Collect site files
         run: |
           mkdir _site
-          cp index.html privacy.html terms.html style.css content.js game.js sw.js manifest.webmanifest _site/
-          cp -r icons vendor images _site/
+          cp index.html privacy.html terms.html style.css content.js game.js i18n.js sw.js manifest.webmanifest _site/
+          cp -r icons vendor images lang _site/
 
       - uses: actions/configure-pages@v5
 

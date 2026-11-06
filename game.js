@@ -28,71 +28,71 @@ const SAVE_VERSION = 2; // 2: 24 sectors, 42 research, 7 eras, encyclopedia
 // era: the era in which the sector becomes available (see ERAS).
 const SECTORS = [
   // Era I · Connected
-  { id: 'isp',      era: 0, name: 'Internet Provider',    base: 15,     inc: 0.5,   c1: '#5AB8FF', c2: '#2563C9' },
-  { id: 'egov',     era: 0, name: 'E-Government',         base: 120,    inc: 2.8,     c1: '#7FD1C7', c2: '#1F8A7E' },
-  { id: 'mbank',    era: 0, name: 'Mobile Banking',       base: 960,   inc: 15,    c1: '#FFB86B', c2: '#D9681C' },
-  { id: 'fiber',    era: 0, name: 'Fiber Backbone',       base: 7700,   inc: 83,    c1: '#9BE7FF', c2: '#1B8DB8' },
-  { id: 'fintech',  era: 0, name: 'Fintech Hub',          base: 61000,   inc: 460,   c1: '#6EE29C', c2: '#1E9A5A' },
-  { id: 'dc',       era: 0, name: 'Data Center',          base: 4.9e5,  inc: 2500,   c1: '#8FA3FF', c2: '#3B4FCF' },
+  { id: 'isp',      era: 0, name: t('Internet Provider'),    base: 15,     inc: 0.5,   c1: '#5AB8FF', c2: '#2563C9' },
+  { id: 'egov',     era: 0, name: t('E-Government'),         base: 120,    inc: 2.8,     c1: '#7FD1C7', c2: '#1F8A7E' },
+  { id: 'mbank',    era: 0, name: t('Mobile Banking'),       base: 960,   inc: 15,    c1: '#FFB86B', c2: '#D9681C' },
+  { id: 'fiber',    era: 0, name: t('Fiber Backbone'),       base: 7700,   inc: 83,    c1: '#9BE7FF', c2: '#1B8DB8' },
+  { id: 'fintech',  era: 0, name: t('Fintech Hub'),          base: 61000,   inc: 460,   c1: '#6EE29C', c2: '#1E9A5A' },
+  { id: 'dc',       era: 0, name: t('Data Center'),          base: 4.9e5,  inc: 2500,   c1: '#8FA3FF', c2: '#3B4FCF' },
   // Era II · Information
-  { id: 'digid',    era: 1, name: 'Digital ID',           base: 3.9e6,    inc: 14000,  c1: '#FFD27A', c2: '#B9770E' },
-  { id: 'g5',       era: 1, name: '5G Network',           base: 3.1e7,  inc: 76000,  c1: '#FF8FAB', c2: '#C23A63' },
-  { id: 'opendata', era: 1, name: 'Open Data Portal',     base: 2.5e8,    inc: 4.2e5,  c1: '#A7F3D0', c2: '#0F8F6B' },
+  { id: 'digid',    era: 1, name: t('Digital ID'),           base: 3.9e6,    inc: 14000,  c1: '#FFD27A', c2: '#B9770E' },
+  { id: 'g5',       era: 1, name: t('5G Network'),           base: 3.1e7,  inc: 76000,  c1: '#FF8FAB', c2: '#C23A63' },
+  { id: 'opendata', era: 1, name: t('Open Data Portal'),     base: 2.5e8,    inc: 4.2e5,  c1: '#A7F3D0', c2: '#0F8F6B' },
   // Era III · Platform
-  { id: 'cloud',    era: 2, name: 'Cloud Platform',       base: 2e9,  inc: 2.3e6,  c1: '#BAE6FD', c2: '#3A7BD5' },
-  { id: 'pay',      era: 2, name: 'Instant Payments',     base: 1.6e10,    inc: 1.3e7,  c1: '#FDE68A', c2: '#D97706' },
-  { id: 'ehealth',  era: 2, name: 'E-Health',             base: 1.3e11,  inc: 7e7,  c1: '#FFA8B8', c2: '#D23B5E' },
+  { id: 'cloud',    era: 2, name: t('Cloud Platform'),       base: 2e9,  inc: 2.3e6,  c1: '#BAE6FD', c2: '#3A7BD5' },
+  { id: 'pay',      era: 2, name: t('Instant Payments'),     base: 1.6e10,    inc: 1.3e7,  c1: '#FDE68A', c2: '#D97706' },
+  { id: 'ehealth',  era: 2, name: t('E-Health'),             base: 1.3e11,  inc: 7e7,  c1: '#FFA8B8', c2: '#D23B5E' },
   // Era IV · Smart
-  { id: 'iot',      era: 3, name: 'IoT Network',          base: 1e12,  inc: 3.8e8,   c1: '#99F6E4', c2: '#0E9384' },
-  { id: 'smart',    era: 3, name: 'Smart City',           base: 8.2e12,    inc: 2.1e9, c1: '#F7C75B', c2: '#C7800F' },
-  { id: 'edu',      era: 3, name: 'E-Education',          base: 6.6e13,  inc: 1.2e10,   c1: '#C4B5FD', c2: '#6D4AD6' },
+  { id: 'iot',      era: 3, name: t('IoT Network'),          base: 1e12,  inc: 3.8e8,   c1: '#99F6E4', c2: '#0E9384' },
+  { id: 'smart',    era: 3, name: t('Smart City'),           base: 8.2e12,    inc: 2.1e9, c1: '#F7C75B', c2: '#C7800F' },
+  { id: 'edu',      era: 3, name: t('E-Education'),          base: 6.6e13,  inc: 1.2e10,   c1: '#C4B5FD', c2: '#6D4AD6' },
   // Era V · AI
-  { id: 'ai',       era: 4, name: 'AI Lab',               base: 5.3e14,    inc: 6.4e10, c1: '#C29BFF', c2: '#6A3FD6' },
-  { id: 'robotics', era: 4, name: 'Robotics',             base: 4.2e15,   inc: 3.5e11, c1: '#CBD5E1', c2: '#566683' },
-  { id: 'auto',     era: 4, name: 'Autonomous Transport', base: 3.4e16,   inc: 1.9e12, c1: '#93C5FD', c2: '#2457C5' },
+  { id: 'ai',       era: 4, name: t('AI Lab'),               base: 5.3e14,    inc: 6.4e10, c1: '#C29BFF', c2: '#6A3FD6' },
+  { id: 'robotics', era: 4, name: t('Robotics'),             base: 4.2e15,   inc: 3.5e11, c1: '#CBD5E1', c2: '#566683' },
+  { id: 'auto',     era: 4, name: t('Autonomous Transport'), base: 3.4e16,   inc: 1.9e12, c1: '#93C5FD', c2: '#2457C5' },
   // Era VI · Quantum
-  { id: 'chip',     era: 5, name: 'Semiconductor Fab',    base: 2.7e17, inc: 1.1e13, c1: '#FCD34D', c2: '#8A6A12' },
-  { id: 'quantum',  era: 5, name: 'Quantum Computing',    base: 2.2e18, inc: 5.8e13, c1: '#5EF0E0', c2: '#138A9C' },
-  { id: 'biotech',  era: 5, name: 'Biotech Lab',          base: 1.7e19, inc: 3.2e14, c1: '#86EFAC', c2: '#1F8A4C' },
+  { id: 'chip',     era: 5, name: t('Semiconductor Fab'),    base: 2.7e17, inc: 1.1e13, c1: '#FCD34D', c2: '#8A6A12' },
+  { id: 'quantum',  era: 5, name: t('Quantum Computing'),    base: 2.2e18, inc: 5.8e13, c1: '#5EF0E0', c2: '#138A9C' },
+  { id: 'biotech',  era: 5, name: t('Biotech Lab'),          base: 1.7e19, inc: 3.2e14, c1: '#86EFAC', c2: '#1F8A4C' },
   // Era VII · Space
-  { id: 'space',    era: 6, name: 'Satellite Internet',   base: 1.4e20,   inc: 1.8e15, c1: '#B5C3D9', c2: '#4A5A75' },
-  { id: 'fusion',   era: 6, name: 'Fusion Power',         base: 1.1e21, inc: 9.7e15,   c1: '#FDBA74', c2: '#C2410C' },
-  { id: 'agency',   era: 6, name: 'Space Agency',         base: 8.9e21,   inc: 5.3e16,   c1: '#A5B4FC', c2: '#3730A3' },
+  { id: 'space',    era: 6, name: t('Satellite Internet'),   base: 1.4e20,   inc: 1.8e15, c1: '#B5C3D9', c2: '#4A5A75' },
+  { id: 'fusion',   era: 6, name: t('Fusion Power'),         base: 1.1e21, inc: 9.7e15,   c1: '#FDBA74', c2: '#C2410C' },
+  { id: 'agency',   era: 6, name: t('Space Agency'),         base: 8.9e21,   inc: 5.3e16,   c1: '#A5B4FC', c2: '#3730A3' },
 ];
 
 const UPGRADES = [];
 (function buildUpgrades() {
   const tiers = [
-    { req: 25,  costMul: 200, mult: 2, label: 'Optimization' },
-    { req: 75,  costMul: 2e4, mult: 2, label: 'Automation' },
-    { req: 150, costMul: 2e6, mult: 3, label: 'AI Integration' },
+    { req: 25,  costMul: 200, mult: 2, label: t('Optimization') },
+    { req: 75,  costMul: 2e4, mult: 2, label: t('Automation') },
+    { req: 150, costMul: 2e6, mult: 3, label: t('AI Integration') },
   ];
   for (const s of SECTORS) {
-    tiers.forEach((t, i) => UPGRADES.push({
-      id: `${s.id}_${i}`, kind: 'sector', sector: s.id, mult: t.mult,
-      icon: s.id, c1: s.c1, c2: s.c2, tag: 'Sector',
-      name: `${s.name} ${t.label}`,
-      desc: `${s.name} income ×${t.mult}`,
-      cost: s.base * t.costMul,
-      unlocked: () => owned(s.id) >= t.req,
+    tiers.forEach((tier, i) => UPGRADES.push({
+      id: `${s.id}_${i}`, kind: 'sector', sector: s.id, mult: tier.mult,
+      icon: s.id, c1: s.c1, c2: s.c2, tag: t('Sector'),
+      name: t('{sector} {tier}', { sector: s.name, tier: tier.label }),
+      desc: t('{sector} income ×{n}', { sector: s.name, n: tier.mult }),
+      cost: s.base * tier.costMul,
+      unlocked: () => owned(s.id) >= tier.req,
     }));
   }
   const ai = [
-    ['AI Assistant',                 1.5, 1e6,  1e5],
-    ['Government AI',                2,   1e10, 1e9],
-    ['Neural Cloud',                 2,   1e14, 1e13],
-    ['National Language Model',      3,   1e18, 1e17],
-    ['Artificial General Intelligence', 5, 1e22, 1e21],
+    [t('AI Assistant'),                 1.5, 1e6,  1e5],
+    [t('Government AI'),                2,   1e10, 1e9],
+    [t('Neural Cloud'),                 2,   1e14, 1e13],
+    [t('National Language Model'),      3,   1e18, 1e17],
+    [t('Artificial General Intelligence'), 5, 1e22, 1e21],
   ];
   ai.forEach(([name, mult, cost, need], i) => UPGRADES.push({
-    id: `ai_${i}`, kind: 'global', mult, cost, name, icon: 'ai', c1: '#C29BFF', c2: '#6A3FD6', tag: 'AI',
-    desc: `All income ×${mult}`,
+    id: `ai_${i}`, kind: 'global', mult, cost, name, icon: 'ai', c1: '#C29BFF', c2: '#6A3FD6', tag: t('AI'),
+    desc: t('All income ×{n}', { n: mult }),
     unlocked: () => state.runEarned >= need,
   }));
   UPGRADES.push(
-    { id: 'click_0', kind: 'click', mult: 3,  cost: 200, name: 'Online Tax System',        desc: 'Tap power ×3',  icon: 'coin', c1: '#F7C75B', c2: '#C7800F', tag: 'Tax', unlocked: () => state.clicks >= 10 },
-    { id: 'click_1', kind: 'click', mult: 5,  cost: 2e5, name: 'Blockchain Tax Registry',  desc: 'Tap power ×5',  icon: 'coin', c1: '#F7C75B', c2: '#C7800F', tag: 'Tax', unlocked: () => state.runEarned >= 5e4 },
-    { id: 'click_2', kind: 'click', mult: 10, cost: 2e9, name: 'Digital Citizen ID',       desc: 'Tap power ×10', icon: 'coin', c1: '#F7C75B', c2: '#C7800F', tag: 'Tax', unlocked: () => state.runEarned >= 5e8 },
+    { id: 'click_0', kind: 'click', mult: 3,  cost: 200, name: t('Online Tax System'),        desc: t('Tap power ×{n}', { n: 3 }),  icon: 'coin', c1: '#F7C75B', c2: '#C7800F', tag: t('Tax'), unlocked: () => state.clicks >= 10 },
+    { id: 'click_1', kind: 'click', mult: 5,  cost: 2e5, name: t('Blockchain Tax Registry'),  desc: t('Tap power ×{n}', { n: 5 }),  icon: 'coin', c1: '#F7C75B', c2: '#C7800F', tag: t('Tax'), unlocked: () => state.runEarned >= 5e4 },
+    { id: 'click_2', kind: 'click', mult: 10, cost: 2e9, name: t('Digital Citizen ID'),       desc: t('Tap power ×{n}', { n: 10 }), icon: 'coin', c1: '#F7C75B', c2: '#C7800F', tag: t('Tax'), unlocked: () => state.runEarned >= 5e8 },
   );
   UPGRADES.sort((a, b) => a.cost - b.cost);
 })();
@@ -209,9 +209,9 @@ function buySector(id) {
   discover(id);
   Sound.play('buy'); buzz(12);
   if (before === 0) track('sector_first', { id, min: minutesPlayed() });
-  if (before === 0) toast(`${s.name} is online · new encyclopedia entry`, s.id, s);
+  if (before === 0) toast(t('{name} is online · new encyclopedia entry', { name: s.name }), s.id, s);
   const hit = MILESTONES.filter(m => before < m && before + n >= m).pop();
-  if (hit) toast(`${s.name} reached ${hit}: income ×2`, s.id, s);
+  if (hit) toast(t('{name} reached {n}: income ×2', { name: s.name, n: hit }), s.id, s);
 }
 
 function buyUpgrade(id) {
@@ -235,7 +235,7 @@ function buySecurity() {
   state.gdp -= secCost();
   state.secLevel++;
   Sound.play('upgrade'); buzz([12, 40, 12]);
-  toast(`Defense upgraded to level ${state.secLevel}`, 'shield-check', 'green');
+  toast(t('Defense upgraded to level {n}', { n: state.secLevel }), 'shield-check', 'green');
 }
 
 function scheduleAttack(now) { state.nextAttack = now + (90 + Math.random() * 60) * 1000; }
@@ -249,7 +249,7 @@ function repelAttack() {
   scheduleAttack(Date.now());
   track('attack', { result: 'defended' });
   Sound.play('defend'); buzz(20);
-  toast(`Attack stopped. Reward: ${money(reward)}`, 'shield-check', 'green');
+  toast(t('Attack stopped. Reward: {amount}', { amount: money(reward) }), 'shield-check', 'green');
 }
 
 function resolveAttack(now) {
@@ -260,7 +260,7 @@ function resolveAttack(now) {
     track('attack', { result: 'auto_blocked', tried });
     state.attacksRepelled++;
     Sound.play('defend');
-    toast('Auto-defense blocked the attack', 'shield-check', 'green');
+    toast(t('Auto-defense blocked the attack'), 'shield-check', 'green');
   } else {
     const stolen = state.gdp * 0.1 * mods().breach;
     state.gdp -= stolen;
@@ -268,7 +268,7 @@ function resolveAttack(now) {
     state.attacksLost++;
     track('attack', { result: 'breach', tried });
     Sound.play('breach'); buzz(300);
-    toast(`Breach! Hackers stole ${money(stolen)}`, 'alert', 'bad');
+    toast(t('Breach! Hackers stole {amount}', { amount: money(stolen) }), 'alert', 'bad');
   }
   scheduleAttack(now);
 }
@@ -291,7 +291,7 @@ function activateBoost() {
   state.boostUntil = now + BOOST_DURATION;
   state.boostReadyAt = now + BOOST_COOLDOWN;
   Sound.play('buy');
-  toast('2× income for 2 minutes', 'bolt', 'gold');
+  toast(t('2× income for 2 minutes'), 'bolt', 'gold');
 }
 
 /* ---------------- Prestige: technology export ---------------- */
@@ -301,9 +301,9 @@ function claimableInfluence() { return state.runEarned < PRESTIGE_DIVISOR ? 0 : 
 function doPrestige() {
   const gain = claimableInfluence();
   if (gain < 1) return;
-  showModal('Export technology?',
-    `You will gain ${gain} Influence.\nGDP, sectors, upgrades and defense will reset.`,
-    { icon: 'globe', tone: 'violet', okText: 'Export', onOk: performPrestige });
+  showModal(t('Export technology?'),
+    t('You will gain {n} Influence.\nGDP, sectors, upgrades and defense will reset.', { n: gain }),
+    { icon: 'globe', tone: 'violet', okText: t('Export'), onOk: performPrestige });
 }
 
 function performPrestige() {
@@ -326,7 +326,7 @@ function performPrestige() {
   sectorSig = ''; upgSig = '';
   saveGame();
   Sound.play('reward');
-  showModal('Technology exported', `+${gain} Influence. All income is now +${Math.round(state.influence * INFLUENCE_BONUS * 100)}%.`, { icon: 'globe', tone: 'violet' });
+  showModal(t('Technology exported'), t('+{n} Influence. All income is now +{pct}%.', { n: gain, pct: Math.round(state.influence * INFLUENCE_BONUS * 100) }), { icon: 'globe', tone: 'violet' });
 }
 
 /* ---------------- Rank ---------------- */
@@ -335,12 +335,12 @@ function performPrestige() {
 const TECH_INDEX_TOP = 720; // score needed for #1
 function techIndex() {
   const parts = [
-    { label: 'Economy', detail: `${money(state.lifeEarned)} lifetime GDP`, pts: 10 * Math.log10(Math.max(1, state.lifeEarned)), max: 200 },
-    { label: 'Research', detail: `${researchCount()} of ${RESEARCH.length} projects`, pts: 5 * researchCount(), max: 5 * RESEARCH.length },
-    { label: 'Era', detail: ERAS[currentEra()].name, pts: 25 * currentEra(), max: 25 * (ERAS.length - 1) },
-    { label: 'Welfare', detail: `${Math.round(welfare())}%`, pts: 0.4 * welfare(), max: 40 },
-    { label: 'Security', detail: `Defense level ${state.secLevel}`, pts: 4 * state.secLevel, max: 4 * SEC_MAX },
-    { label: 'Influence', detail: `${state.influence} points`, pts: 25 * Math.log10(1 + state.influence), max: 100 },
+    { label: t('Economy'), detail: t('{amount} lifetime GDP', { amount: money(state.lifeEarned) }), pts: 10 * Math.log10(Math.max(1, state.lifeEarned)), max: 200 },
+    { label: t('Research'), detail: t('{n} of {total} projects', { n: researchCount(), total: RESEARCH.length }), pts: 5 * researchCount(), max: 5 * RESEARCH.length },
+    { label: t('Era'), detail: ERAS[currentEra()].name, pts: 25 * currentEra(), max: 25 * (ERAS.length - 1) },
+    { label: t('Welfare'), detail: `${Math.round(welfare())}%`, pts: 0.4 * welfare(), max: 40 },
+    { label: t('Security'), detail: t('Defense level {n}', { n: state.secLevel }), pts: 4 * state.secLevel, max: 4 * SEC_MAX },
+    { label: t('Influence'), detail: t('{n} points', { n: state.influence }), pts: 25 * Math.log10(1 + state.influence), max: 100 },
   ];
   parts.forEach(p => { p.pts = Math.min(p.max, p.pts); });
   return { parts, score: parts.reduce((a, p) => a + p.pts, 0) };
@@ -352,32 +352,32 @@ function techRank() {
 function showTechIndex() {
   const { parts, score } = techIndex();
   const lines = parts.map(p => `${p.label}: ${Math.round(p.pts)} / ${p.max} · ${p.detail}`).join('\n');
-  showModal(`Tech Index ${Math.round(score)} · #${techRank()}`, `The world ranking looks at your whole nation:\n\n${lines}\n\n${Math.round(TECH_INDEX_TOP)} points takes you to #1.`, { icon: 'trophy', tone: 'gold' });
+  showModal(t('Tech Index {score} · #{rank}', { score: Math.round(score), rank: techRank() }), t('The world ranking looks at your whole nation:\n\n{lines}\n\n{top} points takes you to #1.', { lines, top: Math.round(TECH_INDEX_TOP) }), { icon: 'trophy', tone: 'gold' });
 }
 
 function rankTitle(r) {
-  if (r === 1) return "World's most advanced digital nation";
-  if (r <= 10) return 'Digital superpower';
-  if (r <= 40) return 'Global tech leader';
-  if (r <= 90) return 'Regional tech hub';
-  if (r <= 150) return 'Digitizing state';
-  return 'Analog state';
+  if (r === 1) return t("World's most advanced digital nation");
+  if (r <= 10) return t('Digital superpower');
+  if (r <= 40) return t('Global tech leader');
+  if (r <= 90) return t('Regional tech hub');
+  if (r <= 150) return t('Digitizing state');
+  return t('Analog state');
 }
 
 function nextGoal() {
   for (const s of SECTORS) {
     if (owned(s.id)) continue;
     if (!eraAllows(s)) break;
-    return { text: `Unlock ${s.name}`, cost: s.base * mods().cost };
+    return { text: t('Unlock {name}', { name: s.name }), cost: s.base * mods().cost };
   }
   let best = null;
   for (const s of SECTORS) {
     const m = MILESTONES.find(x => owned(s.id) < x);
     if (!m) continue;
     const cost = costFor(s, m - owned(s.id));
-    if (!best || cost < best.cost) best = { text: `${m} ${s.name} for ×2 income`, cost };
+    if (!best || cost < best.cost) best = { text: t('{n} {name} for ×2 income', { n: m, name: s.name }), cost };
   }
-  return best || { text: 'Every milestone reached', cost: 0 };
+  return best || { text: t('Every milestone reached'), cost: 0 };
 }
 
 /* ---------------- Formatting ---------------- */
@@ -395,10 +395,10 @@ function money(n) { return '$' + fmt(n); }
 function dur(ms) {
   const s = Math.max(0, Math.ceil(ms / 1000));
   const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
-  if (h >= 48) return `${Math.floor(h / 24)}d ${h % 24}h`;
-  if (h) return `${h}h ${m}m`;
-  if (m) return `${m}m ${sec}s`;
-  return `${sec}s`;
+  if (h >= 48) return t('{d}d {h}h', { d: Math.floor(h / 24), h: h % 24 });
+  if (h) return t('{h}h {m}m', { h, m });
+  if (m) return t('{m}m {s}s', { m, s: sec });
+  return t('{s}s', { s: sec });
 }
 
 /* ---------------- Save / load ---------------- */
@@ -453,7 +453,7 @@ function applyOffline() {
   const gain = incomePerSec(false) * elapsed * (isVip() ? 1 : OFFLINE_EFFICIENCY + mods().offline);
   if (gain <= 0) return;
   earn(gain);
-  showModal('Welcome back', `Your nation earned ${money(gain)} while you were away for ${dur(elapsed * 1000)}.`, { icon: 'moon', tone: 'cyan' });
+  showModal(t('Welcome back'), t('Your nation earned {amount} while you were away for {time}.', { amount: money(gain), time: dur(elapsed * 1000) }), { icon: 'moon', tone: 'cyan' });
 }
 
 /* ---------------- UI helpers ---------------- */
@@ -488,8 +488,8 @@ function showModal(title, text, opts = {}) {
   input.hidden = opts.input === undefined;
   if (!input.hidden) input.value = opts.input;
   $('modalCancel').hidden = !opts.onOk;
-  $('modalCancel').textContent = opts.cancelText || 'Cancel';
-  $('modalOk').textContent = opts.okText || 'Continue';
+  $('modalCancel').textContent = opts.cancelText || t('Cancel');
+  $('modalOk').textContent = opts.okText || t('Continue');
   modalOnOk = opts.onOk || null;
   modalOnCancel = opts.onCancel || null;
   $('modal').hidden = false;
@@ -673,8 +673,8 @@ function buildSectors() {
     if (!isUnlocked(i)) {
       return `<div class="row locked">${tile('lock', null, 'tile-locked')}
         <div class="row-title"><span class="nm">${s.name}</span></div>
-        <button class="buy" disabled>Locked<small>${money(s.base)}</small></button>
-        <div class="row-sub">${eraAllows(s) ? `Build one ${SECTORS[i - 1].name} to unlock` : `Arrives in the ${ERAS[s.era].name} (Era ${ROMAN[s.era]})`}</div></div>`;
+        <button class="buy" disabled>${t('Locked')}<small>${money(s.base)}</small></button>
+        <div class="row-sub">${eraAllows(s) ? t('Build one {name} to unlock', { name: SECTORS[i - 1].name }) : t('Arrives in the {era} (Era {n})', { era: ERAS[s.era].name, n: ROMAN[s.era] })}</div></div>`;
     }
     return `<div class="row" data-id="${s.id}">
       ${tile(s.id, s)}
@@ -694,11 +694,11 @@ function renderSectors() {
     const cost = costFor(s, count);
     const f = k => row.querySelector(`[data-f="${k}"]`);
     f('owned').textContent = n;
-    f('label').textContent = `Build ×${count}`;
+    f('label').textContent = t('Build ×{n}', { n: count });
     f('cost').textContent = money(cost);
     const next = MILESTONES.find(m => n < m);
     const prev = [...MILESTONES].reverse().find(m => n >= m) || 0;
-    f('meta').textContent = `${money(sectorIncome(s))}/s` + (next ? ` · ×2 at ${next}` : ' · maxed');
+    f('meta').textContent = `${money(sectorIncome(s))}/s · ` + (next ? t('×2 at {n}', { n: next }) : t('maxed'));
     f('prog').style.width = next ? `${((n - prev) / (next - prev)) * 100}%` : '100%';
     const btn = row.querySelector('.buy');
     const can = state.gdp >= cost;
@@ -720,10 +720,10 @@ function renderUpgrades(list) {
     return `<div class="row">
       ${tile(u.icon, u)}
       <div class="row-title"><span class="nm">${u.name}</span></div>
-      <button class="buy ${can ? 'can' : ''}" data-upg="${u.id}" ${can ? '' : 'disabled'}>Buy<small>${money(u.cost)}</small></button>
+      <button class="buy ${can ? 'can' : ''}" data-upg="${u.id}" ${can ? '' : 'disabled'}>${t('Buy')}<small>${money(u.cost)}</small></button>
       <div class="row-sub"><span><span class="kind">${u.tag}</span> · ${u.desc}</span></div>
     </div>`;
-  }).join('') : `<div class="empty">${icon('up')}<span>No upgrades yet. Grow your sectors to unlock more.</span></div>`;
+  }).join('') : `<div class="empty">${icon('up')}<span>${t('No upgrades yet. Grow your sectors to unlock more.')}</span></div>`;
 }
 
 function renderSecurity(now) {
@@ -731,12 +731,12 @@ function renderSecurity(now) {
   $('secChance').textContent = `${Math.round(secChance() * 100)}%`;
   $('secBar').style.width = `${secChance() * 100}%`;
   $('secLevel').textContent = `${state.secLevel} / ${SEC_MAX}`;
-  $('nextAttack').textContent = state.attack ? 'Now!' : (incomePerSec(false) < 5 ? 'Not a target yet' : `in ${dur(state.nextAttack - now)}`);
+  $('nextAttack').textContent = state.attack ? t('Now!') : (incomePerSec(false) < 5 ? t('Not a target yet') : t('in {time}', { time: dur(state.nextAttack - now) }));
   $('attacksWon').textContent = state.attacksRepelled;
   $('attacksLost').textContent = state.attacksLost;
   const sb = $('buySec');
-  if (state.secLevel >= SEC_MAX) { sb.textContent = 'Maximum defense'; sb.disabled = true; }
-  else { sb.textContent = `Upgrade defense · ${money(secCost())}`; sb.disabled = state.gdp < secCost(); }
+  if (state.secLevel >= SEC_MAX) { sb.textContent = t('Maximum defense'); sb.disabled = true; }
+  else { sb.textContent = t('Upgrade defense · {amount}', { amount: money(secCost()) }); sb.disabled = state.gdp < secCost(); }
 }
 
 function renderGlobal(now) {
@@ -755,18 +755,18 @@ function renderGlobal(now) {
 
 function renderStats(now) {
   const rows = [
-    ['Lifetime GDP', money(state.lifeEarned)],
-    ['Facilities built', totalOwned()],
-    ['Income multiplier', `×${fmt(globalMult(true))}`],
-    ['Taxes collected (taps)', state.clicks],
-    ['Technology exports', state.prestiges],
-    ['Research completed', `${researchCount()} / ${RESEARCH.length}`],
-    ['Current era', ERAS[currentEra()].name],
-    ['Cyber mini-games won', state.gamesWon],
-    ['Gems', fmt(state.gems)],
-    ['Tech Index', `${Math.round(techIndex().score)} / ${TECH_INDEX_TOP}`],
-    ['Encyclopedia', `${discoveredIds().length} / ${libEntries().length} · ${quizCorrect()} quizzes correct`],
-    ['Time played', dur(now - state.startedAt)],
+    [t('Lifetime GDP'), money(state.lifeEarned)],
+    [t('Facilities built'), totalOwned()],
+    [t('Income multiplier'), `×${fmt(globalMult(true))}`],
+    [t('Taxes collected (taps)'), state.clicks],
+    [t('Technology exports'), state.prestiges],
+    [t('Research completed'), `${researchCount()} / ${RESEARCH.length}`],
+    [t('Current era'), ERAS[currentEra()].name],
+    [t('Cyber mini-games won'), state.gamesWon],
+    [t('Gems'), fmt(state.gems)],
+    [t('Tech Index'), `${Math.round(techIndex().score)} / ${TECH_INDEX_TOP}`],
+    [t('Encyclopedia'), t('{found} / {total} · {n} quizzes correct', { found: discoveredIds().length, total: libEntries().length, n: quizCorrect() })],
+    [t('Time played'), dur(now - state.startedAt)],
   ];
   $('statsList').innerHTML = rows.map(([k, v]) => `<div class="kv"><span>${k}</span><b>${v}</b></div>`).join('');
 }
@@ -786,10 +786,10 @@ function render() {
 
   // effects + attack (visible on every screen)
   const fx = [];
-  if (now < state.boostUntil) fx.push(`<span class="chip good">${icon('bolt', 'ic-xs')}2× income · ${dur(state.boostUntil - now)}</span>`);
-  if (now < state.shieldUntil) fx.push(`<span class="chip good">${icon('shield-check', 'ic-xs')}Cyber Shield · ${dur(state.shieldUntil - now)}</span>`);
-  for (const e of state.eventEffects || []) if (e.until > now) fx.push(`<span class="chip ${e.good ? 'good' : 'bad'}">${icon(e.icon, 'ic-xs')}${esc(e.label)} · ${dur(e.until - now)}</span>`);
-  if (now < state.debuffUntil) fx.push(`<span class="chip bad">${icon('alert', 'ic-xs')}Breach −50% · ${dur(state.debuffUntil - now)}</span>`);
+  if (now < state.boostUntil) fx.push(`<span class="chip good">${icon('bolt', 'ic-xs')}${t('2× income')} · ${dur(state.boostUntil - now)}</span>`);
+  if (now < state.shieldUntil) fx.push(`<span class="chip good">${icon('shield-check', 'ic-xs')}${t('Cyber Shield')} · ${dur(state.shieldUntil - now)}</span>`);
+  for (const e of state.eventEffects || []) if (e.until > now) fx.push(`<span class="chip ${e.good ? 'good' : 'bad'}">${icon(e.icon, 'ic-xs')}${esc(t(e.label))} · ${dur(e.until - now)}</span>`);
+  if (now < state.debuffUntil) fx.push(`<span class="chip bad">${icon('alert', 'ic-xs')}${t('Breach −50%')} · ${dur(state.debuffUntil - now)}</span>`);
   $('effects').innerHTML = fx.join('');
   $('attack').hidden = !state.attack;
   if (state.attack) $('attackBar').style.width = `${Math.max(0, (state.attack.endsAt - now) / (state.attack.len || ATTACK_WINDOW)) * 100}%`;
@@ -811,32 +811,32 @@ function render() {
     $('pop').textContent = fmt(state.pop);
     $('welfare').textContent = `${Math.round(welfare())}%`;
     $('influence').textContent = state.influence;
-    $('defStat').textContent = `Lv ${state.secLevel}`;
-    $('tapValue').textContent = `+${money(clickValue())} per tap`;
-    $('buildingCount').textContent = `${totalOwned()} facilities`;
+    $('defStat').textContent = t('Lv {n}', { n: state.secLevel });
+    $('tapValue').textContent = t('+{amount} per tap', { amount: money(clickValue()) });
+    $('buildingCount').textContent = t('{n} facilities', { n: totalOwned() });
     $('eraChip').textContent = ERAS[currentEra()].name;
     const found = discoveredIds().length, waiting = pendingQuizzes().length;
-    $('libraryCardText').textContent = found ? `${found} of ${libEntries().length} discovered${waiting ? ` · ${waiting} quiz${waiting > 1 ? 'zes' : ''} waiting` : ''}` : 'Discover how digital nations work';
+    $('libraryCardText').textContent = found ? t('{n} of {total} discovered', { n: found, total: libEntries().length }) + (waiting ? ' · ' + (waiting > 1 ? t('{n} quizzes waiting', { n: waiting }) : t('1 quiz waiting')) : '') : t('Discover how digital nations work');
     $('libraryCardDot').hidden = !waiting;
     $('dailyCardDot').hidden = !daily.ready;
     const ms = missionSummary();
     $('missionsCardText').textContent = ms.text;
     $('missionsBar').style.width = `${ms.pct}%`;
     $('missionsDot').hidden = !ms.claimable;
-    $('dailyCardText').textContent = daily.ready ? `Day ${daily.day} reward is ready` : `Next reward in ${dur(msToMidnight())}`;
+    $('dailyCardText').textContent = daily.ready ? t('Day {n} reward is ready', { n: daily.day }) : t('Next reward in {time}', { time: dur(msToMidnight()) });
     const g = nextGoal();
     $('goalText').textContent = g.cost ? `${g.text} · ${money(g.cost)}` : g.text;
     $('goalBar').style.width = `${g.cost ? Math.min(100, (state.gdp / g.cost) * 100) : 100}%`;
     const boostBtn = $('boost');
     if (now < state.boostUntil) {
-      boostBtn.disabled = true; boostBtn.textContent = 'Active';
-      $('boostSub').textContent = `2× income for ${dur(state.boostUntil - now)}`;
+      boostBtn.disabled = true; boostBtn.textContent = t('Active');
+      $('boostSub').textContent = t('2× income for {time}', { time: dur(state.boostUntil - now) });
     } else if (now < state.boostReadyAt) {
       boostBtn.disabled = true; boostBtn.textContent = dur(state.boostReadyAt - now);
-      $('boostSub').textContent = 'Next boost is recharging';
+      $('boostSub').textContent = t('Next boost is recharging');
     } else {
-      boostBtn.disabled = false; boostBtn.textContent = isVip() ? 'Claim' : 'Watch';
-      $('boostSub').textContent = isVip() ? 'VIP: 2× income for 2 minutes, no ad' : 'Watch a short ad for 2× income (2 min)';
+      boostBtn.disabled = false; boostBtn.textContent = isVip() ? t('Claim') : t('Watch');
+      $('boostSub').textContent = isVip() ? t('VIP: 2× income for 2 minutes, no ad') : t('Watch a short ad for 2× income (2 min)');
     }
   } else if (screen === 'sectors') {
     renderSectors();
@@ -883,6 +883,7 @@ const TONE_COLORS = {
   neon: ['#FF4D9D', '#7C3AED'], platinum: ['#F1F5F9', '#8796AE'], royal: ['#FFD86B', '#6D28D9'],
 };
 const TONE_PRICES = { neon: 100, platinum: 150, royal: 200 };
+const TONE_NAMES = { neon: t('Neon'), platinum: t('Platinum'), royal: t('Royal') };
 // [top band, middle band, bottom band, emblem]
 const FLAGS = [
   ['#0F6E8C', '#F5B841', '#1B2839', '#F5B841'],
@@ -898,7 +899,7 @@ const FLAGS = [
   ['#FF4D9D', '#0C1420', '#22D3EE', '#22D3EE'],
 ];
 const FLAG_PRICES = { 6: 150, 7: 200, 8: 150, 9: 250 };
-const FLAG_NAMES = { 6: 'Aurora', 7: 'Royal Gold', 8: 'Sunset', 9: 'Neon' };
+const FLAG_NAMES = { 6: t('Aurora'), 7: t('Royal Gold'), 8: t('Sunset'), 9: t('Neon') };
 
 function flagSvg(i) {
   const [a, b, c, e] = FLAGS[i] || FLAGS[0];
@@ -914,25 +915,25 @@ function avatarTile(iconId, tone) {
 }
 
 const ACHIEVEMENTS = [
-  { id: 'first',   icon: 'isp',          name: 'First Steps',          desc: 'Build your first facility',      prog: () => [totalOwned(), 1] },
-  { id: 'isp25',   icon: 'isp',          name: 'Connected Nation',     desc: 'Own 25 Internet Providers',      prog: () => [owned('isp'), 25] },
-  { id: 'million', icon: 'coin',         name: 'Millionaire State',    desc: 'Earn $1M GDP in total',          prog: () => [state.lifeEarned, 1e6] },
-  { id: 'smart',   icon: 'smart',        name: 'Smart Citizens',       desc: 'Build a Smart City',             prog: () => [owned('smart'), 1] },
-  { id: 'cyber10', icon: 'shield-check', name: 'Cyber Guardian',       desc: 'Stop 10 cyber attacks',          prog: () => [state.attacksRepelled, 10] },
-  { id: 'billion', icon: 'coins',        name: 'Billion-Dollar Nation', desc: 'Earn $1B GDP in total',         prog: () => [state.lifeEarned, 1e9] },
-  { id: 'ai',      icon: 'ai',           name: 'AI Pioneer',           desc: 'Open an AI Lab',                 prog: () => [owned('ai'), 1] },
-  { id: 'export',  icon: 'globe',        name: 'Tech Exporter',        desc: 'Export technology once',         prog: () => [state.prestiges, 1] },
-  { id: 'top50',   icon: 'trophy',       name: 'Top 50',               desc: 'Reach #50 in the tech ranking',  prog: () => [196 - techRank(), 146] },
-  { id: 'orbit',   icon: 'space',        name: 'Orbit Reached',        desc: 'Launch Satellite Internet',      prog: () => [owned('space'), 1] },
-  { id: 'loyal',   icon: 'gift',         name: 'Loyal Leader',         desc: 'Claim 7 daily rewards in a row', prog: () => [state.daily.best, 7] },
-  { id: 'policy',  icon: 'egov',         name: 'Policy Maker',         desc: 'Change a national policy',       prog: () => [state.policyChanges, 1] },
-  { id: 'think',   icon: 'flask',        name: 'Think Tank',           desc: 'Complete 6 research projects',   prog: () => [researchCount(), 6] },
-  { id: 'hacker',  icon: 'bug',          name: 'Firewall Hero',        desc: 'Win the cyber mini-game 5 times', prog: () => [state.gamesWon, 5] },
-  { id: 'quantumEra', icon: 'quantum',   name: 'Quantum Leap',         desc: 'Reach the Quantum Era',          prog: () => [currentEra(), 5] },
-  { id: 'spaceAge', icon: 'rocket',      name: 'Space Age',            desc: 'Reach the Space Era',            prog: () => [currentEra(), 6] },
-  { id: 'curious', icon: 'book',         name: 'Curious Mind',         desc: 'Answer 10 quiz questions correctly', prog: () => [quizCorrect(), 10] },
-  { id: 'scholar', icon: 'book',         name: 'Scholar',              desc: 'Answer 40 quiz questions correctly', prog: () => [quizCorrect(), 40] },
-  { id: 'collector', icon: 'star',       name: 'Encyclopedist',        desc: 'Discover 50 encyclopedia entries', prog: () => [discoveredIds().length, 50] },
+  { id: 'first',   icon: 'isp',          name: t('First Steps'),          desc: t('Build your first facility'),      prog: () => [totalOwned(), 1] },
+  { id: 'isp25',   icon: 'isp',          name: t('Connected Nation'),     desc: t('Own 25 Internet Providers'),      prog: () => [owned('isp'), 25] },
+  { id: 'million', icon: 'coin',         name: t('Millionaire State'),    desc: t('Earn $1M GDP in total'),          prog: () => [state.lifeEarned, 1e6] },
+  { id: 'smart',   icon: 'smart',        name: t('Smart Citizens'),       desc: t('Build a Smart City'),             prog: () => [owned('smart'), 1] },
+  { id: 'cyber10', icon: 'shield-check', name: t('Cyber Guardian'),       desc: t('Stop 10 cyber attacks'),          prog: () => [state.attacksRepelled, 10] },
+  { id: 'billion', icon: 'coins',        name: t('Billion-Dollar Nation'), desc: t('Earn $1B GDP in total'),         prog: () => [state.lifeEarned, 1e9] },
+  { id: 'ai',      icon: 'ai',           name: t('AI Pioneer'),           desc: t('Open an AI Lab'),                 prog: () => [owned('ai'), 1] },
+  { id: 'export',  icon: 'globe',        name: t('Tech Exporter'),        desc: t('Export technology once'),         prog: () => [state.prestiges, 1] },
+  { id: 'top50',   icon: 'trophy',       name: t('Top 50'),               desc: t('Reach #50 in the tech ranking'),  prog: () => [196 - techRank(), 146] },
+  { id: 'orbit',   icon: 'space',        name: t('Orbit Reached'),        desc: t('Launch Satellite Internet'),      prog: () => [owned('space'), 1] },
+  { id: 'loyal',   icon: 'gift',         name: t('Loyal Leader'),         desc: t('Claim 7 daily rewards in a row'), prog: () => [state.daily.best, 7] },
+  { id: 'policy',  icon: 'egov',         name: t('Policy Maker'),         desc: t('Change a national policy'),       prog: () => [state.policyChanges, 1] },
+  { id: 'think',   icon: 'flask',        name: t('Think Tank'),           desc: t('Complete 6 research projects'),   prog: () => [researchCount(), 6] },
+  { id: 'hacker',  icon: 'bug',          name: t('Firewall Hero'),        desc: t('Win the cyber mini-game 5 times'), prog: () => [state.gamesWon, 5] },
+  { id: 'quantumEra', icon: 'quantum',   name: t('Quantum Leap'),         desc: t('Reach the Quantum Era'),          prog: () => [currentEra(), 5] },
+  { id: 'spaceAge', icon: 'rocket',      name: t('Space Age'),            desc: t('Reach the Space Era'),            prog: () => [currentEra(), 6] },
+  { id: 'curious', icon: 'book',         name: t('Curious Mind'),         desc: t('Answer 10 quiz questions correctly'), prog: () => [quizCorrect(), 10] },
+  { id: 'scholar', icon: 'book',         name: t('Scholar'),              desc: t('Answer 40 quiz questions correctly'), prog: () => [quizCorrect(), 40] },
+  { id: 'collector', icon: 'star',       name: t('Encyclopedist'),        desc: t('Discover 50 encyclopedia entries'), prog: () => [discoveredIds().length, 50] },
 ];
 
 function checkAchievements(silent) {
@@ -943,7 +944,7 @@ function checkAchievements(silent) {
       state.achievements[a.id] = Date.now();
       if (!silent) track('achievement', { id: a.id });
       gemEarn('achievement', a.id, ACH_GEMS);
-      if (!silent) { toast(`Achievement: ${a.name} · +${ACH_GEMS} gems`, 'star', 'gold'); Sound.play('reward'); buzz([20, 40, 20]); }
+      if (!silent) { toast(t('Achievement: {name} · +{n} gems', { name: a.name, n: ACH_GEMS }), 'star', 'gold'); Sound.play('reward'); buzz([20, 40, 20]); }
     }
   }
 }
@@ -951,12 +952,14 @@ function checkAchievements(silent) {
 function buildPickers() {
   const tone = state.player.tone;
   $('avatarIcons').innerHTML = AVATARS.map(id =>
-    `<button data-avatar="${id}" aria-label="Avatar ${id}">${avatarTile(id, tone)}</button>`).join('');
+    `<button data-avatar="${id}" aria-label="${t('Avatar')} ${id}">${avatarTile(id, tone)}</button>`).join('');
   $('avatarTones').innerHTML = Object.entries(TONE_COLORS).map(([k, [c1, c2]]) =>
-    `<button data-tone="${k}" aria-label="${k} color" style="--c1:${c1};--c2:${c2}">${toneOwned(k) ? '' : lockBadge(TONE_PRICES[k])}</button>`).join('');
-  $('flagPicker').innerHTML = FLAGS.map((_, i) => `<button data-flag="${i}" aria-label="Flag ${i + 1}">${flagSvg(i)}${flagOwned(i) ? '' : lockBadge(FLAG_PRICES[i])}</button>`).join('');
+    `<button data-tone="${k}" aria-label="${t('Color')} ${k}" style="--c1:${c1};--c2:${c2}">${toneOwned(k) ? '' : lockBadge(TONE_PRICES[k])}</button>`).join('');
+  $('flagPicker').innerHTML = FLAGS.map((_, i) => `<button data-flag="${i}" aria-label="${t('Flag')} ${i + 1}">${flagSvg(i)}${flagOwned(i) ? '' : lockBadge(FLAG_PRICES[i])}</button>`).join('');
   shopSig = '';
 }
+
+function playerName() { return state.player.name === DEFAULT_PLAYER.name ? t(DEFAULT_PLAYER.name) : state.player.name; }
 
 let identitySig = '';
 function renderIdentity() {
@@ -967,17 +970,32 @@ function renderIdentity() {
   $('headerFlag').innerHTML = flagSvg(p.flag);
   $('headerAvatar').innerHTML = avatarTile(p.avatar, p.tone);
   $('profileAvatar').innerHTML = avatarTile(p.avatar, p.tone);
-  $('profileName').textContent = p.name;
-  $('profileNation').textContent = `Leader of ${state.nation}`;
-  $('kvPlayer').textContent = p.name;
+  $('profileName').textContent = playerName();
+  $('profileNation').textContent = t('Leader of {nation}', { nation: state.nation });
+  $('kvPlayer').textContent = playerName();
   $('kvNation').textContent = state.nation;
   for (const b of $('avatarIcons').children) b.classList.toggle('on', b.dataset.avatar === p.avatar);
   for (const b of $('avatarTones').children) b.classList.toggle('on', b.dataset.tone === p.tone);
   for (const b of $('flagPicker').children) b.classList.toggle('on', Number(b.dataset.flag) === p.flag);
 }
 
+function openLanguages() {
+  $('langList').innerHTML = LANGS.map(l => `<button data-lang="${l.code}" class="${l.code === I18N.lang ? 'on' : ''}" lang="${l.code}" ${l.rtl ? 'dir="rtl"' : ''}><b>${l.name}</b><span>${l.english}</span></button>`).join('');
+  $('langSheet').hidden = false;
+}
+
+function chooseLanguage(code) {
+  if (code === I18N.lang) { $('langSheet').hidden = true; return; }
+  track('language', { from: I18N.lang, to: code });
+  flushEvents();
+  saveGame();
+  I18N.setLang(code);
+  location.reload();
+}
+
 let achSig = '';
 function renderSettings() {
+  $('kvLang').textContent = I18N.info.name;
   for (const [id, key] of [['setSound', 'sound'], ['setVibe', 'vibration'], ['setStats', 'analytics']]) $(id).setAttribute('aria-checked', String(state.settings[key] === true));
 }
 
@@ -985,7 +1003,7 @@ function renderRanking() {
   const { score } = techIndex();
   const r = techRank();
   $('tiScore').textContent = `${Math.round(score)} / ${Math.round(TECH_INDEX_TOP)}`;
-  $('tiRank').textContent = `#${r} of 195 nations · ${rankTitle(r)}`;
+  $('tiRank').textContent = t('#{rank} of 195 nations · {title}', { rank: r, title: rankTitle(r) });
   $('tiBar').style.width = `${Math.min(100, score / TECH_INDEX_TOP * 100)}%`;
   renderLeaderboard();
 }
@@ -1034,9 +1052,9 @@ function deviceLabel() {
   const ua = navigator.userAgent;
   if (/iphone|ipad|ipod/i.test(ua)) return 'iPhone / iPad';
   if (/android/i.test(ua)) return 'Android';
-  return 'Computer';
+  return t('Computer');
 }
-function ago(ts) { const s = Math.max(0, Math.round((Date.now() - ts) / 1000)); return s < 5 ? 'just now' : `${dur(s * 1000)} ago`; }
+function ago(ts) { const s = Math.max(0, Math.round((Date.now() - ts) / 1000)); return s < 5 ? t('just now') : t('{time} ago', { time: dur(s * 1000) }); }
 
 function initCloud() {
   if (!isPwaBuild() || !window.supabase || !/^https?:$/.test(location.protocol)) { renderAccount(); return; }
@@ -1113,10 +1131,10 @@ async function onSignedIn() {
       await pushSave();
       toast('Your progress is now saved to your account', 'cloud', 'cyan');
     } else if (sameAccount) {
-      if (remoteChanged(remote)) adoptCloudSave(remote, 'Loaded your latest progress');
+      if (remoteChanged(remote)) adoptCloudSave(remote, t('Loaded your latest progress'));
       else await pushSave();
     } else if (isFreshSave(state)) {
-      adoptCloudSave(remote, 'Welcome back! Your nation is loaded.');
+      adoptCloudSave(remote, t('Welcome back! Your nation is loaded.'));
     } else {
       cloud.busy = false;
       askWhichSave(remote);
@@ -1131,11 +1149,11 @@ async function onSignedIn() {
 }
 
 function askWhichSave(remote) {
-  const local = `This device: ${money(state.lifeEarned)} lifetime GDP, ${totalOwned()} facilities.`;
-  const acct = `Your account: ${money(remote.progress)} lifetime GDP, saved ${ago(new Date(remote.updated_at).getTime())}.`;
-  queueOverlay(() => showModal('Which nation do you want to keep?', `${local}\n${acct}\n\nThe other one will be replaced.`, {
-    icon: 'cloud', tone: 'cyan', okText: 'Use account', cancelText: 'Use this device',
-    onOk: () => { adoptCloudSave(remote, 'Loaded your nation from your account'); renderAccount(); connectWallet(); },
+  const local = t('This device: {amount} lifetime GDP, {n} facilities.', { amount: money(state.lifeEarned), n: totalOwned() });
+  const acct = t('Your account: {amount} lifetime GDP, saved {time}.', { amount: money(remote.progress), time: ago(new Date(remote.updated_at).getTime()) });
+  queueOverlay(() => showModal(t('Which nation do you want to keep?'), `${local}\n${acct}\n\n${t('The other one will be replaced.')}`, {
+    icon: 'cloud', tone: 'cyan', okText: t('Use account'), cancelText: t('Use this device'),
+    onOk: () => { adoptCloudSave(remote, t('Loaded your nation from your account')); renderAccount(); connectWallet(); },
     onCancel: async () => {
       try { await pushSave(); connectWallet(); toast('This device\'s nation is now saved to your account', 'cloud', 'cyan'); }
       catch (e) { cloud.status = 'error'; }
@@ -1147,7 +1165,7 @@ function askWhichSave(remote) {
 // One sync step: load the server save if another device changed it, otherwise upload ours.
 async function syncCycle(message) {
   const remote = await pullSave();
-  if (remoteChanged(remote)) adoptCloudSave(remote, 'Loaded newer progress from another device');
+  if (remoteChanged(remote)) adoptCloudSave(remote, t('Loaded newer progress from another device'));
   else { await pushSave(); if (message) toast(message, 'cloud', 'cyan'); }
 }
 
@@ -1169,16 +1187,16 @@ function cloudPause() {
 }
 // Coming back: check whether another device played meanwhile.
 function cloudResume() { return runSync(); }
-function syncNow() { return runSync('Synced'); }
+function syncNow() { return runSync(t('Synced')); }
 
 // Deletes the account and its cloud data on the server. Progress on this device stays,
 // so the player can keep playing as a guest or reset it separately.
 function askDeleteAccount() {
   if (!cloud.user) return;
-  showModal('Delete your account?', `This permanently deletes ${cloud.user.email} and everything saved to it on our server: your cloud save, gems and purchases. It cannot be undone.\n\nType DELETE to confirm.`, {
-    icon: 'trash', tone: 'bad', input: '', okText: 'Delete account',
+  showModal(t('Delete your account?'), t('This permanently deletes {email} and everything saved to it on our server: your cloud save, gems and purchases. It cannot be undone.\n\nType DELETE to confirm.', { email: cloud.user.email }), {
+    icon: 'trash', tone: 'bad', input: '', okText: t('Delete account'),
     onOk: async value => {
-      if (String(value).trim().toUpperCase() !== 'DELETE') { toast('Type DELETE to confirm', 'alert', 'bad'); return; }
+      if (String(value).trim().toUpperCase() !== 'DELETE') { toast(t('Type DELETE to confirm'), 'alert', 'bad'); return; }
       try {
         const { error } = await cloud.client.rpc('delete_my_account');
         if (error) throw error;
@@ -1186,9 +1204,9 @@ function askDeleteAccount() {
         writeCloudMeta({});
         cloud.user = null; cloud.ready = false; cloud.status = 'off'; cloud.lastSync = 0; cloud.walletReady = false; cloud.wallet = null;
         renderAccount();
-        showModal('Account deleted', 'Your account and its cloud data are gone. Your progress on this device is still here; use "Reset progress on this device" if you want to remove it too.', { icon: 'check', tone: 'green' });
+        showModal(t('Account deleted'), t('Your account and its cloud data are gone. Your progress on this device is still here; use "Reset progress on this device" if you want to remove it too.'), { icon: 'check', tone: 'green' });
       } catch (e) {
-        showModal('Could not delete the account', `${friendlyAuthError(e)} Nothing was deleted.`, { icon: 'alert', tone: 'bad' });
+        showModal(t('Could not delete the account'), `${friendlyAuthError(e)} ${t('Nothing was deleted.')}`, { icon: 'alert', tone: 'bad' });
       }
     },
   });
@@ -1208,26 +1226,26 @@ function renderAccount() {
   const title = $('accountTitle'), text = $('accountText'), btn = $('accountBtn'), actions = $('accountActions');
   if (!title) return;
   if (!cloudAvailable()) {
-    title.textContent = 'Accounts';
-    text.textContent = 'Sign-in works in the web version at tardigrade23.github.io/DigitalNation.';
+    title.textContent = t('Accounts');
+    text.textContent = t('Sign-in works in the web version at {url}.', { url: 'tardigrade23.github.io/DigitalNation' });
     btn.hidden = true; actions.hidden = true;
     return;
   }
   $('deleteAccount').hidden = !cloud.user;
   if (!cloud.user) {
-    title.textContent = 'Save your progress';
-    text.textContent = 'Sign in with your email to keep your nation safe and play on any device.';
+    title.textContent = t('Save your progress');
+    text.textContent = t('Sign in with your email to keep your nation safe and play on any device.');
     btn.hidden = false; actions.hidden = true;
     return;
   }
   $('deleteAccount').hidden = false;
-  title.textContent = cloud.user.email || 'Signed in';
+  title.textContent = cloud.user.email || t('Signed in');
   text.textContent = {
-    syncing: 'Syncing…',
-    synced: `Synced ${ago(cloud.lastSync)} · ${deviceLabel()}`,
-    error: 'Sync paused. Check your connection, then tap Sync now.',
-    off: 'Signed in',
-  }[cloud.status] || 'Signed in';
+    syncing: t('Syncing…'),
+    synced: t('Synced {time} · {device}', { time: ago(cloud.lastSync), device: deviceLabel() }),
+    error: t('Sync paused. Check your connection, then tap Sync now.'),
+    off: t('Signed in'),
+  }[cloud.status] || t('Signed in');
   btn.hidden = true; actions.hidden = false;
   $('syncNow').disabled = cloud.busy;
 }
@@ -1250,17 +1268,17 @@ function closeAuth() { $('auth').hidden = true; if (!overlayOpen()) nextOverlay(
 function authError(msg) { $('authError').textContent = msg; $('authError').hidden = false; }
 function friendlyAuthError(e) {
   const m = String((e && e.message) || e || '');
-  if (/rate|too many|security purposes/i.test(m)) return 'Too many emails were sent. Wait a minute, then try again.';
-  if (/expired|invalid|token/i.test(m)) return 'That code is wrong or has expired. Check the latest email, or send a new code.';
-  if (/fetch|network|failed/i.test(m)) return 'No connection to the server. Check your internet and try again.';
-  return m || 'Something went wrong. Please try again.';
+  if (/rate|too many|security purposes/i.test(m)) return t('Too many emails were sent. Wait a minute, then try again.');
+  if (/expired|invalid|token/i.test(m)) return t('That code is wrong or has expired. Check the latest email, or send a new code.');
+  if (/fetch|network|failed/i.test(m)) return t('No connection to the server. Check your internet and try again.');
+  return m || t('Something went wrong. Please try again.');
 }
 
 async function submitEmail() {
   const email = $('authEmail').value.trim().toLowerCase();
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { authError('Enter a valid email address, like name@example.com.'); return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { authError(t('Enter a valid email address, like name@example.com.')); return; }
   const btn = $('authSend');
-  btn.disabled = true; btn.textContent = 'Sending…';
+  btn.disabled = true; btn.textContent = t('Sending…');
   try {
     const { error } = await cloud.client.auth.signInWithOtp({
       email, options: { shouldCreateUser: true, emailRedirectTo: location.origin + location.pathname },
@@ -1268,32 +1286,32 @@ async function submitEmail() {
     if (error) throw error;
     cloud.email = email;
     showAuthStep('code');
-    $('authSentText').textContent = `We sent an email to ${email}. Open it on this device and tap the sign-in link — this screen updates by itself. Can't find it? Check Spam.`;
+    $('authSentText').textContent = t("We sent an email to {email}. Open it on this device and tap the sign-in link — this screen updates by itself. Can't find it? Check Spam.", { email });
   } catch (e) {
     authError(friendlyAuthError(e));
   }
-  btn.disabled = false; btn.textContent = 'Email me a sign-in link';
+  btn.disabled = false; btn.textContent = t('Email me a sign-in link');
 }
 
 let verifying = false;
 async function submitCode() {
   const token = $('authCode').value.replace(/\D/g, '');
-  if (token.length < 6) { authError('Enter the code from the email.'); return; }
+  if (token.length < 6) { authError(t('Enter the code from the email.')); return; }
   if (verifying) return;
   verifying = true;
   const btn = $('authVerify');
-  btn.disabled = true; btn.textContent = 'Signing in…';
+  btn.disabled = true; btn.textContent = t('Signing in…');
   try {
     const { error } = await cloud.client.auth.verifyOtp({ email: cloud.email, token, type: 'email' });
     if (error) throw error;
     closeAuth();
     Sound.play('reward');
-    toast(`Signed in as ${cloud.email}`, 'cloud', 'cyan');
+    toast(t('Signed in as {email}', { email: cloud.email }), 'cloud', 'cyan');
   } catch (e) {
     authError(friendlyAuthError(e));
   }
   verifying = false;
-  btn.disabled = false; btn.textContent = 'Sign in';
+  btn.disabled = false; btn.textContent = t('Sign in');
 }
 
 /* ---------------- PWA: install + offline ---------------- */
@@ -1305,11 +1323,11 @@ const isStandalone = () => (window.matchMedia && window.matchMedia('(display-mod
 function renderInstall() {
   const btn = $('installBtn'), txt = $('installText');
   btn.hidden = true;
-  if (isStandalone()) txt.textContent = 'Installed. Digital Nation runs full screen and works offline.';
-  else if (!isPwaBuild()) txt.textContent = 'You can install the game from its hosted web address.';
-  else if (deferredInstall) { txt.textContent = 'Add it to your home screen. It opens full screen and works offline.'; btn.hidden = false; }
-  else if (/iphone|ipad|ipod/i.test(navigator.userAgent)) txt.textContent = 'In Safari, tap Share, then "Add to Home Screen".';
-  else txt.textContent = 'Open your browser menu and choose "Install app" or "Add to Home screen".';
+  if (isStandalone()) txt.textContent = t('Installed. Digital Nation runs full screen and works offline.');
+  else if (!isPwaBuild()) txt.textContent = t('You can install the game from its hosted web address.');
+  else if (deferredInstall) { txt.textContent = t('Add it to your home screen. It opens full screen and works offline.'); btn.hidden = false; }
+  else if (/iphone|ipad|ipod/i.test(navigator.userAgent)) txt.textContent = t('In Safari, tap Share, then "Add to Home Screen".');
+  else txt.textContent = t('Open your browser menu and choose "Install app" or "Add to Home screen".');
 }
 
 function registerServiceWorker() {
@@ -1342,10 +1360,10 @@ const LIB = typeof LIBRARY === 'object' ? LIBRARY : {};
 const LIB_IMG = typeof LIBRARY_IMAGES === 'object' ? LIBRARY_IMAGES : {};
 
 function libEntries() {
-  const sectors = SECTORS.map(s => ({ id: s.id, group: 'Sectors', kind: `Sector · ${ERAS[s.era].name}`, name: s.name, icon: s.id, tone: s, how: 'Build it to discover' }));
+  const sectors = SECTORS.map(s => ({ id: s.id, group: t('Sectors'), kind: t('Sector · {era}', { era: ERAS[s.era].name }), name: s.name, icon: s.id, tone: s, how: t('Build it to discover') }));
   const research = RESEARCH.map(n => {
     const b = BRANCHES.find(x => x.id === n.branch);
-    return { id: n.id, group: b.name, kind: `Research · ${b.name}`, name: n.name, icon: b.icon, tone: b.tone, how: 'Research it to discover' };
+    return { id: n.id, group: b.name, kind: t('Research · {branch}', { branch: b.name }), name: n.name, icon: b.icon, tone: b.tone, how: t('Research it to discover') };
   });
   return [...sectors, ...research].filter(e => LIB[e.id]);
 }
@@ -1394,9 +1412,9 @@ function openEntry(id) {
   if (img) {
     pic.onerror = () => { fig.hidden = true; };
     pic.src = img.src;
-    pic.alt = `${e.name} (from the Wikipedia article "${img.article}")`;
+    pic.alt = t('{name} (from the Wikipedia article "{article}")', { name: e.name, article: img.article });
     const credit = $('learnCredit');
-    credit.textContent = `Image: ${img.artist} · ${img.license} · Wikimedia Commons`;
+    credit.textContent = t('Image: {artist} · {license} · Wikimedia Commons', { artist: img.artist, license: img.license });
     credit.href = img.source || 'https://commons.wikimedia.org/';
   }
   renderQuiz();
@@ -1407,15 +1425,15 @@ function openEntry(id) {
 
 function renderQuiz() {
   const id = entryOpen, c = LIB[id], answered = state.quiz[id];
-  $('quizLabel').textContent = answered === undefined ? `Quick quiz · +${QUIZ_GEMS} gems` : 'Quick quiz';
+  $('quizLabel').textContent = answered === undefined ? t('Quick quiz · +{n} gems', { n: QUIZ_GEMS }) : t('Quick quiz');
   $('quizOpts').innerHTML = quizOrder(id).map(i => {
     const cls = answered === undefined ? '' : (i === c.c ? 'right' : '');
     return `<button data-opt="${i}" class="${cls}" ${answered === undefined ? '' : 'disabled'}>${esc(c.a[i])}</button>`;
   }).join('');
   const res = $('quizResult');
   res.hidden = answered === undefined;
-  if (answered === 1) res.textContent = `Correct! +${QUIZ_GEMS} gems`;
-  if (answered === 0) res.textContent = `The right answer is: ${c.a[c.c]}`;
+  if (answered === 1) res.textContent = t('Correct! +{n} gems', { n: QUIZ_GEMS });
+  if (answered === 0) res.textContent = t('The right answer is: {answer}', { answer: c.a[c.c] });
   res.style.color = answered === 1 ? 'var(--good)' : 'var(--muted)';
 }
 
@@ -1431,7 +1449,7 @@ function answerQuiz(i) {
   if (!ok) {
     const picked = $('quizOpts').querySelector(`[data-opt="${i}"]`);
     if (picked) picked.classList.add('wrong');
-    $('quizResult').textContent = `Not quite. The right answer is: ${c.a[c.c]}`;
+    $('quizResult').textContent = t('Not quite. The right answer is: {answer}', { answer: c.a[c.c] });
   }
   libSig = '';
   saveGame();
@@ -1444,15 +1462,15 @@ function closeEntry() {
   if (!overlayOpen()) nextOverlay();
 }
 
-const infoBtn = id => (LIB[id] ? `<button class="info-btn" data-learn="${id}" aria-label="Learn about this">${icon('info', 'ic-sm')}</button>` : '');
+const infoBtn = id => (LIB[id] ? `<button class="info-btn" data-learn="${id}" aria-label="${t('Learn about this')}">${icon('info', 'ic-sm')}</button>` : '');
 
 let libSig = '';
 function renderLibrary() {
   const all = libEntries(), found = discoveredIds().length, waiting = pendingQuizzes().length;
-  $('libCount').textContent = `${found} of ${all.length} discovered`;
+  $('libCount').textContent = t('{n} of {total} discovered', { n: found, total: all.length });
   $('libQuiz').textContent = waiting
-    ? `${waiting} quiz${waiting > 1 ? 'zes' : ''} waiting · +${QUIZ_GEMS} gems each · ${quizCorrect()} answered correctly`
-    : `Build sectors and finish research to discover entries. ${quizCorrect()} quizzes answered correctly.`;
+    ? (waiting > 1 ? t('{n} quizzes waiting', { n: waiting }) : t('1 quiz waiting')) + ' · ' + t('+{n} gems each · {correct} answered correctly', { n: QUIZ_GEMS, correct: quizCorrect() })
+    : t('Build sectors and finish research to discover entries. {n} quizzes answered correctly.', { n: quizCorrect() });
   $('libBar').style.width = `${(found / all.length) * 100}%`;
   const sig = `${found}|${Object.keys(state.quiz).length}`;
   if (sig === libSig) return;
@@ -1460,15 +1478,15 @@ function renderLibrary() {
   const groups = [...new Set(all.map(e => e.group))];
   $('library').innerHTML = groups.map(g => {
     const items = all.filter(e => e.group === g);
-    const groupIcon = g === 'Sectors' ? 'grid' : BRANCHES.find(b => b.name === g).icon;
+    const groupIcon = g === t('Sectors') ? 'grid' : BRANCHES.find(b => b.name === g).icon;
     return `<div class="branch"><div class="branch-head">${icon(groupIcon, 'ic-sm')}${g}</div>${items.map(e => {
       const known = !!state.library[e.id], q = state.quiz[e.id];
       if (!known) {
         return `<div class="row lib-row locked">${tile('lock', null, 'tile-locked')}<div class="row-title"><span class="nm">???</span></div>
           <span></span><div class="row-sub"><span>${e.how}</span></div></div>`;
       }
-      const stateTag = q === undefined ? `<span class="lib-state quiz">Quiz +${QUIZ_GEMS}</span>`
-        : (q === 1 ? `<span class="lib-state done">${icon('check', 'ic-xs')} Learned</span>` : '<span class="lib-state miss">Read</span>');
+      const stateTag = q === undefined ? `<span class="lib-state quiz">${t('Quiz +{n}', { n: QUIZ_GEMS })}</span>`
+        : (q === 1 ? `<span class="lib-state done">${icon('check', 'ic-xs')} ${t('Learned')}</span>` : `<span class="lib-state miss">${t('Read')}</span>`);
       const pic = LIB_IMG[e.id] ? `<span class="thumb"><img src="${LIB_IMG[e.id].src}" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span>` : tile(e.icon, e.tone);
       return `<button class="row lib-row" data-learn="${e.id}">${pic}
         <div class="row-title"><span class="nm">${e.name}</span></div>${stateTag}
@@ -1507,12 +1525,12 @@ function applyWallet(w) {
 
 function walletError(e) {
   const m = String((e && e.message) || e || '');
-  const text = /insufficient_gems/.test(m) ? 'You do not have enough gems for this.'
-    : /limit_reached/.test(m) ? 'You reached today\'s limit for this. It resets at midnight (UTC).'
-    : /already_owned/.test(m) ? 'You already own this.'
-    : /fetch|network|failed/i.test(m) ? 'Connect to the internet to use gems while you are signed in.'
-    : 'The server could not complete this. Please try again.';
-  showModal('Not completed', text, { icon: 'gem', tone: 'violet' });
+  const text = /insufficient_gems/.test(m) ? t('You do not have enough gems for this.')
+    : /limit_reached/.test(m) ? t("You reached today's limit for this. It resets at midnight (UTC).")
+    : /already_owned/.test(m) ? t('You already own this.')
+    : /fetch|network|failed/i.test(m) ? t('Connect to the internet to use gems while you are signed in.')
+    : t('The server could not complete this. Please try again.');
+  showModal(t('Not completed'), text, { icon: 'gem', tone: 'violet' });
   refreshWallet();
 }
 
@@ -1604,7 +1622,7 @@ async function loadLeaderboard(force) {
     }
     lb.loadedAt = Date.now();
   } catch (e) {
-    lb.error = 'Could not load the leaderboard. Check your connection and tap refresh.';
+    lb.error = t('Could not load the leaderboard. Check your connection and tap refresh.');
   }
   lb.loading = false;
   renderLeaderboard(true);
@@ -1613,7 +1631,7 @@ async function loadLeaderboard(force) {
 let lbSig = '';
 function renderLeaderboard(force) {
   if (!cloud.client) {
-    $('lbMe').textContent = 'The leaderboard works in the web version at tardigrade23.github.io/DigitalNation.';
+    $('lbMe').textContent = t('The leaderboard works in the web version at {url}.', { url: 'tardigrade23.github.io/DigitalNation' });
     $('lbJoin').hidden = true; $('lbList').innerHTML = '';
     return;
   }
@@ -1621,18 +1639,18 @@ function renderLeaderboard(force) {
   if (!force && lb.rows && Date.now() - lb.loadedAt > LB_CACHE) { loadLeaderboard(); return; }
   const me = cloud.user && cloud.user.id;
   $('lbJoin').hidden = !!me;
-  $('lbMe').textContent = lb.loading ? 'Loading…'
+  $('lbMe').textContent = lb.loading ? t('Loading…')
     : lb.error ? lb.error
-    : me ? (lb.myRank ? `You are #${lb.myRank} with a Tech Index of ${Math.round(techIndex().score)}.` : 'Your nation will appear after the next sync.')
-    : 'Real players ranked by Tech Index. Sign in to add your nation.';
+    : me ? (lb.myRank ? t('You are #{rank} with a Tech Index of {score}.', { rank: lb.myRank, score: Math.round(techIndex().score) }) : t('Your nation will appear after the next sync.'))
+    : t('Real players ranked by Tech Index. Sign in to add your nation.');
   const sig = JSON.stringify([lb.rows, lb.myRank, me]);
   if (sig === lbSig) return;
   lbSig = sig;
   if (!lb.rows) { $('lbList').innerHTML = ''; return; }
-  if (!lb.rows.length) { $('lbList').innerHTML = '<div class="empty">No nations yet. Sign in and be the first!</div>'; return; }
+  if (!lb.rows.length) { $('lbList').innerHTML = `<div class="empty">${t('No nations yet. Sign in and be the first!')}</div>`; return; }
   const row = (r, pos) => `<div class="lb-row ${r.user_id === me ? 'me' : ''}">
       <span class="lb-pos">${pos}</span><span class="lb-flag">${flagSvg(r.flag)}</span>
-      <span class="lb-name"><b>${esc(r.nation)}</b><span>${esc(r.leader)} · ${ERAS[r.era] ? ERAS[r.era].name : ''}</span></span>
+      <span class="lb-name"><b>${esc(r.nation)}</b><span>${esc(r.leader === DEFAULT_PLAYER.name ? t(r.leader) : r.leader)} · ${ERAS[r.era] ? ERAS[r.era].name : ''}</span></span>
       <span class="lb-score">${Math.round(r.score)}</span></div>`;
   let html = lb.rows.map((r, i) => row(r, i + 1)).join('');
   if (me && lb.myRank && lb.myRank > lb.rows.length) {
@@ -1647,9 +1665,9 @@ const ACH_GEMS = 10;
 const AD_GEMS_PER_DAY = 5;
 const GEM_PACKS = [
   { id: 'p1', gems: 100,  price: '$0.99' },
-  { id: 'p2', gems: 550,  price: '$4.99',  tag: '+10% bonus' },
-  { id: 'p3', gems: 1200, price: '$9.99',  tag: 'Popular' },
-  { id: 'p4', gems: 2500, price: '$19.99', tag: 'Best value' },
+  { id: 'p2', gems: 550,  price: '$4.99',  tag: t('+10% bonus') },
+  { id: 'p3', gems: 1200, price: '$9.99',  tag: t('Popular') },
+  { id: 'p4', gems: 2500, price: '$19.99', tag: t('Best value') },
 ];
 const WARPS = [{ h: 1, cost: 40 }, { h: 2, cost: 70 }, { h: 4, cost: 120 }];
 const WARPS_PER_DAY = 3;
@@ -1657,9 +1675,9 @@ const SIM_BUYS_PER_DAY = 2; // prototype test mode: keeps the economy testable
 const warpsUsed = () => (state.warps && state.warps.day === dayKey() ? state.warps.n : 0);
 const simBuysUsed = () => (state.simBuys && state.simBuys.day === dayKey() ? state.simBuys.n : 0);
 const SHOP_BOOSTS = [
-  { id: 'golden', icon: 'coins', tone: 'gold', name: 'Golden Economy', desc: 'Permanent ×2 income. Kept forever, even after exports.', cost: 1500 },
-  { id: 'shield', icon: 'shield-check', tone: 'green', name: 'Cyber Shield', desc: 'No cyber attacks for 24 hours.', cost: 150 },
-  { id: 'grant', icon: 'flask', tone: 'cyan', name: 'Research Grant', desc: 'Get 1 hour of research points (at least 200 RP).', cost: 100 },
+  { id: 'golden', icon: 'coins', tone: 'gold', name: t('Golden Economy'), desc: t('Permanent ×2 income. Kept forever, even after exports.'), cost: 1500 },
+  { id: 'shield', icon: 'shield-check', tone: 'green', name: t('Cyber Shield'), desc: t('No cyber attacks for 24 hours.'), cost: 150 },
+  { id: 'grant', icon: 'flask', tone: 'cyan', name: t('Research Grant'), desc: t('Get 1 hour of research points (at least 200 RP).'), cost: 100 },
 ];
 
 const isVip = () => Date.now() < state.vipUntil;
@@ -1674,20 +1692,20 @@ function addGems(n, reason, serverEarn = null) {
   if (serverEarn) gemEarn(serverEarn.reason, serverEarn.ref, n);
   else state.gems += n;
   Sound.play('reward'); buzz([15, 30, 15]);
-  toast(`+${n} gems${reason ? ` · ${reason}` : ''}`, 'gem', 'violet');
+  toast(t('+{n} gems', { n }) + (reason ? ` · ${reason}` : ''), 'gem', 'violet');
   saveGame();
   render();
 }
 
 function spendGems(n, label, onDone, item) {
   if (state.gems < n) {
-    showModal('Not enough gems', `You need ${fmt(n)} gems for ${label}. You have ${fmt(state.gems)}.`, {
-      icon: 'gem', tone: 'violet', okText: 'Get gems', onOk: () => { showScreen('shop'); },
+    showModal(t('Not enough gems'), t('You need {n} gems for {item}. You have {have}.', { n: fmt(n), item: label, have: fmt(state.gems) }), {
+      icon: 'gem', tone: 'violet', okText: t('Get gems'), onOk: () => { showScreen('shop'); },
     });
     return;
   }
-  showModal(`Buy ${label}?`, `This costs ${fmt(n)} gems. You have ${fmt(state.gems)}.`, {
-    icon: 'gem', tone: 'violet', okText: `Spend ${fmt(n)} gems`,
+  showModal(t('Buy {item}?', { item: label }), t('This costs {n} gems. You have {have}.', { n: fmt(n), have: fmt(state.gems) }), {
+    icon: 'gem', tone: 'violet', okText: t('Spend {n} gems', { n: fmt(n) }),
     onOk: async () => {
       if (walletMode()) {
         // The server checks the price, the balance and any limits, then answers with the new wallet.
@@ -1709,15 +1727,15 @@ function spendGems(n, label, onDone, item) {
 // Real-money purchases are simulated in the web prototype.
 function simulatedPurchase(title, price, onDone, product) {
   if (walletMode()) {
-    showModal(title, `Price: ${price}\nPrototype: no money is charged. The store version will use Google Play and App Store billing.`, {
-      icon: 'gem', tone: 'violet', okText: 'Buy (simulated)',
+    showModal(title, t('Price: {price}\nPrototype: no money is charged. The store version will use Google Play and App Store billing.', { price }), {
+      icon: 'gem', tone: 'violet', okText: t('Buy (simulated)'),
       onOk: async () => {
         try {
           const w = await walletRpc('purchase_simulated', { p_product: product });
           applyWallet(w);
           track('purchase_sim', { product });
           Sound.play('reward'); buzz([20, 40, 20]);
-          toast(product === 'vip' ? 'VIP active for 30 days' : 'Gems added to your account', product === 'vip' ? 'crown' : 'gem', 'violet');
+          toast(product === 'vip' ? t('VIP active for 30 days') : t('Gems added to your account'), product === 'vip' ? 'crown' : 'gem', 'violet');
           saveGame(); identitySig = ''; shopSig = ''; render();
         } catch (e) { walletError(e); }
       },
@@ -1725,23 +1743,23 @@ function simulatedPurchase(title, price, onDone, product) {
     return;
   }
   if (simBuysUsed() >= SIM_BUYS_PER_DAY) {
-    showModal('Test purchase limit reached', `The prototype allows ${SIM_BUYS_PER_DAY} simulated purchases per day, so the game balance stays realistic. Try again tomorrow.`, { icon: 'gem', tone: 'violet' });
+    showModal(t('Test purchase limit reached'), t('The prototype allows {n} simulated purchases per day, so the game balance stays realistic. Try again tomorrow.', { n: SIM_BUYS_PER_DAY }), { icon: 'gem', tone: 'violet' });
     return;
   }
   const done = onDone;
   onDone = () => { state.simBuys = { day: dayKey(), n: simBuysUsed() + 1 }; done(); };
-  showModal(title, `Price: ${price}\nPrototype: no money is charged. The store version will use Google Play and App Store billing.`, {
-    icon: 'gem', tone: 'violet', okText: 'Buy (simulated)', onOk: onDone,
+  showModal(title, t('Price: {price}\nPrototype: no money is charged. The store version will use Google Play and App Store billing.', { price }), {
+    icon: 'gem', tone: 'violet', okText: t('Buy (simulated)'), onOk: onDone,
   });
 }
 
 function buyPack(id) {
   const p = GEM_PACKS.find(x => x.id === id);
-  if (p) simulatedPurchase(`Buy ${fmt(p.gems)} gems?`, p.price, () => { track('purchase_sim', { product: p.id }); addGems(p.gems, 'Purchase'); }, p.id);
+  if (p) simulatedPurchase(t('Buy {n} gems?', { n: fmt(p.gems) }), p.price, () => { track('purchase_sim', { product: p.id }); addGems(p.gems, t('Purchase')); }, p.id);
 }
 
 function buyVip() {
-  simulatedPurchase(isVip() ? 'Extend VIP by 30 days?' : 'Start VIP membership?', '$4.99 / month', () => {
+  simulatedPurchase(isVip() ? t('Extend VIP by 30 days?') : t('Start VIP membership?'), t('$4.99 / month'), () => {
     state.vipUntil = Math.max(Date.now(), state.vipUntil) + 30 * 86400e3;
     Sound.play('reward'); buzz([20, 40, 20]);
     toast('VIP active for 30 days', 'crown', 'gold');
@@ -1753,14 +1771,14 @@ function buyWarp(h) {
   const w = WARPS.find(x => x.h === h);
   if (!w) return;
   if (warpsUsed() >= WARPS_PER_DAY) {
-    showModal('Time warps used up', `You can use ${WARPS_PER_DAY} time warps per day. They recharge at midnight.`, { icon: 'clock', tone: 'cyan' });
+    showModal(t('Time warps used up'), t('You can use {n} time warps per day. They recharge at midnight.', { n: WARPS_PER_DAY }), { icon: 'clock', tone: 'cyan' });
     return;
   }
   const amount = incomePerSec(false) * h * 3600;
-  spendGems(w.cost, `a ${h}-hour time warp (${money(amount)})`, () => {
+  spendGems(w.cost, t('a {h}-hour time warp ({amount})', { h, amount: money(amount) }), () => {
     earn(amount);
     state.warps = { day: dayKey(), n: warpsUsed() + 1 };
-    toast(`Time warp: +${money(amount)}`, 'clock', 'cyan');
+    toast(t('Time warp: +{amount}', { amount: money(amount) }), 'clock', 'cyan');
   }, `warp_${h}`);
 }
 
@@ -1771,13 +1789,13 @@ function buyShopBoost(id) {
     if (id === 'golden') state.owned.golden = true;
     if (id === 'shield') { state.shieldUntil = Math.max(Date.now(), state.shieldUntil) + 24 * 3600e3; state.attack = null; }
     if (id === 'grant') state.rp += Math.max(200, rpRate() * 3600);
-    toast(`${b.name} activated`, b.icon, b.tone);
+    toast(t('{name} activated', { name: b.name }), b.icon, b.tone);
   }, id);
 }
 
 function pickFlag(i) {
   if (flagOwned(i)) { state.player.flag = i; saveGame(); shopSig = ''; render(); return; }
-  spendGems(FLAG_PRICES[i], `the ${FLAG_NAMES[i]} flag`, () => {
+  spendGems(FLAG_PRICES[i], t('the {name} flag', { name: FLAG_NAMES[i] }), () => {
     if (!state.owned.flags.includes(i)) state.owned.flags.push(i);
     state.player.flag = i;
     buildPickers();
@@ -1786,7 +1804,7 @@ function pickFlag(i) {
 
 function pickTone(k) {
   if (toneOwned(k)) { state.player.tone = k; saveGame(); buildPickers(); render(); return; }
-  spendGems(TONE_PRICES[k], `the ${k} avatar color`, () => {
+  spendGems(TONE_PRICES[k], t('the {name} avatar color', { name: TONE_NAMES[k] }), () => {
     if (!state.owned.tones.includes(k)) state.owned.tones.push(k);
     state.player.tone = k;
     buildPickers();
@@ -1804,7 +1822,7 @@ function watchAd(onReward) {
   adTimer = setInterval(() => {
     const left = len - (Date.now() - start);
     $('adBar').style.width = `${Math.min(100, (1 - left / len) * 100)}%`;
-    $('adText').textContent = left > 0 ? `Your reward arrives in ${Math.ceil(left / 1000)} seconds` : 'Done!';
+    $('adText').textContent = left > 0 ? t('Your reward arrives in {n} seconds', { n: Math.ceil(left / 1000) }) : t('Done!');
     if (left <= 0) {
       clearInterval(adTimer);
       $('adOverlay').hidden = true;
@@ -1817,12 +1835,12 @@ function watchAd(onReward) {
 let shopSig = '';
 function renderShop(now) {
   $('shopGems').textContent = fmt(state.gems);
-  $('vipStatus').textContent = isVip() ? `Active · ${Math.ceil((state.vipUntil - now) / 86400e3)} days left` : 'Monthly membership';
-  $('vipBtn').textContent = isVip() ? 'Extend VIP · $4.99' : 'Start VIP · $4.99 / month';
+  $('vipStatus').textContent = isVip() ? t('Active · {n} days left', { n: Math.ceil((state.vipUntil - now) / 86400e3) }) : t('Monthly membership');
+  $('vipBtn').textContent = isVip() ? t('Extend VIP · $4.99') : t('Start VIP · $4.99 / month');
   const left = adGemsLeft();
-  $('adGemsText').textContent = left > 0 ? `${isVip() ? 'VIP: no ad needed' : 'Watch a short ad'} · +5 gems (${left} of ${AD_GEMS_PER_DAY} left today)` : 'Come back tomorrow for more free gems';
+  $('adGemsText').textContent = left > 0 ? `${isVip() ? t('VIP: no ad needed') : t('Watch a short ad')} · ${t('+5 gems ({n} of {total} left today)', { n: left, total: AD_GEMS_PER_DAY })}` : t('Come back tomorrow for more free gems');
   $('adGemsBtn').disabled = left <= 0;
-  $('adGemsBtn').textContent = isVip() ? 'Claim' : 'Watch';
+  $('adGemsBtn').textContent = isVip() ? t('Claim') : t('Watch');
 
   const ips = incomePerSec(false);
   const sig = [state.gems, warpsUsed(), fmt(ips), state.owned.golden, state.owned.flags.join(), state.owned.tones.join(), state.player.flag, state.player.tone, Math.floor(state.shieldUntil / 60e3), fmt(rpRate())].join('|');
@@ -1833,28 +1851,28 @@ function renderShop(now) {
       ${p.tag ? `<span class="tag">${p.tag}</span>` : ''}${icon('gem')}<b>${fmt(p.gems)}</b><span class="price">${p.price}</span></button>`).join('');
   }
   const warpsLeft = WARPS_PER_DAY - warpsUsed();
-  $('warpInfo').textContent = `Get hours of income instantly, at the full rate. ${warpsLeft} of ${WARPS_PER_DAY} left today.`;
+  $('warpInfo').textContent = t('Get hours of income instantly, at the full rate. {n} of {total} left today.', { n: warpsLeft, total: WARPS_PER_DAY });
   $('warps').innerHTML = WARPS.map(w => {
     const can = state.gems >= w.cost && warpsLeft > 0;
     return `<div class="row">${tile('clock', 'cyan')}
-      <div class="row-title"><span class="nm">${w.h} hour${w.h > 1 ? 's' : ''} of income</span></div>
-      <button class="buy gem ${can ? 'can' : ''}" data-warp="${w.h}">Warp<small>${gemCost(w.cost)}</small></button>
-      <div class="row-sub"><span>+${money(ips * w.h * 3600)} instantly</span></div></div>`;
+      <div class="row-title"><span class="nm">${w.h > 1 ? t('{n} hours of income', { n: w.h }) : t('1 hour of income')}</span></div>
+      <button class="buy gem ${can ? 'can' : ''}" data-warp="${w.h}">${t('Warp')}<small>${gemCost(w.cost)}</small></button>
+      <div class="row-sub"><span>${t('+{amount} instantly', { amount: money(ips * w.h * 3600) })}</span></div></div>`;
   }).join('');
   $('shopBoosts').innerHTML = SHOP_BOOSTS.map(b => {
     const owned = b.id === 'golden' && state.owned.golden;
     const active = b.id === 'shield' && now < state.shieldUntil;
     const can = state.gems >= b.cost;
-    const btn = owned ? `<button class="buy" disabled>${icon('check', 'ic-sm')}<small>Owned</small></button>`
-      : `<button class="buy gem ${can ? 'can' : ''}" data-sboost="${b.id}">${active ? 'Extend' : 'Buy'}<small>${gemCost(b.cost)}</small></button>`;
+    const btn = owned ? `<button class="buy" disabled>${icon('check', 'ic-sm')}<small>${t('Owned')}</small></button>`
+      : `<button class="buy gem ${can ? 'can' : ''}" data-sboost="${b.id}">${active ? t('Extend') : t('Buy')}<small>${gemCost(b.cost)}</small></button>`;
     return `<div class="row">${tile(b.icon, b.tone)}<div class="row-title"><span class="nm">${b.name}</span></div>${btn}
-      <div class="row-sub"><span>${b.desc}${active ? ` Active for ${dur(state.shieldUntil - now)}.` : ''}</span></div></div>`;
+      <div class="row-sub"><span>${b.desc}${active ? ' ' + t('Active for {time}.', { time: dur(state.shieldUntil - now) }) : ''}</span></div></div>`;
   }).join('');
   $('shopFlags').innerHTML = Object.keys(FLAG_PRICES).map(Number).map(i =>
-    `<button data-flag="${i}" class="${state.player.flag === i ? 'on' : ''}" aria-label="${FLAG_NAMES[i]} flag">${flagSvg(i)}${flagOwned(i) ? '' : lockBadge(FLAG_PRICES[i])}</button>`).join('');
+    `<button data-flag="${i}" class="${state.player.flag === i ? 'on' : ''}" aria-label="${t('{name} flag', { name: FLAG_NAMES[i] })}">${flagSvg(i)}${flagOwned(i) ? '' : lockBadge(FLAG_PRICES[i])}</button>`).join('');
   $('shopTones').innerHTML = Object.keys(TONE_PRICES).map(k => {
     const [c1, c2] = TONE_COLORS[k];
-    return `<button data-tone="${k}" class="${state.player.tone === k ? 'on' : ''}"><span class="swatch" style="--c1:${c1};--c2:${c2}"></span>${toneOwned(k) ? k : gemCost(TONE_PRICES[k])}</button>`;
+    return `<button data-tone="${k}" class="${state.player.tone === k ? 'on' : ''}"><span class="swatch" style="--c1:${c1};--c2:${c2}"></span>${toneOwned(k) ? TONE_NAMES[k] : gemCost(TONE_PRICES[k])}</button>`;
   }).join('');
 }
 
@@ -1862,91 +1880,91 @@ function renderShop(now) {
 
 const POLICY_COOLDOWN = 60e3;
 const POLICIES = [
-  { id: 'tax', name: 'Tax Rate', icon: 'coin', options: [
-    { label: 'Low', mods: { income: 0.85, welfare: 15 } },
-    { label: 'Balanced', mods: {} },
-    { label: 'High', mods: { income: 1.3, welfare: -20, popGrowth: 0.6 } } ] },
-  { id: 'net', name: 'Internet Policy', icon: 'isp', options: [
-    { label: 'Open', mods: { income: 1.15, defense: -0.15 } },
-    { label: 'Balanced', mods: {} },
-    { label: 'Firewall', mods: { defense: 0.2, income: 0.9 } } ] },
-  { id: 'edu', name: 'Education', icon: 'book', options: [
-    { label: 'Tech', mods: { research: 1.5, welfare: -5 } },
-    { label: 'Balanced', mods: {} },
-    { label: 'Social', mods: { welfare: 10, research: 0.8 } } ] },
-  { id: 'trade', name: 'Trade', icon: 'globe', options: [
-    { label: 'Export', mods: { influence: 1.25, offline: 0.2, breach: 1.5 } },
-    { label: 'Balanced', mods: {} },
-    { label: 'Self-reliant', mods: { breach: 0.5, income: 0.95 } } ] },
+  { id: 'tax', name: t('Tax Rate'), icon: 'coin', options: [
+    { label: t('Low'), mods: { income: 0.85, welfare: 15 } },
+    { label: t('Balanced'), mods: {} },
+    { label: t('High'), mods: { income: 1.3, welfare: -20, popGrowth: 0.6 } } ] },
+  { id: 'net', name: t('Internet Policy'), icon: 'isp', options: [
+    { label: t('Open'), mods: { income: 1.15, defense: -0.15 } },
+    { label: t('Balanced'), mods: {} },
+    { label: t('Firewall'), mods: { defense: 0.2, income: 0.9 } } ] },
+  { id: 'edu', name: t('Education'), icon: 'book', options: [
+    { label: t('Tech'), mods: { research: 1.5, welfare: -5 } },
+    { label: t('Balanced'), mods: {} },
+    { label: t('Social'), mods: { welfare: 10, research: 0.8 } } ] },
+  { id: 'trade', name: t('Trade'), icon: 'globe', options: [
+    { label: t('Export'), mods: { influence: 1.25, offline: 0.2, breach: 1.5 } },
+    { label: t('Balanced'), mods: {} },
+    { label: t('Self-reliant'), mods: { breach: 0.5, income: 0.95 } } ] },
 ];
 
 const RESEARCH = [
   // Economy
-  { id: 'e1', branch: 'eco', name: 'Digital Taxes',            cost: 20,     mods: { tap: 2 },                         desc: 'Tap power ×2' },
-  { id: 'e2', branch: 'eco', name: 'E-Commerce',               cost: 150,    mods: { income: 1.25 },                   desc: 'All income ×1.25' },
-  { id: 'e3', branch: 'eco', name: 'Digital Currency (CBDC)',  cost: 1500,    mods: { income: 1.5 },                    desc: 'All income ×1.5' },
-  { id: 'e4', branch: 'eco', name: 'Smart Contracts',          cost: 15000,   mods: { cost: 0.9 },                      desc: 'Sectors cost 10% less' },
-  { id: 'e5', branch: 'eco', name: 'Open Banking',             cost: 2e5,   mods: { income: 1.5 },                    desc: 'All income ×1.5' },
-  { id: 'e6', branch: 'eco', name: 'Tokenization',             cost: 3e6,   mods: { cost: 0.85 },                     desc: 'Sectors cost 15% less' },
-  { id: 'e7', branch: 'eco', name: 'Real-Time Economy',        cost: 4e7,    mods: { income: 2 },                      desc: 'All income ×2' },
+  { id: 'e1', branch: 'eco', name: t('Digital Taxes'),            cost: 20,     mods: { tap: 2 },                         desc: t('Tap power ×2') },
+  { id: 'e2', branch: 'eco', name: t('E-Commerce'),               cost: 150,    mods: { income: 1.25 },                   desc: t('All income ×1.25') },
+  { id: 'e3', branch: 'eco', name: t('Digital Currency (CBDC)'),  cost: 1500,    mods: { income: 1.5 },                    desc: t('All income ×1.5') },
+  { id: 'e4', branch: 'eco', name: t('Smart Contracts'),          cost: 15000,   mods: { cost: 0.9 },                      desc: t('Sectors cost 10% less') },
+  { id: 'e5', branch: 'eco', name: t('Open Banking'),             cost: 2e5,   mods: { income: 1.5 },                    desc: t('All income ×1.5') },
+  { id: 'e6', branch: 'eco', name: t('Tokenization'),             cost: 3e6,   mods: { cost: 0.85 },                     desc: t('Sectors cost 15% less') },
+  { id: 'e7', branch: 'eco', name: t('Real-Time Economy'),        cost: 4e7,    mods: { income: 2 },                      desc: t('All income ×2') },
   // Society
-  { id: 's1', branch: 'soc', name: 'Electronic Health Records', cost: 24,    mods: { welfare: 5 },                     desc: 'Welfare +5' },
-  { id: 's2', branch: 'soc', name: 'Online Learning',          cost: 180,    mods: { research: 1.25 },                 desc: 'Research points ×1.25' },
-  { id: 's3', branch: 'soc', name: 'e-Signatures',             cost: 1800,    mods: { popGrowth: 1.5, welfare: 5 },     desc: 'Population grows 50% faster · Welfare +5' },
-  { id: 's4', branch: 'soc', name: 'Universal Connectivity',   cost: 18000,   mods: { welfare: 10, income: 1.1 },       desc: 'Welfare +10 · All income ×1.1' },
-  { id: 's5', branch: 'soc', name: 'Internet Voting',          cost: 2.4e5,   mods: { welfare: 5, influence: 1.15 },    desc: 'Welfare +5 · Export influence ×1.15' },
-  { id: 's6', branch: 'soc', name: 'Telemedicine',             cost: 3.6e6,   mods: { welfare: 8, popGrowth: 1.3 },     desc: 'Welfare +8 · Faster population growth' },
-  { id: 's7', branch: 'soc', name: 'Digital Literacy',         cost: 4.8e7,   mods: { research: 1.5, defense: 0.05 },   desc: 'Research ×1.5 · Auto-defense +5%' },
+  { id: 's1', branch: 'soc', name: t('Electronic Health Records'), cost: 24,    mods: { welfare: 5 },                     desc: t('Welfare +5') },
+  { id: 's2', branch: 'soc', name: t('Online Learning'),          cost: 180,    mods: { research: 1.25 },                 desc: t('Research points ×1.25') },
+  { id: 's3', branch: 'soc', name: t('e-Signatures'),             cost: 1800,    mods: { popGrowth: 1.5, welfare: 5 },     desc: t('Population grows 50% faster · Welfare +5') },
+  { id: 's4', branch: 'soc', name: t('Universal Connectivity'),   cost: 18000,   mods: { welfare: 10, income: 1.1 },       desc: t('Welfare +10 · All income ×1.1') },
+  { id: 's5', branch: 'soc', name: t('Internet Voting'),          cost: 2.4e5,   mods: { welfare: 5, influence: 1.15 },    desc: t('Welfare +5 · Export influence ×1.15') },
+  { id: 's6', branch: 'soc', name: t('Telemedicine'),             cost: 3.6e6,   mods: { welfare: 8, popGrowth: 1.3 },     desc: t('Welfare +8 · Faster population growth') },
+  { id: 's7', branch: 'soc', name: t('Digital Literacy'),         cost: 4.8e7,   mods: { research: 1.5, defense: 0.05 },   desc: t('Research ×1.5 · Auto-defense +5%') },
   // Security
-  { id: 'c1', branch: 'sec', name: 'Firewalls',                cost: 22,     mods: { defense: 0.1 },                   desc: 'Auto-defense +10%' },
-  { id: 'c2', branch: 'sec', name: 'Threat Intelligence',      cost: 160,    mods: { window: 5 },                      desc: '+5 seconds to respond to attacks' },
-  { id: 'c3', branch: 'sec', name: 'Public Key Infrastructure', cost: 1700,   mods: { defense: 0.1 },                   desc: 'Auto-defense +10%' },
-  { id: 'c4', branch: 'sec', name: 'Zero Trust',               cost: 16000,   mods: { defense: 0.1 },                   desc: 'Auto-defense +10%' },
-  { id: 'c5', branch: 'sec', name: 'AI Threat Detection',      cost: 2.2e5,   mods: { defense: 0.1, window: 3 },        desc: 'Auto-defense +10% · +3 seconds to respond' },
-  { id: 'c6', branch: 'sec', name: 'Post-Quantum Cryptography', cost: 3.3e6,  mods: { breach: 0.5 },                    desc: 'Breaches steal half as much' },
-  { id: 'c7', branch: 'sec', name: 'Cyber Resilience',         cost: 4.4e7,    mods: { breach: 0.6, defense: 0.05 },     desc: 'Breach damage ×0.6 · Auto-defense +5%' },
+  { id: 'c1', branch: 'sec', name: t('Firewalls'),                cost: 22,     mods: { defense: 0.1 },                   desc: t('Auto-defense +10%') },
+  { id: 'c2', branch: 'sec', name: t('Threat Intelligence'),      cost: 160,    mods: { window: 5 },                      desc: t('+5 seconds to respond to attacks') },
+  { id: 'c3', branch: 'sec', name: t('Public Key Infrastructure'), cost: 1700,   mods: { defense: 0.1 },                   desc: t('Auto-defense +10%') },
+  { id: 'c4', branch: 'sec', name: t('Zero Trust'),               cost: 16000,   mods: { defense: 0.1 },                   desc: t('Auto-defense +10%') },
+  { id: 'c5', branch: 'sec', name: t('AI Threat Detection'),      cost: 2.2e5,   mods: { defense: 0.1, window: 3 },        desc: t('Auto-defense +10% · +3 seconds to respond') },
+  { id: 'c6', branch: 'sec', name: t('Post-Quantum Cryptography'), cost: 3.3e6,  mods: { breach: 0.5 },                    desc: t('Breaches steal half as much') },
+  { id: 'c7', branch: 'sec', name: t('Cyber Resilience'),         cost: 4.4e7,    mods: { breach: 0.6, defense: 0.05 },     desc: t('Breach damage ×0.6 · Auto-defense +5%') },
   // Infrastructure
-  { id: 'i1', branch: 'inf', name: 'TCP/IP',                   cost: 26,     mods: { income: 1.1 },                    desc: 'All income ×1.1' },
-  { id: 'i2', branch: 'inf', name: 'IPv6',                     cost: 190,    mods: { income: 1.15 },                   desc: 'All income ×1.15' },
-  { id: 'i3', branch: 'inf', name: 'Virtualization',           cost: 1900,   mods: { cost: 0.95 },                     desc: 'Sectors cost 5% less' },
-  { id: 'i4', branch: 'inf', name: 'Internet Exchange Points', cost: 19000,   mods: { income: 1.25 },                   desc: 'All income ×1.25' },
-  { id: 'i5', branch: 'inf', name: 'Edge Computing',           cost: 2.6e5,   mods: { income: 1.3 },                    desc: 'All income ×1.3' },
-  { id: 'i6', branch: 'inf', name: 'Smart Grid',               cost: 3.9e6,    mods: { income: 1.3, welfare: 3 },        desc: 'All income ×1.3 · Welfare +3' },
-  { id: 'i7', branch: 'inf', name: 'Digital Twin',             cost: 5.2e7,   mods: { cost: 0.9 },                      desc: 'Sectors cost 10% less' },
+  { id: 'i1', branch: 'inf', name: t('TCP/IP'),                   cost: 26,     mods: { income: 1.1 },                    desc: t('All income ×1.1') },
+  { id: 'i2', branch: 'inf', name: t('IPv6'),                     cost: 190,    mods: { income: 1.15 },                   desc: t('All income ×1.15') },
+  { id: 'i3', branch: 'inf', name: t('Virtualization'),           cost: 1900,   mods: { cost: 0.95 },                     desc: t('Sectors cost 5% less') },
+  { id: 'i4', branch: 'inf', name: t('Internet Exchange Points'), cost: 19000,   mods: { income: 1.25 },                   desc: t('All income ×1.25') },
+  { id: 'i5', branch: 'inf', name: t('Edge Computing'),           cost: 2.6e5,   mods: { income: 1.3 },                    desc: t('All income ×1.3') },
+  { id: 'i6', branch: 'inf', name: t('Smart Grid'),               cost: 3.9e6,    mods: { income: 1.3, welfare: 3 },        desc: t('All income ×1.3 · Welfare +3') },
+  { id: 'i7', branch: 'inf', name: t('Digital Twin'),             cost: 5.2e7,   mods: { cost: 0.9 },                      desc: t('Sectors cost 10% less') },
   // Science & AI
-  { id: 'a1', branch: 'sci', name: 'Machine Learning',         cost: 30,     mods: { research: 1.2 },                  desc: 'Research points ×1.2' },
-  { id: 'a2', branch: 'sci', name: 'Big Data',                 cost: 220,    mods: { income: 1.15 },                   desc: 'All income ×1.15' },
-  { id: 'a3', branch: 'sci', name: 'Deep Learning',            cost: 2200,   mods: { research: 1.3 },                  desc: 'Research points ×1.3' },
-  { id: 'a4', branch: 'sci', name: 'Transformers (LLMs)',      cost: 22000,   mods: { tap: 3, research: 1.2 },          desc: 'Tap power ×3 · Research ×1.2' },
-  { id: 'a5', branch: 'sci', name: 'Quantum Algorithms',       cost: 3e5,   mods: { research: 1.5 },                  desc: 'Research points ×1.5' },
-  { id: 'a6', branch: 'sci', name: 'Neuromorphic Chips',       cost: 4.5e6,   mods: { income: 1.5 },                    desc: 'All income ×1.5' },
-  { id: 'a7', branch: 'sci', name: 'AI Alignment',             cost: 6e7,   mods: { income: 2, welfare: 5 },          desc: 'All income ×2 · Welfare +5' },
+  { id: 'a1', branch: 'sci', name: t('Machine Learning'),         cost: 30,     mods: { research: 1.2 },                  desc: t('Research points ×1.2') },
+  { id: 'a2', branch: 'sci', name: t('Big Data'),                 cost: 220,    mods: { income: 1.15 },                   desc: t('All income ×1.15') },
+  { id: 'a3', branch: 'sci', name: t('Deep Learning'),            cost: 2200,   mods: { research: 1.3 },                  desc: t('Research points ×1.3') },
+  { id: 'a4', branch: 'sci', name: t('Transformers (LLMs)'),      cost: 22000,   mods: { tap: 3, research: 1.2 },          desc: t('Tap power ×3 · Research ×1.2') },
+  { id: 'a5', branch: 'sci', name: t('Quantum Algorithms'),       cost: 3e5,   mods: { research: 1.5 },                  desc: t('Research points ×1.5') },
+  { id: 'a6', branch: 'sci', name: t('Neuromorphic Chips'),       cost: 4.5e6,   mods: { income: 1.5 },                    desc: t('All income ×1.5') },
+  { id: 'a7', branch: 'sci', name: t('AI Alignment'),             cost: 6e7,   mods: { income: 2, welfare: 5 },          desc: t('All income ×2 · Welfare +5') },
   // Green tech
-  { id: 'n1', branch: 'grn', name: 'Efficient Data Centers',   cost: 28,     mods: { income: 1.05, welfare: 2 },       desc: 'All income ×1.05 · Welfare +2' },
-  { id: 'n2', branch: 'grn', name: 'Renewable Power',          cost: 210,    mods: { cost: 0.95, welfare: 3 },         desc: 'Sectors cost 5% less · Welfare +3' },
-  { id: 'n3', branch: 'grn', name: 'E-Waste Recycling',        cost: 2100,   mods: { cost: 0.97, welfare: 3 },         desc: 'Sectors cost 3% less · Welfare +3' },
-  { id: 'n4', branch: 'grn', name: 'Smart Mobility',           cost: 21000,   mods: { popGrowth: 1.2, welfare: 4 },     desc: 'Faster population growth · Welfare +4' },
-  { id: 'n5', branch: 'grn', name: 'Carbon Accounting',        cost: 2.8e5,    mods: { influence: 1.15 },                desc: 'Export influence ×1.15' },
-  { id: 'n6', branch: 'grn', name: 'Green Hydrogen',           cost: 4.2e6,   mods: { income: 1.3 },                    desc: 'All income ×1.3' },
-  { id: 'n7', branch: 'grn', name: 'Energy Storage',           cost: 5.6e7,   mods: { income: 1.5, offline: 0.1 },      desc: 'All income ×1.5 · Offline earnings +10%' },
+  { id: 'n1', branch: 'grn', name: t('Efficient Data Centers'),   cost: 28,     mods: { income: 1.05, welfare: 2 },       desc: t('All income ×1.05 · Welfare +2') },
+  { id: 'n2', branch: 'grn', name: t('Renewable Power'),          cost: 210,    mods: { cost: 0.95, welfare: 3 },         desc: t('Sectors cost 5% less · Welfare +3') },
+  { id: 'n3', branch: 'grn', name: t('E-Waste Recycling'),        cost: 2100,   mods: { cost: 0.97, welfare: 3 },         desc: t('Sectors cost 3% less · Welfare +3') },
+  { id: 'n4', branch: 'grn', name: t('Smart Mobility'),           cost: 21000,   mods: { popGrowth: 1.2, welfare: 4 },     desc: t('Faster population growth · Welfare +4') },
+  { id: 'n5', branch: 'grn', name: t('Carbon Accounting'),        cost: 2.8e5,    mods: { influence: 1.15 },                desc: t('Export influence ×1.15') },
+  { id: 'n6', branch: 'grn', name: t('Green Hydrogen'),           cost: 4.2e6,   mods: { income: 1.3 },                    desc: t('All income ×1.3') },
+  { id: 'n7', branch: 'grn', name: t('Energy Storage'),           cost: 5.6e7,   mods: { income: 1.5, offline: 0.1 },      desc: t('All income ×1.5 · Offline earnings +10%') },
 ];
 const BRANCHES = [
-  { id: 'eco', name: 'Economy', icon: 'coins', tone: 'gold' },
-  { id: 'soc', name: 'Society', icon: 'users', tone: 'rose' },
-  { id: 'sec', name: 'Security', icon: 'shield', tone: 'bad' },
-  { id: 'inf', name: 'Infrastructure', icon: 'iot', tone: 'cyan' },
-  { id: 'sci', name: 'Science & AI', icon: 'ai', tone: 'violet' },
-  { id: 'grn', name: 'Green Tech', icon: 'leaf', tone: 'green' },
+  { id: 'eco', name: t('Economy'), icon: 'coins', tone: 'gold' },
+  { id: 'soc', name: t('Society'), icon: 'users', tone: 'rose' },
+  { id: 'sec', name: t('Security'), icon: 'shield', tone: 'bad' },
+  { id: 'inf', name: t('Infrastructure'), icon: 'iot', tone: 'cyan' },
+  { id: 'sci', name: t('Science & AI'), icon: 'ai', tone: 'violet' },
+  { id: 'grn', name: t('Green Tech'), icon: 'leaf', tone: 'green' },
 ];
 // need: research projects completed · sector: must own one (it belongs to the previous era)
 const ERAS = [
-  { name: 'Connected Era',   need: 0,  mult: 1 },
-  { name: 'Information Era', need: 4,  mult: 1.5,  sector: 'dc' },
-  { name: 'Platform Era',    need: 10, mult: 2.25, sector: 'opendata' },
-  { name: 'Smart Era',       need: 16, mult: 3.5,  sector: 'ehealth' },
-  { name: 'AI Era',          need: 22, mult: 5,    sector: 'smart' },
-  { name: 'Quantum Era',     need: 30, mult: 8,    sector: 'robotics' },
-  { name: 'Space Era',       need: 38, mult: 12,   sector: 'quantum' },
+  { name: t('Connected Era'),   need: 0,  mult: 1 },
+  { name: t('Information Era'), need: 4,  mult: 1.5,  sector: 'dc' },
+  { name: t('Platform Era'),    need: 10, mult: 2.25, sector: 'opendata' },
+  { name: t('Smart Era'),       need: 16, mult: 3.5,  sector: 'ehealth' },
+  { name: t('AI Era'),          need: 22, mult: 5,    sector: 'smart' },
+  { name: t('Quantum Era'),     need: 30, mult: 8,    sector: 'robotics' },
+  { name: t('Space Era'),       need: 38, mult: 12,   sector: 'quantum' },
 ];
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'];
 
@@ -1989,7 +2007,7 @@ function checkEra() {
     gemEarn('era', String(e), 25);
     track('era_reached', { era: e, hours: Math.round(minutesPlayed() / 60) });
     Sound.play('reward'); buzz([30, 60, 30]);
-    queueOverlay(() => showModal(`Welcome to the ${ERAS[e].name}`, `Your nation entered Era ${ROMAN[e]}. All income is now ×${ERAS[e].mult}, and you received 25 gems.`, { icon: 'flask', tone: 'cyan' }));
+    queueOverlay(() => showModal(t('Welcome to the {era}', { era: ERAS[e].name }), t('Your nation entered Era {n}. All income is now ×{mult}, and you received 25 gems.', { n: ROMAN[e], mult: ERAS[e].mult }), { icon: 'flask', tone: 'cyan' }));
   }
 }
 
@@ -1997,15 +2015,15 @@ function fmtMods(m) {
   const parts = [];
   const pct = v => `${v > 0 ? '+' : '−'}${Math.round(Math.abs(v) * 100)}%`;
   const add = (good, text) => parts.push(`<span class="${good ? 'up' : 'down'}">${text}</span>`);
-  if (m.income) add(m.income > 1, `Income ×${m.income}`);
-  if (m.welfare) add(m.welfare > 0, `Welfare ${m.welfare > 0 ? '+' : '−'}${Math.abs(m.welfare)}`);
-  if (m.popGrowth) add(m.popGrowth > 1, m.popGrowth > 1 ? 'Faster population growth' : 'Slower population growth');
-  if (m.defense) add(m.defense > 0, `Auto-defense ${pct(m.defense)}`);
-  if (m.research) add(m.research > 1, `Research ×${m.research}`);
-  if (m.influence) add(m.influence > 1, `Export influence ×${m.influence}`);
-  if (m.offline) add(m.offline > 0, `Offline earnings ${pct(m.offline)}`);
-  if (m.breach) add(m.breach < 1, `Breach damage ×${m.breach}`);
-  return parts.length ? parts.join(' · ') : '<span class="muted">No bonuses or penalties</span>';
+  if (m.income) add(m.income > 1, t('Income ×{n}', { n: m.income }));
+  if (m.welfare) add(m.welfare > 0, t('Welfare {n}', { n: `${m.welfare > 0 ? '+' : '−'}${Math.abs(m.welfare)}` }));
+  if (m.popGrowth) add(m.popGrowth > 1, m.popGrowth > 1 ? t('Faster population growth') : t('Slower population growth'));
+  if (m.defense) add(m.defense > 0, t('Auto-defense {n}', { n: pct(m.defense) }));
+  if (m.research) add(m.research > 1, t('Research ×{n}', { n: m.research }));
+  if (m.influence) add(m.influence > 1, t('Export influence ×{n}', { n: m.influence }));
+  if (m.offline) add(m.offline > 0, t('Offline earnings {n}', { n: pct(m.offline) }));
+  if (m.breach) add(m.breach < 1, t('Breach damage ×{n}', { n: m.breach }));
+  return parts.length ? parts.join(' · ') : `<span class="muted">${t('No bonuses or penalties')}</span>`;
 }
 
 function setPolicy(id, opt) {
@@ -2037,7 +2055,7 @@ function buyResearch(id) {
   state.stats.researchStarted++;
   track('research_start', { id });
   Sound.play('buy'); buzz(12);
-  toast(`Research started: ${n.name} (${dur(state.researching.left * 1000)})`, 'flask', 'cyan');
+  toast(t('Research started: {name} ({time})', { name: n.name, time: dur(state.researching.left * 1000) }), 'flask', 'cyan');
   researchSig = '';
   saveGame();
   render();
@@ -2059,7 +2077,7 @@ function completeResearch(id) {
   track('research_done', { id, n: researchCount(), min: minutesPlayed() });
   discover(id);
   Sound.play('upgrade'); buzz([12, 40, 12]);
-  toast(`Research complete: ${n.name} · new encyclopedia entry`, 'flask', 'cyan');
+  toast(t('Research complete: {name} · new encyclopedia entry', { name: n.name }), 'flask', 'cyan');
   researchSig = '';
   saveGame();
 }
@@ -2069,7 +2087,7 @@ let policiesBuilt = false;
 function renderPolicies(now) {
   const unlocked = policiesUnlocked();
   $('policyLock').hidden = unlocked;
-  if (!unlocked) $('policyLockText').textContent = `Build 5 E-Government portals to start making national policy (${owned('egov')} / 5).`;
+  if (!unlocked) $('policyLockText').textContent = t('Build 5 E-Government portals to start making national policy ({n} / 5).', { n: owned('egov') });
   if (!policiesBuilt) {
     policiesBuilt = true;
     $('policies').innerHTML = POLICIES.map(p => `<div class="card policy" data-pid="${p.id}">
@@ -2086,7 +2104,7 @@ function renderPolicies(now) {
       b.disabled = !unlocked || (wait > 0 && i !== sel);
     });
     card.querySelector('[data-f="fx"]').innerHTML = fmtMods(p.options[sel].mods);
-    card.querySelector('[data-f="cd"]').textContent = !unlocked ? 'Locked' : (wait > 0 ? `Can change again in ${dur(wait)}` : 'You can change this now');
+    card.querySelector('[data-f="cd"]').textContent = !unlocked ? t('Locked') : (wait > 0 ? t('Can change again in {time}', { time: dur(wait) }) : t('You can change this now'));
   }
 }
 
@@ -2114,9 +2132,9 @@ function renderResearch() {
       const avail = researchAvailable(n) && !running, can = avail && !run && state.rp >= n.cost;
       const cls = done ? 'done' : (avail || running ? '' : 'locked');
       const time = dur(researchSeconds(n) * 1000);
-      const btn = done ? `<button class="buy" disabled>${icon('check', 'ic-sm')}<small>Done</small></button>`
-        : running ? `<button class="buy" disabled>Running<small data-f="left">${dur(Math.max(0, run.left) * 1000)}</small></button>`
-        : `<button class="buy rp ${can ? 'can' : ''}" data-res="${n.id}" ${can ? '' : 'disabled'}>${!avail ? 'Locked' : run ? 'Lab busy' : 'Research'}<small>${fmt(n.cost)} RP · ${time}</small></button>`;
+      const btn = done ? `<button class="buy" disabled>${icon('check', 'ic-sm')}<small>${t('Done')}</small></button>`
+        : running ? `<button class="buy" disabled>${t('Running')}<small data-f="left">${dur(Math.max(0, run.left) * 1000)}</small></button>`
+        : `<button class="buy rp ${can ? 'can' : ''}" data-res="${n.id}" ${can ? '' : 'disabled'}>${!avail ? t('Locked') : run ? t('Lab busy') : t('Research')}<small>${fmt(n.cost)} RP · ${time}</small></button>`;
       const sub = running ? `<span>${n.desc}</span><span class="meter"><i data-f="bar" style="width:${Math.min(100, (1 - run.left / run.total) * 100)}%"></i></span>` : `<span>${n.desc}</span>`;
       return `<div class="row node ${cls}" ${running ? `data-running="${n.id}"` : ''}>${tile(done ? 'check' : 'flask', done ? 'green' : b.tone)}
         <div class="row-title"><span class="nm">${n.name}</span>${done ? infoBtn(n.id) : ''}</div>${btn}
@@ -2126,17 +2144,19 @@ function renderResearch() {
 
 function renderEra() {
   const e = currentEra(), era = ERAS[e], next = ERAS[e + 1];
-  $('eraNum').textContent = `Era ${ROMAN[e]}`;
+  $('eraNum').textContent = t('Era {n}', { n: ROMAN[e] });
   $('eraName').textContent = era.name;
   $('eraMult').textContent = `×${era.mult}`;
   if (!next) {
-    $('eraNext').textContent = 'The final era. Your nation leads the world in technology.';
+    $('eraNext').textContent = t('The final era. Your nation leads the world in technology.');
     $('eraBar').style.width = '100%';
     return;
   }
   const n = researchCount();
-  const needSector = next.sector && owned(next.sector) === 0 ? ` and build ${/^[AEIOU]/.test(SECTORS.find(s => s.id === next.sector).name) ? 'an' : 'a'} ${SECTORS.find(s => s.id === next.sector).name}` : '';
-  $('eraNext').textContent = `Complete ${next.need} research projects${needSector} to reach the ${next.name} (×${next.mult})`;
+  const needName = next.sector && owned(next.sector) === 0 ? SECTORS.find(s => s.id === next.sector).name : '';
+  $('eraNext').textContent = needName
+    ? t('Complete {n} research projects and build: {sector}. Then you reach the {era} (×{mult})', { n: next.need, sector: needName, era: next.name, mult: next.mult })
+    : t('Complete {n} research projects to reach the {era} (×{mult})', { n: next.need, era: next.name, mult: next.mult });
   $('eraBar').style.width = `${Math.min(100, (n / next.need) * 100)}%`;
 }
 
@@ -2147,7 +2167,7 @@ let game = null;
 function startGame() {
   if (!state.attack || game) return;
   game = { hits: 0, cell: -1, moveAt: 0 };
-  $('gameGrid').innerHTML = Array.from({ length: 9 }, (_, i) => `<button class="cell" data-cell="${i}" aria-label="Server ${i + 1}">${icon('bug')}</button>`).join('');
+  $('gameGrid').innerHTML = Array.from({ length: 9 }, (_, i) => `<button class="cell" data-cell="${i}" aria-label="${t('Server {n}', { n: i + 1 })}">${icon('bug')}</button>`).join('');
   $('gameHits').textContent = `0 / ${GAME_HITS}`;
   $('cyberGame').hidden = false;
   moveBug();
@@ -2240,9 +2260,9 @@ function maybeAskAnalytics() {
   if (analyticsAsked || state.settings.analytics !== null || !cloud.client || overlayOpen()) return;
   if (!COACH.filter(c => c.tut).every(c => state.coach[c.id])) return;
   analyticsAsked = true;
-  queueOverlay(() => showModal('Help improve Digital Nation?',
-    'Share anonymous gameplay statistics, such as when you finish the tutorial or reach a new era. They are linked to a random ID, never to your email, and help us balance the game. You can change this any time in Profile → Settings.', {
-      icon: 'chart', tone: 'cyan', okText: 'Share stats', cancelText: 'No thanks',
+  queueOverlay(() => showModal(t('Help improve Digital Nation?'),
+    t('Share anonymous gameplay statistics, such as when you finish the tutorial or reach a new era. They are linked to a random ID, never to your email, and help us balance the game. You can change this any time in Profile → Settings.'), {
+      icon: 'chart', tone: 'cyan', okText: t('Share stats'), cancelText: t('No thanks'),
       onOk: () => setAnalytics(true),
       onCancel: () => setAnalytics(false),
     }));
@@ -2304,7 +2324,7 @@ function buzz(pattern) {
 /* ---------------- Overlays (modal + daily) queue ---------------- */
 
 const overlayQueue = [];
-function overlayOpen() { return !$('nationEvent').hidden || !$('missions').hidden || !$('modal').hidden || !$('daily').hidden || !$('cyberGame').hidden || !$('adOverlay').hidden || !$('auth').hidden || !$('learn').hidden; }
+function overlayOpen() { return !$('nationEvent').hidden || !$('missions').hidden || !$('modal').hidden || !$('daily').hidden || !$('cyberGame').hidden || !$('adOverlay').hidden || !$('auth').hidden || !$('learn').hidden || !$('langSheet').hidden; }
 function queueOverlay(fn) { if (overlayOpen()) overlayQueue.push(fn); else fn(); }
 function nextOverlay() { const fn = overlayQueue.shift(); if (fn) fn(); updateCoach(); }
 
@@ -2313,22 +2333,22 @@ function nextOverlay() { const fn = overlayQueue.shift(); if (fn) fn(); updateCo
 // Each mission compares a lifetime counter with its value when the mission was handed out.
 const MISSION_GEMS = 5, WEEKLY_GEMS = 25;
 const MISSIONS = [
-  { id: 'tap',      icon: 'coins',  text: t => `Collect taxes ${t} times`,                          metric: () => state.clicks,          target: () => 150 },
-  { id: 'build',    icon: 'smart',  text: t => `Build ${t} facilities`,                             metric: () => state.stats.built,     target: () => Math.max(10, Math.round(totalOwned() * 0.03) * 5) },
-  { id: 'earn',     icon: 'coin',   text: t => `Earn ${money(t)} GDP`,                              metric: () => state.lifeEarned,      target: () => Math.max(1000, incomePerSec(false) * 1800) },
-  { id: 'upgrade',  icon: 'up',     text: t => `Buy ${t} upgrade${t > 1 ? 's' : ''}`,               metric: () => state.stats.upgrades,  target: () => 2, when: () => availableUpgrades().length > 0 },
-  { id: 'research', icon: 'flask',  text: () => 'Start a research project',                         metric: () => state.stats.researchStarted, target: () => 1, when: () => researchUnlocked() },
-  { id: 'quiz',     icon: 'book',   text: t => `Answer ${t} encyclopedia quiz${t > 1 ? 'zes' : ''} correctly`, metric: () => quizCorrect(), target: () => Math.min(2, pendingQuizzes().length), when: () => pendingQuizzes().length > 0 },
-  { id: 'defend',   icon: 'shield', text: t => `Stop ${t} cyber attacks`,                           metric: () => state.attacksRepelled, target: () => 2, when: () => incomePerSec(false) >= 5 },
-  { id: 'minigame', icon: 'bug',    text: () => 'Win the cyber mini-game',                          metric: () => state.gamesWon,        target: () => 1, when: () => incomePerSec(false) >= 5 },
-  { id: 'policy',   icon: 'egov',   text: () => 'Change a national policy',                         metric: () => state.policyChanges,   target: () => 1, when: () => policiesUnlocked() },
+  { id: 'tap',      icon: 'coins',  text: n => t('Collect taxes {n} times', { n }),                          metric: () => state.clicks,          target: () => 150 },
+  { id: 'build',    icon: 'smart',  text: n => t('Build {n} facilities', { n }),                             metric: () => state.stats.built,     target: () => Math.max(10, Math.round(totalOwned() * 0.03) * 5) },
+  { id: 'earn',     icon: 'coin',   text: n => t('Earn {amount} GDP', { amount: money(n) }),                              metric: () => state.lifeEarned,      target: () => Math.max(1000, incomePerSec(false) * 1800) },
+  { id: 'upgrade',  icon: 'up',     text: n => (n > 1 ? t('Buy {n} upgrades', { n }) : t('Buy 1 upgrade')),               metric: () => state.stats.upgrades,  target: () => 2, when: () => availableUpgrades().length > 0 },
+  { id: 'research', icon: 'flask',  text: () => t('Start a research project'),                         metric: () => state.stats.researchStarted, target: () => 1, when: () => researchUnlocked() },
+  { id: 'quiz',     icon: 'book',   text: n => (n > 1 ? t('Answer {n} encyclopedia quizzes correctly', { n }) : t('Answer 1 encyclopedia quiz correctly')), metric: () => quizCorrect(), target: () => Math.min(2, pendingQuizzes().length), when: () => pendingQuizzes().length > 0 },
+  { id: 'defend',   icon: 'shield', text: n => t('Stop {n} cyber attacks', { n }),                           metric: () => state.attacksRepelled, target: () => 2, when: () => incomePerSec(false) >= 5 },
+  { id: 'minigame', icon: 'bug',    text: () => t('Win the cyber mini-game'),                          metric: () => state.gamesWon,        target: () => 1, when: () => incomePerSec(false) >= 5 },
+  { id: 'policy',   icon: 'egov',   text: () => t('Change a national policy'),                         metric: () => state.policyChanges,   target: () => 1, when: () => policiesUnlocked() },
 ];
 const WEEKLY_MISSIONS = [
-  { id: 'w_research', icon: 'flask',  text: t => `Start ${t} research projects`,        metric: () => state.stats.researchStarted, target: () => 3, when: () => researchUnlocked() },
-  { id: 'w_build',    icon: 'smart',  text: t => `Build ${t} facilities`,               metric: () => state.stats.built,     target: () => Math.max(60, Math.round(totalOwned() * 0.06) * 5) },
-  { id: 'w_quiz',     icon: 'book',   text: t => `Answer ${t} quizzes correctly`,       metric: () => quizCorrect(),         target: () => Math.min(6, pendingQuizzes().length), when: () => pendingQuizzes().length >= 3 },
-  { id: 'w_defend',   icon: 'shield', text: t => `Stop ${t} cyber attacks`,             metric: () => state.attacksRepelled, target: () => 8, when: () => incomePerSec(false) >= 5 },
-  { id: 'w_earn',     icon: 'coin',   text: t => `Earn ${money(t)} GDP`,                metric: () => state.lifeEarned,      target: () => Math.max(1e5, incomePerSec(false) * 36000) },
+  { id: 'w_research', icon: 'flask',  text: n => t('Start {n} research projects', { n }),        metric: () => state.stats.researchStarted, target: () => 3, when: () => researchUnlocked() },
+  { id: 'w_build',    icon: 'smart',  text: n => t('Build {n} facilities', { n }),               metric: () => state.stats.built,     target: () => Math.max(60, Math.round(totalOwned() * 0.06) * 5) },
+  { id: 'w_quiz',     icon: 'book',   text: n => t('Answer {n} quizzes correctly', { n }),       metric: () => quizCorrect(),         target: () => Math.min(6, pendingQuizzes().length), when: () => pendingQuizzes().length >= 3 },
+  { id: 'w_defend',   icon: 'shield', text: n => t('Stop {n} cyber attacks', { n }),             metric: () => state.attacksRepelled, target: () => 8, when: () => incomePerSec(false) >= 5 },
+  { id: 'w_earn',     icon: 'coin',   text: n => t('Earn {amount} GDP', { amount: money(n) }),                metric: () => state.lifeEarned,      target: () => Math.max(1e5, incomePerSec(false) * 36000) },
 ];
 
 function weekKey(d = new Date()) {
@@ -2357,7 +2377,7 @@ function updateMissions() {
   for (const ms of [...M.list, M.weekly].filter(Boolean)) {
     if (!ms.notified && !ms.claimed && missionDone(ms)) {
       ms.notified = true;
-      toast(`Mission complete: ${missionDef(ms.id).text(ms.target)}`, 'target', 'green');
+      toast(t('Mission complete: {text}', { text: missionDef(ms.id).text(ms.target) }), 'target', 'green');
       Sound.play('reward');
     }
   }
@@ -2368,25 +2388,25 @@ function missionSummary() {
   const M = state.missions, list = M.list || [];
   const done = list.filter(m => m.claimed || missionDone(m)).length;
   const claimable = [...list, M.weekly].filter(Boolean).some(m => !m.claimed && missionDone(m));
-  return { text: list.length ? `${done} of ${list.length} done today` : 'Finish the tutorial to get missions', pct: list.length ? (done / list.length) * 100 : 0, claimable };
+  return { text: list.length ? t('{n} of {total} done today', { n: done, total: list.length }) : t('Finish the tutorial to get missions'), pct: list.length ? (done / list.length) * 100 : 0, claimable };
 }
 
 function renderMissions() {
   const M = state.missions;
   const row = (ms, weekly) => {
     const d = missionDef(ms.id), p = missionProgress(ms), done = p >= ms.target;
-    const reward = weekly ? `+${WEEKLY_GEMS} gems · 1 h of income` : `+${MISSION_GEMS} gems · 15 min of income`;
+    const reward = weekly ? t('+{n} gems · 1 h of income', { n: WEEKLY_GEMS }) : t('+{n} gems · 15 min of income', { n: MISSION_GEMS });
     const btn = ms.claimed ? `<button class="btn" disabled>${icon('check', 'ic-sm')}</button>`
-      : `<button class="btn ${done ? 'btn-gold' : ''}" data-claim="${ms.id}" ${done ? '' : 'disabled'}>Claim</button>`;
+      : `<button class="btn ${done ? 'btn-gold' : ''}" data-claim="${ms.id}" ${done ? '' : 'disabled'}>${t('Claim')}</button>`;
     const prog = d.id === 'earn' || d.id === 'w_earn' ? `${money(p)} / ${money(ms.target)}` : `${fmt(p)} / ${fmt(ms.target)}`;
     return `<div class="mission ${ms.claimed ? 'claimed' : ''}">${tile(d.icon, weekly ? 'violet' : 'green')}
       <span class="mission-text">${d.text(ms.target)}</span>${btn}
       <span class="mission-sub"><span class="meter"><i style="width:${(p / ms.target) * 100}%"></i></span><span class="mission-count">${prog}</span><span class="mission-reward">${reward}</span></span></div>`;
   };
-  $('missionsDaily').innerHTML = (M.list || []).map(ms => row(ms, false)).join('') || '<div class="empty">Finish the tutorial to get missions.</div>';
+  $('missionsDaily').innerHTML = (M.list || []).map(ms => row(ms, false)).join('') || `<div class="empty">${t('Finish the tutorial to get missions.')}</div>`;
   $('missionsWeekly').innerHTML = M.weekly ? row(M.weekly, true) : '';
-  $('missionsDayLeft').textContent = `New in ${dur(msToMidnight())}`;
-  $('missionsWeekLeft').textContent = `New in ${dur(msToMonday())}`;
+  $('missionsDayLeft').textContent = t('New in {time}', { time: dur(msToMidnight()) });
+  $('missionsWeekLeft').textContent = t('New in {time}', { time: dur(msToMonday()) });
 }
 
 function showMissions() { updateMissions(); renderMissions(); $('missions').hidden = false; updateCoach(); }
@@ -2404,7 +2424,7 @@ function claimMission(id) {
   else gemEarn('mission', `${M.day}:${id}`, MISSION_GEMS);
   track('mission_claim', { id, weekly });
   Sound.play('reward'); buzz([15, 30, 15]);
-  toast(`+${weekly ? WEEKLY_GEMS : MISSION_GEMS} gems and ${money(income)}`, 'target', 'green');
+  toast(t('+{n} gems and {amount}', { n: weekly ? WEEKLY_GEMS : MISSION_GEMS, amount: money(income) }), 'target', 'green');
   saveGame();
   renderMissions();
   render();
@@ -2439,12 +2459,12 @@ function maybeNationalEvent(now) {
 
 function choiceSummary(c) {
   const parts = [];
-  if (c.cost) parts.push(`<span class="down">Costs ${c.cost} min of income</span>`);
-  if (c.gain) parts.push(`<span class="up">+${c.gain} min of income</span>`);
+  if (c.cost) parts.push(`<span class="down">${t('Costs {n} min of income', { n: c.cost })}</span>`);
+  if (c.gain) parts.push(`<span class="up">${t('+{n} min of income', { n: c.gain })}</span>`);
   const fx = c.mods && Object.keys(c.mods).length ? fmtMods(c.mods) : '';
-  const len = c.minutes >= 60 ? `${Math.floor(c.minutes / 60)} h${c.minutes % 60 ? ` ${c.minutes % 60} min` : ''}` : `${c.minutes} min`;
-  if (fx) parts.push(`${fx} <span class="muted">for ${len}</span>`);
-  return parts.length ? parts.join(' · ') : '<span class="muted">No effect</span>';
+  const len = c.minutes >= 60 ? (c.minutes % 60 ? t('{h} h {m} min', { h: Math.floor(c.minutes / 60), m: c.minutes % 60 }) : t('{h} h', { h: c.minutes / 60 })) : t('{m} min', { m: c.minutes });
+  if (fx) parts.push(`${fx} <span class="muted">${t('for {time}', { time: len })}</span>`);
+  return parts.length ? parts.join(' · ') : `<span class="muted">${t('No effect')}</span>`;
 }
 
 function showNationalEvent(ev) {
@@ -2456,7 +2476,7 @@ function showNationalEvent(ev) {
   $('eventReal').textContent = ev.real;
   $('eventChoices').innerHTML = ev.choices.map((c, i) => {
     const affordable = !c.cost || state.gdp >= ips * c.cost * 60;
-    return `<button data-choice="${i}" ${affordable ? '' : 'disabled'}><b>${esc(c.label)}</b><span class="policy-effect">${choiceSummary(c)}${affordable ? '' : ' · <span class="down">not enough GDP</span>'}</span></button>`;
+    return `<button data-choice="${i}" ${affordable ? '' : 'disabled'}><b>${esc(c.label)}</b><span class="policy-effect">${choiceSummary(c)}${affordable ? '' : ` · <span class="down">${t('not enough GDP')}</span>`}</span></button>`;
   }).join('');
   $('nationEvent').hidden = false;
   $('nationEvent').querySelector('.event-box').scrollTop = 0;
@@ -2514,16 +2534,16 @@ function renderDaily() {
     const done = st.ready ? day < st.day : day <= st.day;
     const today = st.ready && day === st.day;
     const cls = `day ${day === DAILY.length ? 'big' : ''} ${done ? 'done' : ''} ${today ? 'today' : ''}`;
-    const extra = r.boost ? ` + 2× ${r.boost}m` : '';
+    const extra = r.boost ? ` + 2× ${t('{m}m', { m: r.boost })}` : '';
     const gems = (r.gems || 0) + (isVip() ? 10 : 0);
     const gemTxt = gems ? `<span class="gem-mini">${icon('gem')}+${gems}</span>` : '';
-    return `<div class="${cls}">Day ${day}${icon(done ? 'check' : (r.boost ? 'gift' : 'coin'))}<b>${money(dailyAmount(day))}${extra}</b>${gemTxt}</div>`;
+    return `<div class="${cls}">${t('Day {n}', { n: day })}${icon(done ? 'check' : (r.boost ? 'gift' : 'coin'))}<b>${money(dailyAmount(day))}${extra}</b>${gemTxt}</div>`;
   }).join('');
   $('dailyClaim').hidden = !st.ready;
-  $('dailyClose').textContent = st.ready ? 'Later' : 'Close';
+  $('dailyClose').textContent = st.ready ? t('Later') : t('Close');
   $('dailySub').textContent = st.ready
-    ? (st.day === 1 ? 'Come back every day. Rewards grow with each day in a row.' : `Day ${st.day} in a row. Keep the streak going!`)
-    : `Claimed for today. Next reward in ${dur(msToMidnight())}.`;
+    ? (st.day === 1 ? t('Come back every day. Rewards grow with each day in a row.') : t('Day {n} in a row. Keep the streak going!', { n: st.day }))
+    : t('Claimed for today. Next reward in {time}.', { time: dur(msToMidnight()) });
 }
 
 function showDaily() { renderDaily(); $('daily').hidden = false; updateCoach(); }
@@ -2543,7 +2563,7 @@ function claimDaily() {
   track('daily_claim', { day: st.day });
   saveGame();
   Sound.play('reward'); buzz([20, 40, 20]);
-  toast(`Day ${st.day} reward: ${money(amount)}${gems ? ` · +${gems} gems` : ''}`, 'gift', 'rose');
+  toast(t('Day {n} reward: {amount}', { n: st.day, amount: money(amount) }) + (gems ? ' · ' + t('+{n} gems', { n: gems }) : ''), 'gift', 'rose');
   closeDaily();
   render();
 }
@@ -2561,29 +2581,29 @@ function maybeAutoDaily() {
 const tabBtn = name => document.querySelector(`.tabbar [data-screen="${name}"]`);
 const COACH = [
   { id: 't1', tut: true, screen: 'nation', target: () => $('tap'),
-    text: 'Welcome, Leader! Tap <b>Collect Taxes</b> to raise your first $15.', until: () => state.gdp >= 15 || owned('isp') > 0 },
+    text: t('Welcome, Leader! Tap <b>Collect Taxes</b> to raise your first $15.'), until: () => state.gdp >= 15 || owned('isp') > 0 },
   { id: 't2', tut: true, target: () => tabBtn('sectors'),
-    text: 'Well done. Now open <b>Sectors</b> to invest in your country.', until: () => screen === 'sectors' || owned('isp') > 0 },
+    text: t('Well done. Now open <b>Sectors</b> to invest in your country.'), until: () => screen === 'sectors' || owned('isp') > 0 },
   { id: 't3', tut: true, screen: 'sectors', target: () => document.querySelector('[data-buy="isp"]'),
-    text: 'Build your first <b>Internet Provider</b>. It earns GDP every second.', until: () => owned('isp') > 0 },
-  { id: 't4', tut: true, target: () => document.querySelector('.ips-pill'), button: "Let's go",
-    text: 'Your nation now earns on its own, even while you are away. Keep building to climb the world ranking!' },
+    text: t('Build your first <b>Internet Provider</b>. It earns GDP every second.'), until: () => owned('isp') > 0 },
+  { id: 't4', tut: true, target: () => document.querySelector('.ips-pill'), button: t("Let's go"),
+    text: t('Your nation now earns on its own, even while you are away. Keep building to climb the world ranking!') },
   { id: 'tipSec', when: () => !!state.attack, target: () => $('repel'),
-    text: 'Hackers are attacking! Tap <b>Defend</b>, then catch the malware before the timer runs out.', until: () => !state.attack },
+    text: t('Hackers are attacking! Tap <b>Defend</b>, then catch the malware before the timer runs out.'), until: () => !state.attack },
   { id: 'tipUpg', when: () => availableUpgrades().some(u => state.gdp >= u.cost), target: () => tabBtn('upgrades'),
-    text: 'An <b>upgrade</b> is ready. Upgrades multiply your income.', until: () => screen === 'upgrades' },
+    text: t('An <b>upgrade</b> is ready. Upgrades multiply your income.'), until: () => screen === 'upgrades' },
   { id: 'tipPolicy', when: () => policiesUnlocked(), target: () => tabBtn('global'),
-    text: 'You can now set <b>national policy</b>. Every choice has a benefit and a cost.', until: () => screen === 'global' },
+    text: t('You can now set <b>national policy</b>. Every choice has a benefit and a cost.'), until: () => screen === 'global' },
   { id: 'tipResearch', when: () => researchUnlocked() && state.rp >= RESEARCH[0].cost, target: () => tabBtn('global'),
-    text: 'Your first <b>research</b> project is ready. Research is permanent.', until: () => screen === 'global' && govTab === 'research' },
+    text: t('Your first <b>research</b> project is ready. Research is permanent.'), until: () => screen === 'global' && govTab === 'research' },
   { id: 'tipShop', when: () => state.gems >= 50, target: () => $('gemBtn'),
-    text: 'You have <b>gems</b>! Spend them in the shop on time warps, boosts and premium flags.', until: () => screen === 'shop' },
+    text: t('You have <b>gems</b>! Spend them in the shop on time warps, boosts and premium flags.'), until: () => screen === 'shop' },
   { id: 'tipAccount', when: () => cloudAvailable() && !cloud.user && state.lifeEarned >= 1e5, target: () => $('profileBtn'),
-    text: 'Your nation is growing. <b>Sign in</b> from your profile to keep it safe and play on any device.', until: () => screen === 'profile' || !!cloud.user },
+    text: t('Your nation is growing. <b>Sign in</b> from your profile to keep it safe and play on any device.'), until: () => screen === 'profile' || !!cloud.user },
   { id: 'tipLearn', when: () => pendingQuizzes().length > 0, screen: 'nation', target: () => $('libraryCard'),
-    text: 'New <b>encyclopedia</b> entries! Learn how real digital nations work and answer quizzes for gems.', until: () => screen === 'library' },
+    text: t('New <b>encyclopedia</b> entries! Learn how real digital nations work and answer quizzes for gems.'), until: () => screen === 'library' },
   { id: 'tipExport', when: () => claimableInfluence() >= 1, target: () => tabBtn('global'),
-    text: 'You can now <b>export technology</b> for permanent Influence.', until: () => screen === 'global' },
+    text: t('You can now <b>export technology</b> for permanent Influence.'), until: () => screen === 'global' },
 ];
 
 function currentCoach() {
@@ -2606,8 +2626,8 @@ function updateCoach() {
 
   if (coachShown !== c.id) {
     coachShown = c.id;
-    const skip = c.tut && c.id !== 't4' ? '<button class="coach-skip" data-coach="skip">Skip tutorial</button>' : '';
-    const okLabel = c.button || (c.tut ? '' : 'Got it');
+    const skip = c.tut && c.id !== 't4' ? `<button class="coach-skip" data-coach="skip">${t('Skip tutorial')}</button>` : '';
+    const okLabel = c.button || (c.tut ? '' : t('Got it'));
     const ok = okLabel ? `<button class="btn btn-gold" data-coach="ok">${okLabel}</button>` : '';
     bubble.innerHTML = `<div>${c.text}</div><div class="coach-actions">${skip}${ok}</div>`;
   }
@@ -2690,7 +2710,7 @@ function bindUI() {
   }
   $('shopBack').addEventListener('click', () => showScreen(lastTab));
   $('vipBtn').addEventListener('click', buyVip);
-  $('adGemsBtn').addEventListener('click', () => { if (adGemsLeft() > 0) watchAd(() => { state.adGems = { day: dayKey(), n: adGemsUsed() + 1 }; addGems(5, 'Ad reward', { reason: 'ad', ref: '' }); }); });
+  $('adGemsBtn').addEventListener('click', () => { if (adGemsLeft() > 0) watchAd(() => { state.adGems = { day: dayKey(), n: adGemsUsed() + 1 }; addGems(5, t('Ad reward'), { reason: 'ad', ref: '' }); }); });
   $('gemPacks').addEventListener('click', e => { const b = e.target.closest('[data-pack]'); if (b) buyPack(b.dataset.pack); });
   $('warps').addEventListener('click', e => { const b = e.target.closest('[data-warp]'); if (b) buyWarp(Number(b.dataset.warp)); });
   $('shopBoosts').addEventListener('click', e => { const b = e.target.closest('[data-sboost]'); if (b) buyShopBoost(b.dataset.sboost); });
@@ -2724,8 +2744,8 @@ function bindUI() {
   $('syncNow').addEventListener('click', () => syncNow());
   $('deleteAccount').addEventListener('click', askDeleteAccount);
   $('signOut').addEventListener('click', () => {
-    showModal('Sign out?', 'Your progress stays on this device and in your account. Sign in again any time to keep syncing.', {
-      icon: 'logout', tone: 'cyan', okText: 'Sign out', onOk: signOut,
+    showModal(t('Sign out?'), t('Your progress stays on this device and in your account. Sign in again any time to keep syncing.'), {
+      icon: 'logout', tone: 'cyan', okText: t('Sign out'), onOk: signOut,
     });
   });
   $('authEmailForm').addEventListener('submit', e => { e.preventDefault(); submitEmail(); });
@@ -2761,14 +2781,14 @@ function bindUI() {
   $('profileBtn').addEventListener('click', () => showScreen('profile'));
   $('profileBack').addEventListener('click', () => showScreen(lastTab));
   $('editNation').addEventListener('click', () => {
-    showModal('Name your nation', 'Choose a name for your digital state.', {
-      icon: 'pencil', tone: 'cyan', input: state.nation, okText: 'Save',
+    showModal(t('Name your nation'), t('Choose a name for your digital state.'), {
+      icon: 'pencil', tone: 'cyan', input: state.nation, okText: t('Save'),
       onOk: n => { if (n && n.trim()) { state.nation = n.trim().slice(0, 32); saveGame(); render(); } },
     });
   });
   $('editPlayer').addEventListener('click', () => {
-    showModal('Your name', 'How should your citizens address you?', {
-      icon: 'users', tone: 'gold', input: state.player.name, okText: 'Save',
+    showModal(t('Your name'), t('How should your citizens address you?'), {
+      icon: 'users', tone: 'gold', input: playerName(), okText: t('Save'),
       onOk: n => { if (n && n.trim()) { state.player.name = n.trim().slice(0, 24); saveGame(); render(); } },
     });
   });
@@ -2787,6 +2807,9 @@ function bindUI() {
   $('dailyCard').addEventListener('click', () => queueOverlay(showDaily));
   $('missionsCard').addEventListener('click', () => queueOverlay(showMissions));
   $('missionsClose').addEventListener('click', closeMissions);
+  $('setLang').addEventListener('click', openLanguages);
+  $('langClose').addEventListener('click', () => { $('langSheet').hidden = true; if (!overlayOpen()) nextOverlay(); });
+  $('langList').addEventListener('click', e => { const b = e.target.closest('[data-lang]'); if (b) chooseLanguage(b.dataset.lang); });
   $('eventChoices').addEventListener('click', e => { const b = e.target.closest('[data-choice]'); if (b) chooseEvent(Number(b.dataset.choice)); });
   $('missions').addEventListener('click', e => { const b = e.target.closest('[data-claim]'); if (b) claimMission(b.dataset.claim); });
   $('dailyClaim').addEventListener('click', claimDaily);
@@ -2813,8 +2836,8 @@ function bindUI() {
     renderInstall();
   });
   $('reset').addEventListener('click', () => {
-    showModal('Reset everything?', 'All progress, including Influence, will be deleted. This cannot be undone.', {
-      icon: 'trash', tone: 'bad', okText: 'Reset',
+    showModal(t('Reset everything?'), t('All progress, including Influence, will be deleted. This cannot be undone.'), {
+      icon: 'trash', tone: 'bad', okText: t('Reset'),
       onOk: () => { state = defaultState(); sectorSig = ''; upgSig = ''; achSig = ''; coachShown = ''; dailyAutoShown = ''; saveGame(); buildPickers(); showScreen('nation'); },
     });
   });
@@ -2827,6 +2850,7 @@ function bindUI() {
   window.addEventListener('beforeunload', saveGame);
 }
 
+I18N.translateDom();
 postLoad();
 bindUI();
 buildPickers();
