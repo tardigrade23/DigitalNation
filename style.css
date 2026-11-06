@@ -734,3 +734,9 @@ button.rank-pill { cursor: pointer; }
   .gdp { font-size: 28px; }
   .buy { min-width: 84px; }
 }
+
+/* World ranking + settings screens */
+.ti-card { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; }
+.ti-body { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; }
+.chip-btn { cursor: pointer; font: inherit; }
+.chip-btn:active { transform: scale(.96); }

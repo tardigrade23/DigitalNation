@@ -352,7 +352,7 @@ function techRank() {
 function showTechIndex() {
   const { parts, score } = techIndex();
   const lines = parts.map(p => `${p.label}: ${Math.round(p.pts)} / ${p.max} · ${p.detail}`).join('\n');
-  showModal(`Tech Index ${Math.round(score)} · #${techRank()}`, `The world ranking looks at your whole nation:\n\n${lines}\n\n${Math.round(TECH_INDEX_TOP)} points takes you to #1.\n\nSee how you compare with real players in Govern → Leaders.`, { icon: 'trophy', tone: 'gold' });
+  showModal(`Tech Index ${Math.round(score)} · #${techRank()}`, `The world ranking looks at your whole nation:\n\n${lines}\n\n${Math.round(TECH_INDEX_TOP)} points takes you to #1.`, { icon: 'trophy', tone: 'gold' });
 }
 
 function rankTitle(r) {
@@ -742,10 +742,9 @@ function renderSecurity(now) {
 function renderGlobal(now) {
   renderEra();
   for (const b of $('govTabs').children) b.classList.toggle('on', b.dataset.gov === govTab);
-  for (const k of ['policies', 'research', 'export', 'leaders']) $(`gov-${k}`).hidden = k !== govTab;
+  for (const k of ['policies', 'research', 'export']) $(`gov-${k}`).hidden = k !== govTab;
   if (govTab === 'policies') renderPolicies(now);
   if (govTab === 'research') renderResearch();
-  if (govTab === 'leaders') renderLeaderboard();
   const claim = claimableInfluence();
   $('runEarned').textContent = money(state.runEarned);
   $('claimable').textContent = `+${claim}`;
@@ -853,15 +852,20 @@ function render() {
     renderShop(now);
   } else if (screen === 'library') {
     renderLibrary();
+  } else if (screen === 'leaderboard') {
+    renderRanking();
+  } else if (screen === 'settings') {
+    renderSettings();
   }
   updateCoach();
 }
 
 let lastTab = 'nation';
+const SUB_SCREENS = ['profile', 'shop', 'library', 'leaderboard', 'settings'];
 function showScreen(name) {
   screen = name;
-  if (!['profile', 'shop', 'library'].includes(name)) lastTab = name;
-  if (name === 'shop' || name === 'library') track('screen_open', { name });
+  if (!SUB_SCREENS.includes(name)) lastTab = name;
+  if (['shop', 'library', 'leaderboard'].includes(name)) track('screen_open', { name });
   for (const b of document.querySelectorAll('.tabbar button')) b.classList.toggle('on', b.dataset.screen === name);
   for (const s of document.querySelectorAll('.screen')) s.hidden = s.id !== `screen-${name}`;
   sectorSig = ''; upgSig = ''; achSig = '';
@@ -973,6 +977,19 @@ function renderIdentity() {
 }
 
 let achSig = '';
+function renderSettings() {
+  for (const [id, key] of [['setSound', 'sound'], ['setVibe', 'vibration'], ['setStats', 'analytics']]) $(id).setAttribute('aria-checked', String(state.settings[key] === true));
+}
+
+function renderRanking() {
+  const { score } = techIndex();
+  const r = techRank();
+  $('tiScore').textContent = `${Math.round(score)} / ${Math.round(TECH_INDEX_TOP)}`;
+  $('tiRank').textContent = `#${r} of 195 nations · ${rankTitle(r)}`;
+  $('tiBar').style.width = `${Math.min(100, score / TECH_INDEX_TOP * 100)}%`;
+  renderLeaderboard();
+}
+
 function renderProfile(now, rank) {
   const done = ACHIEVEMENTS.filter(a => state.achievements[a.id]).length;
   $('profileRank').textContent = `#${rank}`;
@@ -996,7 +1013,6 @@ function renderProfile(now, rank) {
     </div>`).join('');
   }
   renderStats(now);
-  for (const [id, key] of [['setSound', 'sound'], ['setVibe', 'vibration'], ['setStats', 'analytics']]) $(id).setAttribute('aria-checked', String(state.settings[key] === true));
 }
 
 /* ---------------- Accounts + cloud save (Supabase) ---------------- */
@@ -2640,7 +2656,12 @@ function bindUI() {
   });
   $('boost').addEventListener('click', () => { if (Date.now() >= state.boostReadyAt) watchAd(() => { activateBoost(); render(); }); });
   $('gemBtn').addEventListener('click', () => showScreen('shop'));
-  $('rankBtn').addEventListener('click', showTechIndex);
+  $('rankBtn').addEventListener('click', () => showScreen('leaderboard'));
+  $('profileRankBtn').addEventListener('click', () => showScreen('leaderboard'));
+  $('techIndexCard').addEventListener('click', showTechIndex);
+  $('leaderboardBack').addEventListener('click', () => showScreen(lastTab));
+  $('settingsBtn').addEventListener('click', () => showScreen('settings'));
+  $('settingsBack').addEventListener('click', () => showScreen('profile'));
   $('libraryCard').addEventListener('click', () => showScreen('library'));
   $('libraryBack').addEventListener('click', () => showScreen(lastTab));
   $('learnClose').addEventListener('click', closeEntry);

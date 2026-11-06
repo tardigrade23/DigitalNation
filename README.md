@@ -17,7 +17,7 @@ The game saves itself to the browser's `localStorage` every 5 seconds.
 
 Digital Nation is a Progressive Web App. Once it is hosted over HTTPS, players can install it to their home screen. It then opens full screen with its own icon and works offline.
 
-- **Android / Chrome:** Profile → App → **Install**, or use the browser menu → *Install app*
+- **Android / Chrome:** Profile → ⚙ Settings → App → **Install**, or use the browser menu → *Install app*
 - **iPhone / Safari:** Share → *Add to Home Screen*
 
 ### Hosting on GitHub Pages
@@ -52,7 +52,7 @@ The bottom tab bar has five screens:
 | **Upgrades** | Sector boosts, AI upgrades that multiply all income, and tax (tap power) upgrades |
 | **Security** | Defense level, auto-defense chance, and attack history |
 | **Govern** | Era progress, plus three tabs: **Policies**, **Research** and **Export** (prestige) |
-| **Profile** | Opened from the avatar or flag at the top. Leader and nation names, avatar, national flag, achievements, statistics, and app install |
+| **Profile** | Opened from the avatar or flag at the top. Leader and nation names, avatar, national flag, achievements and statistics. The ⚙ button opens **Settings** (sound, vibration, anonymous stats, tutorial replay, install, privacy and terms, reset, account deletion) |
 
 ## Core systems
 
@@ -70,9 +70,9 @@ The bottom tab bar has five screens:
   - Only free licenses are accepted; anything Commons marks as non-free is rejected.
 - **Offline income**: while you're away, you earn 50% of your normal income for up to 8 hours.
 - **2× boost**: a stand-in for a rewarded ad.
-- **Tutorial**: four guided steps for new players (tap, open Sectors, build, passive income), then one-time tips for the first cyber attack, the first affordable upgrade, and the first technology export. It can be replayed from Profile → Settings.
+- **Tutorial**: four guided steps for new players (tap, open Sectors, build, passive income), then one-time tips for the first cyber attack, the first affordable upgrade, and the first technology export. It can be replayed from Profile → ⚙ Settings.
 - **Daily reward**: a 7-day streak. Rewards are minutes of current income with a minimum amount, and day 7 also gives 30 minutes of 2× income. Missing a day restarts the streak.
-- **Sound and vibration**: synthesized with Web Audio, so there are no audio files. Vibration works on Android only. Both can be turned off in Profile → Settings.
+- **Sound and vibration**: synthesized with Web Audio, so there are no audio files. Vibration works on Android only. Both can be turned off in Profile → ⚙ Settings.
 
 ## Accounts and cloud save
 
@@ -87,8 +87,8 @@ Players can play without an account. From **Profile → Save your progress** the
 - `vendor/supabase.js` is supabase-js 2.45.4, served locally so the game works offline and does not depend on a CDN.
 - The single-file claude.ai build leaves accounts out, because that host blocks requests to Supabase.
 
-- **Account deletion**: Profile → *Delete my account* (type DELETE to confirm) calls `public.delete_my_account()`. This server function deletes the signed-in user and, by cascade, all of their rows. Progress stored on the device is kept, and *Reset progress on this device* removes it.
-- **Legal pages**: `privacy.html` and `terms.html`, linked from Profile → About. Before launch, replace the GitHub issues contact with a real support email.
+- **Account deletion**: Profile → ⚙ Settings → *Delete my account* (type DELETE to confirm) calls `public.delete_my_account()`. This server function deletes the signed-in user and, by cascade, all of their rows. Progress stored on the device is kept, and *Reset progress on this device* removes it.
+- **Legal pages**: `privacy.html` and `terms.html`, linked from Profile → ⚙ Settings → About. Before launch, replace the GitHub issues contact with a real support email.
 
 **One-time Supabase dashboard settings** (Authentication section):
 1. **URL Configuration**: set *Site URL* to `https://tardigrade23.github.io/DigitalNation/` and add it under *Redirect URLs*.
@@ -132,7 +132,7 @@ After the tutorial, a national event happens every 25–45 minutes of play, and 
 
 ## Player leaderboard
 
-Govern → **Leaders** ranks real players by Tech Index (top 50, plus your own position if you are lower). Signed-in players' entries (nation, leader, flag, score, era) are written to `public.leaderboard` when they sync, at most every 5 minutes. Anyone can read the table; each player can write only their own row. Scores are reported by the game client, so they can be faked by a determined cheater; before a public launch, move the score calculation to the server or add plausibility checks.
+The **World Ranking** screen (tap the trophy rank in the header, or the rank chip in Profile) shows your Tech Index and ranks real players by Tech Index (top 50, plus your own position if you are lower). Signed-in players' entries (nation, leader, flag, score, era) are written to `public.leaderboard` when they sync, at most every 5 minutes. Anyone can read the table; each player can write only their own row. Scores are reported by the game client, so they can be faked by a determined cheater; before a public launch, move the score calculation to the server or add plausibility checks.
 
 ## Monetization (prototype)
 
