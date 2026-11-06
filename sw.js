@@ -1,10 +1,11 @@
 /* Digital Nation service worker
- * - App files: network-first, so updates arrive as soon as you are online;
+ * - App files: network-first, revalidated with the server every time (the
+ *   browser's HTTP cache would otherwise serve files up to 10 minutes old);
  *   falls back to the cache when offline.
  * - Google Fonts: cache-first.
  * Bump CACHE_VERSION when the list of precached files changes.
  */
-const CACHE_VERSION = 'dn-v7';
+const CACHE_VERSION = 'dn-v8';
 const APP_CACHE = `${CACHE_VERSION}-app`;
 const FONT_CACHE = 'dn-fonts';
 
@@ -55,7 +56,7 @@ self.addEventListener('fetch', event => {
   if (url.origin !== self.location.origin) return;
 
   event.respondWith(
-    fetch(req)
+    fetch(req, { cache: 'no-cache' })
       .then(res => {
         if (res.ok) {
           const copy = res.clone();

@@ -1316,7 +1316,22 @@ function registerServiceWorker() {
   window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; renderInstall(); });
   window.addEventListener('appinstalled', () => { deferredInstall = null; toast('Digital Nation installed', 'check', 'green'); renderInstall(); });
   if (!isPwaBuild() || !('serviceWorker' in navigator) || !/^https?:$/.test(location.protocol)) return;
-  window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => { /* unsupported host */ }); });
+  // An installed app is often resumed rather than reopened, so look for a new
+  // version whenever it comes back to the foreground and reload into it.
+  const hadController = !!navigator.serviceWorker.controller;
+  let reloading = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hadController || reloading) return;
+    reloading = true;
+    saveGame();
+    location.reload();
+  });
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').then(reg => {
+      document.addEventListener('visibilitychange', () => { if (!document.hidden) reg.update().catch(() => {}); });
+      setInterval(() => reg.update().catch(() => {}), 30 * 60 * 1000);
+    }).catch(() => { /* unsupported host */ });
+  });
 }
 
 /* ---------------- Tech Encyclopedia + quizzes ---------------- */
