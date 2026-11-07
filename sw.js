@@ -5,7 +5,7 @@
  * - Google Fonts: cache-first.
  * Bump CACHE_VERSION when the list of precached files changes.
  */
-const CACHE_VERSION = 'dn-v10';
+const CACHE_VERSION = 'dn-v11';
 const APP_CACHE = `${CACHE_VERSION}-app`;
 const FONT_CACHE = 'dn-fonts';
 
@@ -71,4 +71,24 @@ self.addEventListener('fetch', event => {
         )
       )
   );
+});
+
+// Reminders from the push-send Edge Function. Skipped while the game is open on screen.
+self.addEventListener('push', event => {
+  let d = {};
+  try { d = event.data ? event.data.json() : {}; } catch (e) { d = { body: event.data && event.data.text() }; }
+  event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+    if (list.some(c => c.visibilityState === 'visible')) return undefined;
+    return self.registration.showNotification(d.title || 'Digital Nation', {
+      body: d.body || '', tag: d.tag || 'digitalnation', icon: 'icons/icon-192.png', badge: 'icons/icon-192.png',
+    });
+  }));
+});
+
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+    for (const c of list) if ('focus' in c) return c.focus();
+    return self.clients.openWindow('./');
+  }));
 });

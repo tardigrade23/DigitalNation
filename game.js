@@ -18,7 +18,7 @@ const DEBUFF_DURATION = 30e3;
 const SEC_MAX = 7;
 const DEFAULT_NATION = 'Digital Nation';
 const DEFAULT_PLAYER = { name: 'Leader', avatar: 'ai', tone: 'gold', flag: 0 };
-const DEFAULT_SETTINGS = { sound: true, vibration: true, analytics: null }; // analytics: null until the player answers
+const DEFAULT_SETTINGS = { sound: true, vibration: true, analytics: null, push: false }; // analytics: null until the player answers
 const DEFAULT_DAILY = { streak: 0, last: '', best: 0 };
 const DEFAULT_POLICIES = { tax: 1, net: 1, edu: 1, trade: 1 };
 const START_GEMS = 25;
@@ -117,6 +117,7 @@ function defaultState() {
     policyChanges: 0, gamesWon: 0,
     stats: { built: 0, upgrades: 0, researchStarted: 0 }, missions: { day: '', list: [], week: '', weekly: null },
     events: { next: 0, seen: {}, log: [] }, eventEffects: [],
+    colonies: 0, bestEra: 0, season: null,
     gems: START_GEMS, vipUntil: 0, shieldUntil: 0, owned: { golden: false, flags: [], tones: [] }, adGems: { day: '', n: 0 },
     v: SAVE_VERSION, library: {}, quiz: {}, warps: { day: '', n: 0 }, simBuys: { day: '', n: 0 },
   };
@@ -155,6 +156,7 @@ function globalMult(withTemp) {
   m *= 1 + state.influence * INFLUENCE_BONUS;
   m *= mods().income * ERAS[currentEra()].mult;
   if (state.owned.golden) m *= 2;
+  m *= colonyIncomeMult();
   if (withTemp) {
     const now = Date.now();
     if (now < state.boostUntil) m *= 2;
@@ -321,6 +323,7 @@ function performPrestige() {
     gems: state.gems, vipUntil: state.vipUntil, shieldUntil: state.shieldUntil, owned: state.owned, adGems: state.adGems,
     v: state.v, library: state.library, quiz: state.quiz, warps: state.warps, simBuys: state.simBuys, pendingEarns: state.pendingEarns,
     researching: state.researching, stats: state.stats, missions: state.missions, events: state.events, eventEffects: state.eventEffects,
+    colonies: state.colonies, bestEra: state.bestEra, season: state.season,
   };
   state = Object.assign(defaultState(), keep);
   sectorSig = ''; upgSig = '';
@@ -342,6 +345,7 @@ function techIndex() {
     { label: t('Security'), detail: t('Defense level {n}', { n: state.secLevel }), pts: 4 * state.secLevel, max: 4 * SEC_MAX },
     { label: t('Influence'), detail: t('{n} points', { n: state.influence }), pts: 25 * Math.log10(1 + state.influence), max: 100 },
   ];
+  if (state.colonies > 0) parts.push({ label: t('Space colonies'), detail: t('{n} colonies', { n: state.colonies }), pts: 60 * state.colonies, max: 60 * state.colonies });
   parts.forEach(p => { p.pts = Math.min(p.max, p.pts); });
   return { parts, score: parts.reduce((a, p) => a + p.pts, 0) };
 }
@@ -434,6 +438,9 @@ function normalizeSave(saved) {
   if (!s.missions || typeof s.missions !== 'object') s.missions = { day: '', list: [], week: '', weekly: null };
   s.events = Object.assign({ next: 0, seen: {}, log: [] }, saved && saved.events);
   if (!Array.isArray(s.eventEffects)) s.eventEffects = [];
+  s.colonies = Math.max(0, s.colonies | 0);
+  s.bestEra = Math.max(s.bestEra | 0, s.era | 0);
+  if (!s.season || typeof s.season !== 'object') s.season = null;
   if (saved && !saved.v) s.v = 1;
   // Players from before the tutorial existed skip it.
   if (!saved || typeof saved.coach !== 'object' || !saved.coach) s.coach = saved ? { t1: 1, t2: 1, t3: 1, t4: 1 } : {};
@@ -745,6 +752,7 @@ function renderGlobal(now) {
   for (const k of ['policies', 'research', 'export']) $(`gov-${k}`).hidden = k !== govTab;
   if (govTab === 'policies') renderPolicies(now);
   if (govTab === 'research') renderResearch();
+  renderColonies();
   const claim = claimableInfluence();
   $('runEarned').textContent = money(state.runEarned);
   $('claimable').textContent = `+${claim}`;
@@ -802,7 +810,7 @@ function render() {
   $('secBadge').hidden = !(state.attack || (state.secLevel < SEC_MAX && state.gdp >= secCost()));
   const resReady = researchUnlocked() && !state.researching && RESEARCH.some(n => researchAvailable(n) && state.rp >= n.cost);
   $('resBadge').hidden = !resReady;
-  $('govBadge').hidden = !(resReady || claimableInfluence() >= 1) || screen === 'global';
+  $('govBadge').hidden = !(resReady || claimableInfluence() >= 1 || colonyReady()) || screen === 'global';
   const daily = dailyStatus();
   const tutorialDone = COACH.filter(c => c.tut).every(c => state.coach[c.id]);
   $('nationBadge').hidden = !daily.ready || screen === 'nation' || !tutorialDone;
@@ -934,6 +942,8 @@ const ACHIEVEMENTS = [
   { id: 'curious', icon: 'book',         name: t('Curious Mind'),         desc: t('Answer 10 quiz questions correctly'), prog: () => [quizCorrect(), 10] },
   { id: 'scholar', icon: 'book',         name: t('Scholar'),              desc: t('Answer 40 quiz questions correctly'), prog: () => [quizCorrect(), 40] },
   { id: 'collector', icon: 'star',       name: t('Encyclopedist'),        desc: t('Discover 50 encyclopedia entries'), prog: () => [discoveredIds().length, 50] },
+  { id: 'colony1',  icon: 'rocket',      name: t('One Small Step'),       desc: t('Found your first space colony'), prog: () => [state.colonies, 1] },
+  { id: 'colony5',  icon: 'globe',       name: t('Interplanetary Nation'), desc: t('Found 5 space colonies'),      prog: () => [state.colonies, 5] },
 ];
 
 function checkAchievements(silent) {
@@ -996,7 +1006,7 @@ function chooseLanguage(code) {
 let achSig = '';
 function renderSettings() {
   $('kvLang').textContent = I18N.info.name;
-  for (const [id, key] of [['setSound', 'sound'], ['setVibe', 'vibration'], ['setStats', 'analytics']]) $(id).setAttribute('aria-checked', String(state.settings[key] === true));
+  for (const [id, key] of [['setSound', 'sound'], ['setVibe', 'vibration'], ['setStats', 'analytics'], ['setPush', 'push']]) $(id).setAttribute('aria-checked', String(state.settings[key] === true));
 }
 
 function renderRanking() {
@@ -1123,13 +1133,14 @@ const isFreshSave = s => s.lifeEarned < 1000 && !s.prestiges && !s.vipUntil && !
 async function onSignedIn() {
   track('sign_in', {});
   if (!cloud.user || cloud.busy) return;
+  claimInvite();
   cloud.busy = true; cloud.ready = false; cloud.status = 'syncing'; renderAccount();
   try {
     const remote = await pullSave();
     const sameAccount = readCloudMeta().uid === cloud.user.id;
     if (!remote) {
       await pushSave();
-      toast('Your progress is now saved to your account', 'cloud', 'cyan');
+      toast(t('Your progress is now saved to your account'), 'cloud', 'cyan');
     } else if (sameAccount) {
       if (remoteChanged(remote)) adoptCloudSave(remote, t('Loaded your latest progress'));
       else await pushSave();
@@ -1155,7 +1166,7 @@ function askWhichSave(remote) {
     icon: 'cloud', tone: 'cyan', okText: t('Use account'), cancelText: t('Use this device'),
     onOk: () => { adoptCloudSave(remote, t('Loaded your nation from your account')); renderAccount(); connectWallet(); },
     onCancel: async () => {
-      try { await pushSave(); connectWallet(); toast('This device\'s nation is now saved to your account', 'cloud', 'cyan'); }
+      try { await pushSave(); connectWallet(); toast(t("This device's nation is now saved to your account"), 'cloud', 'cyan'); }
       catch (e) { cloud.status = 'error'; }
       renderAccount();
     },
@@ -1218,7 +1229,7 @@ async function signOut() {
   await cloud.client.auth.signOut().catch(() => {});
   writeCloudMeta({});
   cloud.user = null; cloud.ready = false; cloud.status = 'off'; cloud.lastSync = 0; cloud.walletReady = false; cloud.wallet = null;
-  toast('Signed out. Your progress stays on this device.', 'logout', 'cyan');
+  toast(t('Signed out. Your progress stays on this device.'), 'logout', 'cyan');
   renderAccount();
 }
 
@@ -1332,7 +1343,7 @@ function renderInstall() {
 
 function registerServiceWorker() {
   window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; renderInstall(); });
-  window.addEventListener('appinstalled', () => { deferredInstall = null; toast('Digital Nation installed', 'check', 'green'); renderInstall(); });
+  window.addEventListener('appinstalled', () => { deferredInstall = null; toast(t('Digital Nation installed'), 'check', 'green'); renderInstall(); });
   if (!isPwaBuild() || !('serviceWorker' in navigator) || !/^https?:$/.test(location.protocol)) return;
   // An installed app is often resumed rather than reopened, so look for a new
   // version whenever it comes back to the foreground and reload into it.
@@ -1381,6 +1392,7 @@ function discover(id) {
 // Runs after any save is loaded (local or cloud): fills in the encyclopedia and
 // moves older saves to the new era system without a "new era" popup.
 function postLoad() {
+  checkSeason();
   for (const s of SECTORS) if (owned(s.id) > 0) discover(s.id);
   for (const n of RESEARCH) if (state.research[n.id]) discover(n.id);
   if ((state.v || 1) < SAVE_VERSION) { state.era = currentEra(); state.v = SAVE_VERSION; }
@@ -1588,7 +1600,7 @@ async function connectWallet() {
 
 // public.leaderboard: everyone can read it; signed-in players write only their own row.
 const LB_PUSH_EVERY = 5 * 60e3, LB_CACHE = 60e3, LB_SIZE = 50;
-const lb = { rows: null, myRank: null, loadedAt: 0, pushedAt: 0, loading: false, error: '' };
+const lb = { rows: null, myRank: null, loadedAt: 0, pushedAt: 0, loading: false, error: '', mode: 'all' };
 
 async function pushLeaderboard(force) {
   if (!cloud.user || !cloud.client || (!force && Date.now() - lb.pushedAt < LB_PUSH_EVERY)) return;
@@ -1598,12 +1610,17 @@ async function pushLeaderboard(force) {
     nation: String(state.nation || 'Digital Nation').slice(0, 32),
     leader: String(state.player.name || 'Leader').slice(0, 24),
     flag: Math.min(20, Math.max(0, state.player.flag | 0)),
-    score: Math.min(1000, Math.round(techIndex().score * 10) / 10),
+    score: Math.min(1e6, Math.round(techIndex().score * 10) / 10),
     era: currentEra(),
     lifetime_gdp: state.lifeEarned,
   };
-  try { const { error } = await cloud.client.from('leaderboard').upsert(row); if (error) throw error; }
-  catch (e) { lb.pushedAt = 0; }
+  const full = { ...row, colonies: state.colonies, season: seasonId(), season_gdp: seasonGdp() };
+  try {
+    let { error } = await cloud.client.from('leaderboard').upsert(full);
+    // Before the 2026-11-07 migration the table has no season columns yet.
+    if (error && /column|schema cache/i.test(error.message || '')) ({ error } = await cloud.client.from('leaderboard').upsert({ ...row, score: Math.min(1000, row.score) }));
+    if (error) throw error;
+  } catch (e) { lb.pushedAt = 0; }
 }
 
 async function loadLeaderboard(force) {
@@ -1611,13 +1628,16 @@ async function loadLeaderboard(force) {
   lb.loading = true; lb.error = ''; renderLeaderboard(true);
   try {
     if (cloud.user) await pushLeaderboard(true);
-    const { data, error } = await cloud.client.from('leaderboard')
-      .select('user_id, nation, leader, flag, score, era').order('score', { ascending: false }).limit(LB_SIZE);
+    const season = lb.mode === 'season';
+    const q = cloud.client.from('leaderboard');
+    const { data, error } = season
+      ? await q.select('user_id, nation, leader, flag, score, era, season_gdp').eq('season', seasonId()).order('season_gdp', { ascending: false }).limit(LB_SIZE)
+      : await q.select('user_id, nation, leader, flag, score, era').order('score', { ascending: false }).limit(LB_SIZE);
     if (error) throw error;
     lb.rows = data || [];
     lb.myRank = null;
     if (cloud.user) {
-      const r = await cloud.client.rpc('my_leaderboard_rank');
+      const r = season ? await cloud.client.rpc('my_season_rank', { p_season: seasonId() }) : await cloud.client.rpc('my_leaderboard_rank');
       if (!r.error) lb.myRank = r.data;
     }
     lb.loadedAt = Date.now();
@@ -1641,9 +1661,12 @@ function renderLeaderboard(force) {
   $('lbJoin').hidden = !!me;
   $('lbMe').textContent = lb.loading ? t('Loading…')
     : lb.error ? lb.error
-    : me ? (lb.myRank ? t('You are #{rank} with a Tech Index of {score}.', { rank: lb.myRank, score: Math.round(techIndex().score) }) : t('Your nation will appear after the next sync.'))
+    : me ? (lb.myRank ? (lb.mode === 'season' ? t('You are #{rank} this season with {amount} GDP.', { rank: lb.myRank, amount: money(seasonGdp()) }) : t('You are #{rank} with a Tech Index of {score}.', { rank: lb.myRank, score: Math.round(techIndex().score) })) : t('Your nation will appear after the next sync.'))
     : t('Real players ranked by Tech Index. Sign in to add your nation.');
-  const sig = JSON.stringify([lb.rows, lb.myRank, me]);
+  for (const b of $('lbTabs').children) b.classList.toggle('on', b.dataset.lb === lb.mode);
+  $('seasonInfo').hidden = lb.mode !== 'season';
+  if (lb.mode === 'season') $('seasonInfo').textContent = t('Season: {name} · ends in {time}', { name: seasonName(), time: dur(seasonEndsIn()) });
+  const sig = JSON.stringify([lb.rows, lb.myRank, me, lb.mode]);
   if (sig === lbSig) return;
   lbSig = sig;
   if (!lb.rows) { $('lbList').innerHTML = ''; return; }
@@ -1651,12 +1674,306 @@ function renderLeaderboard(force) {
   const row = (r, pos) => `<div class="lb-row ${r.user_id === me ? 'me' : ''}">
       <span class="lb-pos">${pos}</span><span class="lb-flag">${flagSvg(r.flag)}</span>
       <span class="lb-name"><b>${esc(r.nation)}</b><span>${esc(r.leader === DEFAULT_PLAYER.name ? t(r.leader) : r.leader)} · ${ERAS[r.era] ? ERAS[r.era].name : ''}</span></span>
-      <span class="lb-score">${Math.round(r.score)}</span></div>`;
+      <span class="lb-score">${lb.mode === 'season' ? money(r.season_gdp || 0) : Math.round(r.score)}</span></div>`;
   let html = lb.rows.map((r, i) => row(r, i + 1)).join('');
   if (me && lb.myRank && lb.myRank > lb.rows.length) {
-    html += `<div class="lb-gap">…</div>` + row({ user_id: me, nation: state.nation, leader: state.player.name, flag: state.player.flag, era: currentEra(), score: techIndex().score }, lb.myRank);
+    html += `<div class="lb-gap">…</div>` + row({ user_id: me, nation: state.nation, leader: state.player.name, flag: state.player.flag, era: currentEra(), score: techIndex().score, season_gdp: seasonGdp() }, lb.myRank);
   }
   $('lbList').innerHTML = html;
+}
+
+/* ---------------- Space colonies (second prestige) ---------------- */
+
+const COLONY_INCOME = 3, COLONY_RESEARCH = 2, COLONY_GEMS = 100;
+const COLONY_NAMES = [t('Moon Base'), t('Mars Colony'), t('Europa Station'), t('Titan Outpost'), t('Ceres Mining Base'), t('Ganymede Lab'), t('Venus Cloud City'), t('Proxima Gateway')];
+function colonyName(i) { return i < COLONY_NAMES.length ? COLONY_NAMES[i] : t('Deep Space Colony {n}', { n: i + 1 }); }
+function colonyIncomeMult() { return Math.pow(COLONY_INCOME, state.colonies || 0); }
+function colonyResearchMult() { return Math.pow(COLONY_RESEARCH, state.colonies || 0); }
+function colonyReady() { return currentEra() === ERAS.length - 1; }
+
+function doColony() {
+  if (!colonyReady()) return;
+  const name = colonyName(state.colonies);
+  showModal(t('Found {name}?', { name }),
+    t('Your nation starts over: GDP, sectors, research, eras, Influence and policies reset. You keep gems, cosmetics, achievements and the encyclopedia.\n\nForever after: all income ×{inc} and research ×{res}, and you receive {gems} gems.',
+      { inc: fmt(colonyIncomeMult() * COLONY_INCOME), res: fmt(colonyResearchMult() * COLONY_RESEARCH), gems: COLONY_GEMS }),
+    { icon: 'rocket', tone: 'violet', okText: t('Launch'), onOk: performColony });
+}
+
+function performColony() {
+  if (!colonyReady()) return;
+  const n = state.colonies + 1;
+  track('colony', { n, hours: Math.round(minutesPlayed() / 60) });
+  const keep = {
+    nation: state.nation, lifeEarned: state.lifeEarned, prestiges: state.prestiges,
+    clicks: state.clicks, attacksRepelled: state.attacksRepelled, attacksLost: state.attacksLost,
+    startedAt: state.startedAt, player: state.player, achievements: state.achievements,
+    settings: state.settings, daily: state.daily, coach: state.coach, policyChanges: state.policyChanges, gamesWon: state.gamesWon,
+    gems: state.gems, vipUntil: state.vipUntil, shieldUntil: state.shieldUntil, owned: state.owned, adGems: state.adGems,
+    v: state.v, library: state.library, quiz: state.quiz, warps: state.warps, simBuys: state.simBuys, pendingEarns: state.pendingEarns,
+    stats: state.stats, missions: state.missions, events: state.events,
+    colonies: n, bestEra: state.bestEra, season: state.season,
+  };
+  const name = colonyName(n - 1);
+  state = Object.assign(defaultState(), keep);
+  sectorSig = ''; upgSig = ''; researchSig = ''; policiesBuilt = false;
+  gemEarn('colony', String(n), COLONY_GEMS);
+  checkAchievements();
+  saveGame();
+  Sound.play('reward'); buzz([30, 60, 30, 60]);
+  showModal(t('{name} is founded', { name }),
+    t('Your nation starts a new chapter. All income is now ×{inc} and research runs ×{res} faster, forever.', { inc: fmt(colonyIncomeMult()), res: fmt(colonyResearchMult()) }),
+    { icon: 'rocket', tone: 'violet' });
+  render();
+}
+
+function renderColonies() {
+  const c = state.colonies, ready = colonyReady();
+  $('colonyCount').textContent = c;
+  $('colonyBonus').textContent = c ? t('Income ×{inc} · Research ×{res}', { inc: fmt(colonyIncomeMult()), res: fmt(colonyResearchMult()) }) : '-';
+  $('colonyNext').textContent = colonyName(c);
+  const sig = String(c);
+  if ($('colonyList').dataset.sig !== sig) {
+    $('colonyList').dataset.sig = sig;
+    $('colonyList').innerHTML = Array.from({ length: c }, (_, i) => `<span class="chip">${icon('rocket', 'ic-xs')}${esc(colonyName(i))}</span>`).join('');
+  }
+  $('colonyBtn').disabled = !ready;
+  $('colonyBtn').textContent = t('Found {name}', { name: colonyName(c) });
+  $('colonyReq').textContent = ready ? t('Your nation is ready for space.') : t('Reach the Space Era to found a colony. Now: {era}.', { era: ERAS[currentEra()].name });
+}
+
+/* ---------------- Seasons (calendar months, UTC) ---------------- */
+
+function seasonId(d = new Date()) { return d.toISOString().slice(0, 7); }
+function seasonEndsIn() { const d = new Date(); return Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 1) - Date.now(); }
+function seasonName() {
+  try { return new Intl.DateTimeFormat(I18N.lang, { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date()); }
+  catch (e) { return seasonId(); }
+}
+function checkSeason() {
+  const id = seasonId();
+  if (!state.season || state.season.id !== id) state.season = { id, start: state.lifeEarned };
+}
+function seasonGdp() { checkSeason(); return Math.max(0, state.lifeEarned - state.season.start); }
+
+/* ---------------- Push notifications ---------------- */
+
+const PUSH_KEY = 'digitalnation_push';
+function pushInfo() { try { return JSON.parse(localStorage.getItem(PUSH_KEY)) || null; } catch (e) { return null; } }
+function pushSupported() { return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window && isPwaBuild() && cloudAvailable(); }
+const b64urlBytes = s => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((s.length + 3) % 4)), c => c.charCodeAt(0));
+const randomSecret = () => Array.from(crypto.getRandomValues(new Uint8Array(24)), b => b.toString(16).padStart(2, '0')).join('');
+
+async function enablePush() {
+  if (!pushSupported()) {
+    const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    showModal(t('Notifications'), ios && !isStandalone()
+      ? t('On iPhone and iPad, first add Digital Nation to your Home Screen (Share → Add to Home Screen), then turn on notifications in the app.')
+      : t('This browser cannot show notifications from the game.'), { icon: 'bell', tone: 'cyan' });
+    return;
+  }
+  try {
+    if (await Notification.requestPermission() !== 'granted') { toast(t('Notifications are blocked. Allow them in your browser settings.'), 'alert', 'bad'); return; }
+    const reg = await navigator.serviceWorker.ready;
+    const { data, error } = await cloud.client.functions.invoke('push-send', { body: { action: 'key' } });
+    if (error || !data || !data.publicKey) throw error || new Error('no key');
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64urlBytes(data.publicKey) });
+    const info = pushInfo() || { id: crypto.randomUUID(), secret: randomSecret() };
+    const r = await cloud.client.rpc('push_register', { p_device: info.id, p_secret: info.secret, p_sub: sub.toJSON(), p_lang: I18N.lang });
+    if (r.error) throw r.error;
+    try { localStorage.setItem(PUSH_KEY, JSON.stringify(info)); } catch (e) { /* storage unavailable */ }
+    state.settings.push = true; saveGame();
+    pushSig = ''; schedulePush();
+    track('push_on', {});
+    toast(t('Notifications are on'), 'bell', 'green');
+  } catch (e) {
+    toast(t('Could not turn on notifications. Try again later.'), 'alert', 'bad');
+  }
+  render();
+}
+
+async function disablePush() {
+  const info = pushInfo();
+  state.settings.push = false; saveGame(); render();
+  track('push_off', {});
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.getSubscription();
+    if (sub) await sub.unsubscribe();
+    if (info) await cloud.client.rpc('push_unregister', { p_device: info.id, p_secret: info.secret });
+  } catch (e) { /* offline: the server forgets the device when the push service rejects it */ }
+  try { localStorage.removeItem(PUSH_KEY); } catch (e) { /* storage unavailable */ }
+}
+
+// Reminders for while the player is away. The server sends each one at its time;
+// the service worker skips it if the game is open on screen.
+function pushPlan() {
+  const now = Date.now(), items = [];
+  if (state.researching) {
+    const n = RESEARCH.find(x => x.id === state.researching.id);
+    if (n) items.push({ kind: 'research', at: now + state.researching.left * 1000, title: t('Research complete'), body: t('{name} is ready. Start the next project.', { name: n.name }) });
+  }
+  const d = new Date();
+  if (dailyStatus().ready) { d.setHours(19, 0, 0, 0); if (d.getTime() < now + 60e3) { d.setDate(d.getDate() + 1); d.setHours(10, 0, 0, 0); } }
+  else { d.setDate(d.getDate() + 1); d.setHours(10, 0, 0, 0); }
+  items.push({ kind: 'daily', at: d.getTime(), title: t('Daily reward'), body: t('Your daily reward is ready. Keep your streak going!') });
+  items.push({ kind: 'treasury', at: now + (isVip() ? 24 * 3600 : OFFLINE_MAX_SEC) * 1000, title: t('Treasury is full'), body: t('{nation} has stopped earning while you are away. Come back to collect.', { nation: state.nation }) });
+  return items;
+}
+let pushSig = '';
+function schedulePush() {
+  if (!state.settings.push || !cloudAvailable()) return;
+  const info = pushInfo();
+  if (!info) return;
+  const items = pushPlan();
+  const sig = JSON.stringify(items.map(i => [i.kind, Math.round(i.at / 300e3)]));
+  if (sig === pushSig) return;
+  pushSig = sig;
+  cloud.client.rpc('push_schedule', { p_device: info.id, p_secret: info.secret, p_items: items }).then(r => { if (r.error) pushSig = ''; }, () => { pushSig = ''; });
+}
+// Offered once, when a research project will take an hour or more.
+function maybeAskPush() {
+  if (state.settings.push || state.coach.pushAsk || !pushSupported() || !state.researching || state.researching.total < 3600) return;
+  state.coach.pushAsk = 1;
+  queueOverlay(() => showModal(t('Get a reminder?'), t('We can tell you when research finishes, when your daily reward is ready, and when your treasury is full. You can turn this off any time in Settings.'),
+    { icon: 'bell', tone: 'cyan', okText: t('Turn on'), cancelText: t('Not now'), onOk: enablePush }));
+}
+
+/* ---------------- Share card and invites ---------------- */
+
+const INVITE_KEY = 'digitalnation_ref';
+const GAME_URL = 'https://tardigrade23.github.io/DigitalNation/';
+const share = { blob: null, url: '', code: null, invites: 0 };
+
+function captureInvite() {
+  try {
+    const q = new URLSearchParams(location.search), code = (q.get('ref') || '').toLowerCase();
+    if (/^[a-z0-9]{6}$/.test(code)) {
+      localStorage.setItem(INVITE_KEY, code);
+      track('invite_open', {});
+      q.delete('ref');
+      history.replaceState(null, '', location.pathname + (q.toString() ? `?${q}` : '') + location.hash);
+    }
+  } catch (e) { /* storage or history unavailable */ }
+}
+
+async function claimInvite() {
+  let code = null;
+  try { code = localStorage.getItem(INVITE_KEY); } catch (e) { return; }
+  if (!code || !cloud.user) return;
+  try {
+    const w = await walletRpc('claim_referral', { p_code: code });
+    applyWallet(w);
+    toast(t('Invite accepted: +50 gems'), 'gem', 'violet');
+    track('invite_claim', {});
+  } catch (e) {
+    if (/fetch|network|failed/i.test(String(e && e.message))) return; // try again next time
+  }
+  try { localStorage.removeItem(INVITE_KEY); } catch (e) { /* storage unavailable */ }
+}
+
+function shareBaseUrl() { return /^https?:$/.test(location.protocol) && isPwaBuild() ? location.origin + location.pathname : GAME_URL; }
+
+async function openShare() {
+  $('shareSheet').hidden = false;
+  track('share_open', {});
+  share.url = shareBaseUrl();
+  $('shareInvite').textContent = cloud.user ? t('Loading…') : t('Sign in to get your invite link: you and every friend who joins with it get 50 gems.');
+  if (cloud.user) {
+    try {
+      const r = await walletRpc('my_referral_code');
+      share.code = r.code; share.invites = r.invites || 0;
+      share.url = `${shareBaseUrl()}?ref=${r.code}`;
+      $('shareInvite').textContent = t('Friends who sign in with your link get 50 gems, and so do you (up to 20 friends). Friends joined: {n}.', { n: share.invites });
+    } catch (e) {
+      $('shareInvite').textContent = t('Your invite link is not available right now. You can still share your nation.');
+    }
+  }
+  share.blob = await drawShareCard();
+  $('shareImg').src = URL.createObjectURL(share.blob);
+}
+
+function shareText() {
+  return t('My digital nation {nation} is #{rank} in the world. Can you build a better one?', { nation: state.nation, rank: techRank() });
+}
+
+async function shareNow() {
+  const text = shareText();
+  track('share', { invite: !!share.code });
+  try {
+    const file = share.blob && new File([share.blob], 'digital-nation.png', { type: 'image/png' });
+    if (file && navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], text: `${text} ${share.url}` }); return; }
+    if (navigator.share) { await navigator.share({ title: 'Digital Nation', text, url: share.url }); return; }
+  } catch (e) {
+    if (e && e.name === 'AbortError') return;
+  }
+  // No share sheet (most desktops): save the picture and copy the link.
+  if (share.blob) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(share.blob); a.download = 'digital-nation.png'; a.click();
+  }
+  copyShareLink();
+}
+
+async function copyShareLink() {
+  try { await navigator.clipboard.writeText(`${shareText()} ${share.url}`); toast(t('Link copied'), 'check', 'green'); }
+  catch (e) { showModal(t('Copy link'), share.url, { icon: 'share', tone: 'cyan' }); }
+}
+
+// A 1080 × 1350 picture of the nation for social media.
+async function drawShareCard() {
+  const W = 1080, H = 1350, cv = document.createElement('canvas');
+  cv.width = W; cv.height = H;
+  const c = cv.getContext('2d');
+  const g = c.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, '#0C1420'); g.addColorStop(1, '#1B2839');
+  c.fillStyle = g; c.fillRect(0, 0, W, H);
+  // skyline silhouette
+  const r = rng(state.nation.length * 7919 + state.player.flag);
+  c.fillStyle = 'rgba(76, 201, 240, .10)';
+  for (let x = 0; x < W; x += 54) { const h = 120 + r() * 260; c.fillRect(x, H - 260 - h, 46, h + 260); }
+  c.fillStyle = 'rgba(245, 184, 65, .55)';
+  for (let i = 0; i < 160; i++) c.fillRect(Math.floor(r() * W / 54) * 54 + 8 + Math.floor(r() * 3) * 12, H - 120 - r() * 420, 6, 9);
+  const font = (w, size) => `${w} ${size}px Manrope, "Noto Sans", system-ui, sans-serif`;
+  const head = size => `700 ${size}px "Chakra Petch", Manrope, system-ui, sans-serif`;
+  c.textAlign = 'center'; c.direction = I18N.info.rtl ? 'rtl' : 'ltr';
+  // flag
+  const flagImg = await new Promise(res => {
+    const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null);
+    im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(flagSvg(state.player.flag).replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" '));
+  });
+  if (flagImg) { c.save(); c.beginPath(); c.roundRect(390, 96, 300, 200, 22); c.clip(); c.drawImage(flagImg, 390, 96, 300, 200); c.restore(); }
+  c.fillStyle = '#E8EEF6'; c.font = head(84);
+  c.fillText(state.nation.slice(0, 22), W / 2, 400, W - 120);
+  c.fillStyle = '#93A4BC'; c.font = font(600, 40);
+  c.fillText(t('Leader: {name}', { name: playerName() }), W / 2, 462, W - 120);
+  // rank
+  c.fillStyle = '#F5B841'; c.font = head(220);
+  c.fillText(`#${techRank()}`, W / 2, 700);
+  c.fillStyle = '#E8EEF6'; c.font = font(700, 44);
+  c.fillText(rankTitle(techRank()), W / 2, 770, W - 120);
+  // stats
+  const stats = [
+    [t('Tech Index'), String(Math.round(techIndex().score))],
+    [t('Lifetime GDP'), money(state.lifeEarned)],
+    [t('Era'), ERAS[currentEra()].name],
+  ];
+  if (state.colonies) stats.push([t('Space colonies'), String(state.colonies)]);
+  const bw = (W - 160) / stats.length;
+  stats.forEach(([k, v], i) => {
+    const x = 80 + bw * i;
+    c.fillStyle = 'rgba(17,27,42,.92)'; c.beginPath(); c.roundRect(x + 8, 840, bw - 16, 170, 24); c.fill(); c.strokeStyle = 'rgba(255,255,255,.08)'; c.lineWidth = 2; c.stroke();
+    c.fillStyle = '#E8EEF6'; c.font = head(v.length > 10 ? 40 : 56); c.fillText(v, x + bw / 2, 925, bw - 40);
+    c.fillStyle = '#93A4BC'; c.font = font(600, 30); c.fillText(k, x + bw / 2, 975, bw - 40);
+  });
+  c.fillStyle = '#E8EEF6'; c.font = head(52);
+  c.fillText('Digital Nation', W / 2, 1170);
+  c.fillStyle = '#4CC9F0'; c.font = font(700, 34);
+  c.fillText(share.code ? t('Join me: invite code {code}', { code: share.code }) : t('Build your own digital nation'), W / 2, 1230, W - 120);
+  c.fillStyle = '#93A4BC'; c.font = font(600, 28);
+  c.fillText(GAME_URL.replace(/^https:\/\//, '').replace(/\/$/, ''), W / 2, 1280);
+  return new Promise(res => cv.toBlob(res, 'image/png'));
 }
 
 /* ---------------- Gems, shop, VIP, ads ---------------- */
@@ -1762,7 +2079,7 @@ function buyVip() {
   simulatedPurchase(isVip() ? t('Extend VIP by 30 days?') : t('Start VIP membership?'), t('$4.99 / month'), () => {
     state.vipUntil = Math.max(Date.now(), state.vipUntil) + 30 * 86400e3;
     Sound.play('reward'); buzz([20, 40, 20]);
-    toast('VIP active for 30 days', 'crown', 'gold');
+    toast(t('VIP active for 30 days'), 'crown', 'gold');
     saveGame(); identitySig = ''; render();
   }, 'vip');
 }
@@ -2004,10 +2321,12 @@ function checkEra() {
   const e = currentEra();
   if (e > state.era) {
     state.era = e;
-    gemEarn('era', String(e), 25);
+    const firstTime = e > state.bestEra;
+    state.bestEra = Math.max(state.bestEra, e);
+    if (firstTime) gemEarn('era', String(e), 25);
     track('era_reached', { era: e, hours: Math.round(minutesPlayed() / 60) });
     Sound.play('reward'); buzz([30, 60, 30]);
-    queueOverlay(() => showModal(t('Welcome to the {era}', { era: ERAS[e].name }), t('Your nation entered Era {n}. All income is now ×{mult}, and you received 25 gems.', { n: ROMAN[e], mult: ERAS[e].mult }), { icon: 'flask', tone: 'cyan' }));
+    queueOverlay(() => showModal(t('Welcome to the {era}', { era: ERAS[e].name }), (firstTime ? t('Your nation entered Era {n}. All income is now ×{mult}, and you received 25 gems.', { n: ROMAN[e], mult: ERAS[e].mult }) : t('Your nation entered Era {n}. All income is now ×{mult}.', { n: ROMAN[e], mult: ERAS[e].mult })), { icon: 'flask', tone: 'cyan' }));
   }
 }
 
@@ -2045,7 +2364,7 @@ function setPolicy(id, opt) {
 const RESEARCH_TIME = [10 * 60, 3600, 4 * 3600, 16 * 3600, 48 * 3600, 96 * 3600, 192 * 3600]; // by position in the branch
 function researchSeconds(n) {
   const i = RESEARCH.filter(x => x.branch === n.branch).indexOf(n);
-  return RESEARCH_TIME[i] / mods().research;
+  return RESEARCH_TIME[i] / mods().research / colonyResearchMult();
 }
 function buyResearch(id) {
   const n = RESEARCH.find(x => x.id === id);
@@ -2056,6 +2375,8 @@ function buyResearch(id) {
   track('research_start', { id });
   Sound.play('buy'); buzz(12);
   toast(t('Research started: {name} ({time})', { name: n.name, time: dur(state.researching.left * 1000) }), 'flask', 'cyan');
+  schedulePush();
+  maybeAskPush();
   researchSig = '';
   saveGame();
   render();
@@ -2324,7 +2645,7 @@ function buzz(pattern) {
 /* ---------------- Overlays (modal + daily) queue ---------------- */
 
 const overlayQueue = [];
-function overlayOpen() { return !$('nationEvent').hidden || !$('missions').hidden || !$('modal').hidden || !$('daily').hidden || !$('cyberGame').hidden || !$('adOverlay').hidden || !$('auth').hidden || !$('learn').hidden || !$('langSheet').hidden; }
+function overlayOpen() { return !$('nationEvent').hidden || !$('missions').hidden || !$('modal').hidden || !$('daily').hidden || !$('cyberGame').hidden || !$('adOverlay').hidden || !$('auth').hidden || !$('learn').hidden || !$('langSheet').hidden || !$('shareSheet').hidden; }
 function queueOverlay(fn) { if (overlayOpen()) overlayQueue.push(fn); else fn(); }
 function nextOverlay() { const fn = overlayQueue.shift(); if (fn) fn(); updateCoach(); }
 
@@ -2817,6 +3138,15 @@ function bindUI() {
   $('setSound').addEventListener('click', () => { state.settings.sound = !state.settings.sound; Sound.play('tap'); saveGame(); render(); });
   $('setVibe').addEventListener('click', () => { state.settings.vibration = !state.settings.vibration; buzz(30); saveGame(); render(); });
   $('setStats').addEventListener('click', () => setAnalytics(state.settings.analytics !== true));
+  $('setPush').addEventListener('click', () => (state.settings.push ? disablePush() : enablePush()));
+  $('colonyBtn').addEventListener('click', doColony);
+  $('shareBtn').addEventListener('click', openShare);
+  $('shareBtn2').addEventListener('click', openShare);
+  $('shareGo').addEventListener('click', shareNow);
+  $('shareCopy').addEventListener('click', copyShareLink);
+  $('shareClose').addEventListener('click', () => { $('shareSheet').hidden = true; if (!overlayOpen()) nextOverlay(); });
+  $('lbTabs').addEventListener('click', e => { const b = e.target.closest('[data-lb]'); if (b && b.dataset.lb !== lb.mode) { lb.mode = b.dataset.lb; lb.rows = null; lbSig = ''; loadLeaderboard(true); } });
+  window.addEventListener('pagehide', schedulePush);
   $('replayTut').addEventListener('click', () => { for (const c of COACH) if (c.tut) delete state.coach[c.id]; coachShown = ''; showScreen('nation'); });
   $('coach').addEventListener('click', e => {
     const c = currentCoach();
@@ -2844,13 +3174,14 @@ function bindUI() {
 
   window.addEventListener('resize', drawSkyline);
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) { saveGame(); cloudPause(); flushEvents(); }
+    if (document.hidden) { saveGame(); cloudPause(); flushEvents(); schedulePush(); }
     else { const away = Date.now() - state.lastSave; applyOffline(); lastTick = Date.now(); render(); maybeAutoDaily(); cloudResume(); if (away > 2 * 3600e3) state.events.next = Math.min(state.events.next, Date.now() + 10e3); }
   });
   window.addEventListener('beforeunload', saveGame);
 }
 
 I18N.translateDom();
+captureInvite();
 postLoad();
 bindUI();
 buildPickers();
@@ -2871,7 +3202,7 @@ track('session_start', { day: Math.floor((Date.now() - state.startedAt) / 86400e
 
 // Debug / test hook
 // Hooks for automated tests and tools/simulate.mjs (balance simulation).
-window.DN = { get state() { return state; }, set state(v) { state = v; }, showNationalEvent, EVENTS,
+window.DN = { get state() { return state; }, set state(v) { state = v; }, showNationalEvent, EVENTS, colonyReady, performColony, seasonGdp, seasonId, pushPlan, drawShareCard,
   sim: { buySector, buyUpgrade, buyResearch, buySecurity, costFor, sectorMult, globalMult, mods, rpRate, popTarget, welfare, totalOwned, owned,
     researchAvailable, claimableInfluence, performPrestige, currentEra, checkEra, secCost, dailyAmount, DAILY, isUnlocked, availableUpgrades,
     clickValue, earn, ERAS, SEC_MAX, OFFLINE_EFFICIENCY, OFFLINE_MAX_SEC, progressResearch, researchSeconds },

@@ -186,6 +186,22 @@ The active bot reaches #4 in the world ranking after 60 days. Before this pass, 
 - tap multipliers no longer scale with income;
 - Influence grows logarithmically and gives +5% per point.
 
+## Space colonies (endgame)
+
+After the Space Era (about day 25–35) the Govern → Export tab offers **Space Colonies**, a second, endless prestige. Founding a colony resets GDP, sectors, research, eras, Influence and policies. Gems, cosmetics, achievements, the encyclopedia and lifetime GDP stay. Every colony permanently multiplies all income ×3 and research speed ×2, and gives 100 gems (wallet reason `colony`). Each colony adds 60 points to the Tech Index. Colonies are named Moon Base, Mars Colony, Europa Station and so on.
+
+## Seasons
+
+Every calendar month (UTC) is a season. World Ranking → **This season** ranks players by GDP earned during the month (`leaderboard.season`, `season_gdp`, `my_season_rank`).
+
+## Push notifications
+
+Settings → Notifications (or the offer after the first long research project) subscribes the device with Web Push. No account is needed: the device registers with a random id and secret (`push_register`) and sends a short queue of upcoming reminders whenever the game goes to the background (`push_schedule`): research finished, daily reward ready (19:00 or next morning 10:00, local time) and treasury full (offline earnings cap). pg_cron calls the `push-send` Edge Function every 5 minutes; it sends due reminders and forgets devices whose subscription expired. The VAPID key pair is derived on the server from the project's service role key, so there is no extra secret. The service worker does not show a reminder while the game is open on screen. On iPhone and iPad, notifications work only when the game is added to the Home Screen (iOS 16.4+).
+
+## Sharing and invites
+
+Profile and World Ranking have **Share my nation**: a 1080 × 1350 picture with flag, rank, Tech Index, GDP, era and colonies, shared through the phone's share sheet (desktop: the picture is downloaded and the link copied). Signed-in players get an invite link (`?ref=code`, `my_referral_code`). A new player who opens it and signs in within 14 days gets 50 gems, and so does the inviter, for up to 20 friends (`claim_referral`).
+
 ## Languages
 
 The game is available in 12 languages: English, Azerbaijani, Turkish, Russian, Spanish, Portuguese, French, German, Arabic (right to left), Hindi, Indonesian and Chinese. Everything is translated, including the encyclopedia, quizzes and national events. The legal pages (`privacy.html`, `terms.html`) stay in English.
@@ -204,6 +220,7 @@ The game is available in 12 languages: English, Azerbaijani, Turkish, Russian, S
 - `content.js`: Tech Encyclopedia cards and quizzes
 - `style.css`: visual design, built phone-first and safe-area aware
 - `game.js`: game logic, rendering, the canvas skyline, and cloud sync. The balance constants are at the top (`SECTORS`, `COST_GROWTH`, `PRESTIGE_DIVISOR` and others)
+- `supabase/functions/push-send/index.ts`: Edge Function that sends push reminders
 - `i18n.js`, `i18n/*.json`, `lang/*.js`: translations (see Languages)
 - `tools/i18n.mjs`: extracts, checks and builds translations
 - `tools/build_single_file.py`: bundles everything, all languages included, into one HTML page. PWA tags are left out

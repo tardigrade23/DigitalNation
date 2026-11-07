@@ -755,3 +755,14 @@ button.rank-pill { cursor: pointer; }
 /* Right-to-left languages: keep amounts like "+$1.2K/s" readable */
 [dir="rtl"] .ips-pill, [dir="rtl"] .buy small, [dir="rtl"] .gem-pill, [dir="rtl"] .rank-pill, [dir="rtl"] .kv b, [dir="rtl"] .lb-score { direction: ltr; unicode-bidi: isolate; }
 [dir="rtl"] .row-sub > span, [dir="rtl"] .chip, [dir="rtl"] .goal-text, [dir="rtl"] .muted.small { unicode-bidi: plaintext; }
+
+/* Colonies, sharing, seasons */
+.colony-card { margin-top: 12px; }
+.colony-list { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 10px; }
+.colony-list:empty { display: none; }
+.colony-list .chip { color: var(--text); }
+.share-btn { margin: 10px 0 2px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.share-box { display: flex; flex-direction: column; gap: 10px; }
+.share-img { width: 100%; max-height: 52vh; object-fit: contain; border-radius: 14px; background: var(--surface-2); aspect-ratio: 4 / 5; }
+.season-info { margin: 8px 2px 4px; }
+#lbTabs { margin-top: 4px; }
