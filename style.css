@@ -343,7 +343,7 @@ main { padding-block: 16px; padding-left: var(--gutter-l); padding-right: var(--
 .pick-grid button .tile { width: 52px; height: 52px; border-radius: 15px; }
 .pick-grid button .tile .ic { width: 26px; height: 26px; }
 .pick-grid button.on { border-color: var(--gold); }
-.tone-row { display: flex; gap: 10px; justify-content: center; }
+.tone-row { display: flex; flex-wrap: wrap; gap: 10px 8px; justify-content: center; padding: 0 8px; }
 .tone-row button { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(145deg, var(--c1), var(--c2)); border: 2px solid transparent; box-shadow: 0 0 0 2px var(--surface) inset; }
 .tone-row button.on { border-color: var(--text); }
 

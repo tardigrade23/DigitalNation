@@ -152,7 +152,7 @@ function globalMult(withTemp) {
   let m = 1;
   for (const u of UPGRADES) if (u.kind === 'global' && state.upgrades[u.id]) m *= u.mult;
   m *= 1 + welfare() / 100;
-  m *= Math.pow(state.pop / 1e6, 0.35);
+  m *= Math.pow(Math.max(1, state.pop) / 1e6, 0.35);
   m *= 1 + state.influence * INFLUENCE_BONUS;
   m *= mods().income * ERAS[currentEra()].mult;
   if (state.owned.golden) m *= 2;
@@ -421,6 +421,17 @@ function loadGame() {
 // Fills in fields that older saves (local or cloud) do not have yet.
 function normalizeSave(saved) {
   const s = saved && typeof saved === 'object' ? Object.assign(defaultState(), saved) : defaultState();
+  // Numbers must be finite: a broken or edited save must never poison the economy with NaN.
+  const def = defaultState();
+  for (const [k, v] of Object.entries(def)) {
+    if (typeof v === 'number' && (typeof s[k] !== 'number' || !isFinite(s[k]) || s[k] < 0)) s[k] = v;
+  }
+  for (const k of ['sectors', 'upgrades', 'research', 'achievements', 'library', 'quiz']) {
+    if (!s[k] || typeof s[k] !== 'object' || Array.isArray(s[k])) s[k] = {};
+  }
+  for (const [id, n] of Object.entries(s.sectors)) { const v = Math.floor(Number(n)); if (isFinite(v) && v > 0) s.sectors[id] = v; else delete s.sectors[id]; }
+  s.lifeEarned = Math.max(s.lifeEarned, s.runEarned);
+  if (typeof s.nation !== 'string' || !s.nation.trim()) s.nation = DEFAULT_NATION;
   if (s.nation === 'Rəqəmsal Respublika' || s.nation === 'Digital Republic') s.nation = DEFAULT_NATION; // older defaults
   s.player = Object.assign({ ...DEFAULT_PLAYER }, saved && saved.player);
   if (!s.achievements || typeof s.achievements !== 'object') s.achievements = {};
@@ -1131,8 +1142,8 @@ function adoptCloudSave(remote, message) {
 const isFreshSave = s => s.lifeEarned < 1000 && !s.prestiges && !s.vipUntil && !(s.owned && s.owned.golden);
 
 async function onSignedIn() {
-  track('sign_in', {});
   if (!cloud.user || cloud.busy) return;
+  if (readCloudMeta().uid !== cloud.user.id) track('sign_in', {});
   claimInvite();
   cloud.busy = true; cloud.ready = false; cloud.status = 'syncing'; renderAccount();
   try {
@@ -1499,7 +1510,7 @@ function renderLibrary() {
       }
       const stateTag = q === undefined ? `<span class="lib-state quiz">${t('Quiz +{n}', { n: QUIZ_GEMS })}</span>`
         : (q === 1 ? `<span class="lib-state done">${icon('check', 'ic-xs')} ${t('Learned')}</span>` : `<span class="lib-state miss">${t('Read')}</span>`);
-      const pic = LIB_IMG[e.id] ? `<span class="thumb"><img src="${LIB_IMG[e.id].src}" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span>` : tile(e.icon, e.tone);
+      const pic = LIB_IMG[e.id] ? `<span class="thumb"><img src="${LIB_IMG[e.id].src}" alt="" loading="lazy" decoding="async"></span>` : tile(e.icon, e.tone);
       return `<button class="row lib-row" data-learn="${e.id}">${pic}
         <div class="row-title"><span class="nm">${e.name}</span></div>${stateTag}
         <div class="row-sub"><span>${e.kind}</span></div></button>`;
@@ -2977,7 +2988,8 @@ let skyTimer = 0;
 let achTimer = 0;
 function tick() {
   const now = Date.now();
-  const dt = Math.min(1, (now - lastTick) / 1000); // long gaps are handled by applyOffline
+  // Clamped: long gaps are handled by applyOffline, and a clock that jumps back must not run time in reverse.
+  const dt = Math.max(0, Math.min(1, (now - lastTick) / 1000));
   lastTick = now;
   earn(incomePerSec() * dt);
   state.pop += (popTarget() - state.pop) * Math.min(1, dt * 0.05 * mods().popGrowth);
@@ -3181,6 +3193,8 @@ function bindUI() {
 }
 
 I18N.translateDom();
+// Broken encyclopedia thumbnails disappear (no inline handlers: Content Security Policy).
+document.addEventListener('error', e => { if (e.target instanceof HTMLImageElement && e.target.closest('.thumb')) e.target.remove(); }, true);
 captureInvite();
 postLoad();
 bindUI();
