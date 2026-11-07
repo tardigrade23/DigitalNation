@@ -529,6 +529,7 @@ main { padding-block: 16px; padding-left: var(--gutter-l); padding-right: var(--
 .tone-shop button { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: var(--muted); }
 .tone-shop .swatch { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(145deg, var(--c1), var(--c2)); border: 2px solid transparent; }
 .tone-shop button.on .swatch { border-color: var(--text); }
+.tone-row button { position: relative; }
 .tone-row button .lockbadge { right: -8px; bottom: -6px; }
 .gem-mini { display: inline-flex; align-items: center; gap: 2px; color: var(--violet); font-weight: 800; }
 .gem-mini .ic { width: 11px !important; height: 11px !important; color: var(--violet) !important; }
