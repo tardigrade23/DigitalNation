@@ -18,7 +18,8 @@ const rd = f => fs.readFileSync(path.join(root, f), 'utf8');
 const SRC = path.join(root, 'i18n', 'en.json');
 
 function fromGame() {
-  const src = rd('game.js');
+  // game.js, plus text that only the guide uses (tools/build_guide.mjs).
+  const src = rd('game.js') + '\n' + rd('tools/build_guide.mjs');
   const out = [];
   // t('...') and t("...") calls whose first argument is a plain string literal.
   const re = /\bt\(\s*('(?:[^'\\\n]|\\.)*'|"(?:[^"\\\n]|\\.)*")/g;

@@ -202,6 +202,10 @@ Settings → Notifications (or the offer after the first long research project) 
 
 Profile and World Ranking have **Share my nation**: a 1080 × 1350 picture with flag, rank, Tech Index, GDP, era and colonies, shared through the phone's share sheet (desktop: the picture is downloaded and the link copied). Signed-in players get an invite link (`?ref=code`, `my_referral_code`). A new player who opens it and signs in within 14 days gets 50 gems, and so does the inviter, for up to 20 friends (`claim_referral`).
 
+## Guide (public wiki)
+
+`guide/` is a static wiki generated from the game itself, in all 12 languages: sectors, research, eras, policies, national events, achievements and one page per encyclopedia entry (photo, facts, quiz, in-game numbers). `tools/build_guide.mjs` opens the game in headless Chromium once per language and reads the data and translations, so the guide always matches the game; nothing is written by hand. The Pages workflow builds it on every deploy (`_site/guide`), and the game links to it from Settings → About → Game guide. Each page has hreflang links and the guide has `sitemap.xml` for search engines. Build it locally with `node tools/build_guide.mjs` (output in `guide/`, which git ignores).
+
 ## Languages
 
 The game is available in 12 languages: English, Azerbaijani, Turkish, Russian, Spanish, Portuguese, French, German, Arabic (right to left), Hindi, Indonesian and Chinese. Everything is translated, including the encyclopedia, quizzes and national events. The legal pages (`privacy.html`, `terms.html`) stay in English.

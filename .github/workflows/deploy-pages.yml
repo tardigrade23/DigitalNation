@@ -30,6 +30,16 @@ jobs:
           cp index.html privacy.html terms.html style.css content.js game.js i18n.js sw.js manifest.webmanifest _site/
           cp -r icons vendor images lang _site/
 
+      # The guide (a static wiki) is generated from the game itself in headless Chromium.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build the guide
+        run: |
+          npm install --no-save --no-package-lock playwright@1.49.1
+          npx playwright install --with-deps chromium
+          node tools/build_guide.mjs _site/guide
+
       - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v3
