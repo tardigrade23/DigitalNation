@@ -25,7 +25,7 @@
 *{box-sizing:border-box}
 html,body{margin:0}
 body{background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-header{position:sticky;top:0;z-index:5;background:var(--panel);border-bottom:1px solid var(--line);padding:10px 16px;display:flex;align-items:center;gap:12px}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--panel);border-bottom:1px solid var(--line);padding:10px 16px;display:flex;align-items:center;gap:12px}
 header h1{font-size:18px;margin:0;flex:1}
 .progress{flex:0 0 160px;height:8px;background:var(--line);border-radius:4px;overflow:hidden}
 .progress>div{height:100%;background:var(--accent);width:0;transition:width .3s}
@@ -82,6 +82,9 @@ textarea{min-height:90px}
 .pager{display:flex;justify-content:space-between;gap:10px;margin-top:8px}
 .score{font-size:15px;color:var(--muted);margin-top:6px}
 ul,ol{padding-left:22px}
+.ex{background:var(--code);border-radius:10px;padding:12px 16px;margin:14px 0}
+.ex>.tag{display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--accent);margin-bottom:4px}
+.ex p{margin:6px 0}.ex ul,.ex ol{margin:6px 0}
 nav .part{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:14px 12px 4px;font-weight:700}
 nav .part:first-child{padding-top:0}
 input[type=range]{accent-color:var(--accent);min-width:140px}
@@ -131,6 +134,15 @@ input[type=range]{accent-color:var(--accent);min-width:140px}
       <li>“x &gt; 3” — mülahizə <b>deyil</b>, çünki x bilinmir (bu, <i>predikatdır</i>, 6-cı dərsdə görəcəyik)</li>
     </ul>
     <div class="note">Mülahizələri adətən kiçik hərflərlə işarə edirik: <span class="sym">p</span>, <span class="sym">q</span>, <span class="sym">r</span>. Məsələn, p = “Yağış yağır”.</div>
+    <div class="ex"><span class="tag">📌 Real nümunə: xəbər başlıqları</span>
+      <p>Hansı başlığı yoxlamaq olar?</p>
+      <ul>
+        <li>“Sabah Bakıda küləyin sürəti 20 m/s-ə çatacaq.” <b>Mülahizədir.</b> Sabah ölçüb doğru və ya yalan olduğunu bilə bilərik.</li>
+        <li>“Bu, şəhərin ən yaxşı restoranıdır.” <b>Mülahizə kimi görünür, amma</b> “ən yaxşı” sözünün meyarı yoxdur: qiymət, dad, yoxsa xidmət? Əvvəlcə meyarı dəqiqləşdirmək lazımdır.</li>
+        <li>“Gənclər indi heç nə oxumur.” Bu, qeyri-dəqiq iddiadır. Dəqiq forması belə olardı: “2025-ci ildə 18–25 yaşlıların 60%-i il ərzində bir kitab da oxumayıb.” Bu artıq yoxlana bilən mülahizədir.</li>
+      </ul>
+      <p><b>Praktik dərs:</b> mübahisədən əvvəl soruş: “Bu cümlə ümumiyyətlə doğru və ya yalan ola bilərmi?” Cavab “yox”dursa, mübahisə boşunadır. Əvvəlcə cümləni dəqiqləşdirmək lazımdır.</p>
+    </div>
   </div>
   <div class="card"><h3>✍️ Tapşırıq: hansı cümlə mülahizədir?</h3><div class="quiz" data-quiz="props"></div></div>
 </section>
@@ -149,6 +161,15 @@ input[type=range]{accent-color:var(--accent);min-width:140px}
       <tr><td>p ↔ q</td><td>Ekvivalentlik</td><td>“p ancaq və ancaq q olduqda”</td><td>ikisinin qiyməti eyni olduqda</td></tr>
     </table></div>
     <div class="note"><b>İmplikasiya ən çox səhv salınan bağlayıcıdır.</b> “Əgər imtahandan 90 alsan, sənə velosiped alaram” vədini düşün. Vəd yalnız bir halda pozulur: sən 90 aldın (D), velosiped alınmadı (Y). 90 almasan, nə olursa olsun vəd pozulmayıb. Ona görə yalan əsasdan istənilən nəticə “doğru” sayılır.</div>
+    <div class="ex"><span class="tag">📌 Real nümunələr: bağlayıcılar gündəlik həyatda</span>
+      <ul>
+        <li><b>∧ (və). Bank tətbiqi:</b> “Ödənişi təsdiqləmək üçün <i>SMS kodu</i> və <i>PİN</i> lazımdır.” p = kod düzdür, q = PİN düzdür. Ödəniş yalnız p ∧ q = D olanda keçir. Biri səhv olsa, keçmir.</li>
+        <li><b>∨ (və ya). Mağaza endirimi:</b> “<i>Endirim kartı</i> və ya <i>promo-kod</i> ilə 10% endirim.” İkisindən biri kifayətdir, ikisi birlikdə də olar. Bu, <b>inklüziv</b> “və ya”dır.</li>
+        <li><b>Diqqət, “ya… ya” fərqlidir.</b> Restoranda “Nahar menyusuna çay <i>ya</i> qəhvə daxildir” deyilirsə, ikisini birlikdə ala bilməzsən. Bu, <b>istisna edən</b> “və ya”dır: ¬(p ↔ q). Gündəlik dildə bu iki məna tez-tez qarışır.</li>
+        <li><b>→ (əgər… onda). Yol qaydası:</b> “Sürət 90 km/saatdan çoxdursa, cərimə yazılır.” Sürücü 70 km/saatla gedib, amma qırmızı işıqda keçdiyi üçün cərimə alıb. Qayda pozulubmu? <b>Xeyr.</b> Əsas yalandır (p = Y), deməli p → q doğrudur. Qayda cərimənin başqa səbəbdən yazılmasını qadağan etmir.</li>
+        <li><b>↔ (ancaq və ancaq). İmtahan:</b> “51 və daha çox bal toplayan, ancaq və ancaq o, keçir.” 51+ bal toplayan keçir, 51-dən az toplayan keçmir. Hər iki istiqamət işləyir.</li>
+      </ul>
+    </div>
   </div>
   <div class="card">
     <h3>🎛️ Laboratoriya: p və q qiymətlərini dəyiş</h3>
@@ -168,6 +189,18 @@ input[type=range]{accent-color:var(--accent);min-width:140px}
     <p class="lead">Mürəkkəb mülahizənin bütün mümkün hallarda qiymətini göstərən cədvəl.</p>
     <p>n dəyişən varsa, cədvəldə <b>2ⁿ</b> sətir olur: 2 dəyişəndə 4, 3 dəyişəndə 8 sətir. Formulu hissə-hissə, içəridən çölə doğru hesablayırıq.</p>
     <p>Bağlayıcıların gücü (güclüdən zəifə): <span class="sym">¬</span> → <span class="sym">∧</span> → <span class="sym">∨</span> → <span class="sym">→</span> → <span class="sym">↔</span>. Yəni <span class="sym">¬p ∨ q ∧ r</span> belə oxunur: <span class="sym">(¬p) ∨ (q ∧ r)</span>.</p>
+    <div class="ex"><span class="tag">📌 Addım-addım nümunə</span>
+      <p>Dostun deyir: <i>“Yağış yağsa və çətirim olmasa, islanacağam.”</i> Bu vəd nə vaxt yalan çıxır?</p>
+      <p>p = “yağış yağır”, q = “çətirim var”, r = “islanıram”. Formul: <span class="sym">(p ∧ ¬q) → r</span></p>
+      <div class="scroll"><table class="tt">
+        <tr><th>p</th><th>q</th><th>r</th><th>¬q</th><th>p ∧ ¬q</th><th>(p ∧ ¬q) → r</th><th>Həyatda</th></tr>
+        <tr><td>D</td><td>D</td><td>Y</td><td>Y</td><td>Y</td><td class="res T">D</td><td style="text-align:left">Yağış yağdı, çətiri vardı, islanmadı</td></tr>
+        <tr><td>D</td><td>Y</td><td>D</td><td>D</td><td>D</td><td class="res T">D</td><td style="text-align:left">Yağış yağdı, çətiri yox idi, islandı</td></tr>
+        <tr><td>D</td><td>Y</td><td>Y</td><td>D</td><td>D</td><td class="res F">Y</td><td style="text-align:left"><b>Yağış yağdı, çətiri yox idi, amma islanmadı</b></td></tr>
+        <tr><td>Y</td><td>Y</td><td>D</td><td>D</td><td>Y</td><td class="res T">D</td><td style="text-align:left">Yağış yox idi, amma islandı (məsələn, hovuzda)</td></tr>
+      </table></div>
+      <p>Cədvəlin 8 sətrindən yalnız birində iddia yalan çıxır: şərt ödənib (yağış var, çətir yoxdur), amma nəticə baş verməyib. Bu formulu aşağıdakı generatora yaz və bütün 8 sətri gör: <span class="sym">p ∧ ¬q → r</span>.</p>
+    </div>
   </div>
   <div class="card">
     <h3>🛠️ Cədvəl generatoru</h3>
@@ -210,6 +243,17 @@ input[type=range]{accent-color:var(--accent);min-width:140px}
       <tr><td>İmplikasiyanın inkarı</td><td>¬(p → q) ≡ p ∧ ¬q</td></tr>
     </table></div>
     <div class="note">De Morqan gündəlik dildə: “Çay <b>və</b> qəhvə içmədim” cümləsinin inkarı “Çay <b>və ya</b> qəhvə içmişəm” olur, yəni “ən azı birini içmişəm”.</div>
+    <div class="ex"><span class="tag">📌 Real nümunə 1: siyasi vəd</span>
+      <p>Namizəd deyir: <i>“Seçilsəm, maaşları artıracağam.”</i> (p → q). Vədin pozulduğunu sübut etmək üçün nə göstərmək lazımdır?</p>
+      <p>İmplikasiyanın inkarı: <span class="sym">¬(p → q) ≡ p ∧ ¬q</span>. Yəni <b>seçildi və artırmadı</b>. Namizəd seçilməyibsə, vədi pozduğunu demək olmaz. Bu, jurnalistlərin tez-tez səhv saldığı yerdir.</p>
+    </div>
+    <div class="ex"><span class="tag">📌 Real nümunə 2: yanğın təhlükəsizliyi (kontrapozisiya)</span>
+      <p>Qayda: “Bina təhlükəsizdirsə, onun yanğın çıxışı var.” Bu, belə də ifadə edilə bilər: <b>“Yanğın çıxışı yoxdursa, bina təhlükəsiz deyil.”</b> İkinci forma müfəttiş üçün daha rahatdır, çünki çıxışın olub-olmadığını tez yoxlamaq olar.</p>
+      <p>Amma bu nəticə <b>çıxmır</b>: “Yanğın çıxışı varsa, bina təhlükəsizdir” (tərs implikasiya). Binada çıxış ola bilər, amma elektrik naqilləri köhnə ola bilər.</p>
+    </div>
+    <div class="ex"><span class="tag">📌 Real nümunə 3: klubun girişi (De Morqan)</span>
+      <p>Qayda: “Yaşı 18-dən az <b>və ya</b> şəxsiyyət vəsiqəsi olmayan içəri buraxılmır.” Bəs kim buraxılır? ¬(A ∨ B) ≡ ¬A ∧ ¬B, yəni “yaşı 18 və ya daha çox olan <b>və</b> vəsiqəsi olan”. Proqramçılar formalarda bu çevirməni hər gün edir.</p>
+    </div>
   </div>
   <div class="card">
     <h3>⚖️ Ekvivalentlik yoxlayıcısı</h3>
@@ -241,6 +285,18 @@ input[type=range]{accent-color:var(--accent);min-width:140px}
       <li><b>Nəticənin təsdiqi:</b> p → q, q ⊢ p. Yanlışdır. “Yağış yağırsa, yol yaşdır. Yol yaşdır, deməli yağış yağıb.” Yolu suvarma maşını da isladıb ola bilər.</li>
       <li><b>Əsasın inkarı:</b> p → q, ¬p ⊢ ¬q. Bu da yanlışdır.</li>
     </ul>
+    <div class="ex"><span class="tag">📌 Real nümunə: detektiv düşüncəsi (modus tollens)</span>
+      <p>“Oğru içəri pəncərədən girsəydi, pəncərənin altındakı palçıqda iz qalardı. İz yoxdur. <b>Deməli, oğru pəncərədən girməyib.</b>” Bu, düzgün nəticədir: p → q, ¬q ⊢ ¬p. Detektiv versiyaları belə aradan qaldırır.</p>
+    </div>
+    <div class="ex"><span class="tag">📌 Real nümunə: həkim qəbulunda (modus ponens)</span>
+      <p>“Qanda şəkər 7.0 mmol/l-dən yüksəkdirsə (ac qarına), diabet şübhəsi var. Səndə 7.8-dir. <b>Deməli, diabet şübhəsi var.</b>” Həkim əlavə analiz təyin edir.</p>
+    </div>
+    <div class="ex"><span class="tag">⚠️ Real səhv: sosial şəbəkədə (nəticənin təsdiqi)</span>
+      <p>“Korrupsioner məmurlar bahalı maşın sürür. Bu məmur bahalı maşın sürür. Deməli, korrupsionerdir.” Məntiqi baxımdan bu nəticə çıxmır. Maşın miras qala bilər, həyat yoldaşının biznesi ola bilər… Ola bilər ki, nəticə doğrudur, amma bu arqument onu <b>isbat etmir</b>.</p>
+    </div>
+    <div class="ex"><span class="tag">⚠️ Real səhv: sağlamlıq (əsasın inkarı)</span>
+      <p>“Siqaret çəksən, ağciyər xərçənginə tutula bilərsən. Mən siqaret çəkmirəm, deməli mənə heç nə olmayacaq.” Yanlışdır: xəstəliyin başqa səbəbləri də var (çirkli hava, passiv siqaret, irsiyyət).</p>
+    </div>
   </div>
   <div class="card">
     <h3>🔍 Arqument yoxlayıcısı</h3>
@@ -277,6 +333,19 @@ input[type=range]{accent-color:var(--accent);min-width:140px}
       <li>“Bəzi tələbələr riyaziyyatı sevir”: <span class="sym">∃x (Tələbə(x) ∧ Sevir(x))</span></li>
     </ul>
     <p class="fb">Diqqət: ∀ ilə adətən →, ∃ ilə isə ∧ işlənir.</p>
+    <div class="ex"><span class="tag">📌 Real nümunə: reklam</span>
+      <p>“<b>Bütün</b> stomatoloqlar bu diş pastasını tövsiyə edir.” Bu, ∀ iddiasıdır. Onu təkzib etmək üçün bir dənə tövsiyə etməyən stomatoloq kifayətdir. Ona görə də dürüst reklam adətən belə yazır: “Sorğuda iştirak edən stomatoloqların 80%-i…” Bu, artıq yoxlana bilən iddiadır.</p>
+    </div>
+    <div class="ex"><span class="tag">📌 Real nümunə: kvantorların sırası</span>
+      <ul>
+        <li>“Hər kəsin sevdiyi bir müğənni var”: <span class="sym">∀x ∃y Sevir(x, y)</span>. Hər insanın öz sevimlisi var, ola bilər ki, hamısı fərqlidir.</li>
+        <li>“Elə bir müğənni var ki, onu hamı sevir”: <span class="sym">∃y ∀x Sevir(x, y)</span>. Bu, çox güclü iddiadır.</li>
+      </ul>
+      <p>Sözlər demək olar ki, eynidir, məna isə tamam fərqlidir. Müqavilələrdə belə fərqlər məhkəmə mübahisələrinə səbəb olur.</p>
+    </div>
+    <div class="ex"><span class="tag">📌 Real nümunə: düzgün inkar</span>
+      <p>Müəllim: “Heç bir tələbə imtahandan kəsilməyib.” Direktor bunun yalan olduğunu deyir. Bu nə deməkdir? “Hamı kəsilib” <b>deyil</b>. Sadəcə, “ən azı bir tələbə kəsilib”: <span class="sym">¬¬∃x K(x) ≡ ∃x K(x)</span>.</p>
+    </div>
   </div>
   <div class="card"><h3>✍️ Tapşırıq</h3><div class="quiz" data-quiz="quant"></div></div>
 </section>
@@ -302,6 +371,17 @@ input[type=range]{accent-color:var(--accent);min-width:140px}
       <li>İki “bəzi” əsasdan nəticə çıxmır.</li>
       <li>Əsaslardan biri inkardırsa, nəticə də inkar olmalıdır.</li>
     </ul>
+    <div class="ex"><span class="tag">📌 Real nümunə: məhkəmə qərarı</span>
+      <p>Hüquqda hər qərar əslində sillogizmdir:</p>
+      <p>1) <b>Norma:</b> “Qırmızı işıqda keçən bütün sürücülər cərimələnir.” (A hökmü)<br>
+      2) <b>Fakt:</b> “Rauf qırmızı işıqda keçib.” (kameranın görüntüsü)<br>
+      3) <b>Qərar:</b> “Deməli, Rauf cərimələnir.”</p>
+      <p>Vəkil adətən ya normaya (“bu hal qanunda nəzərdə tutulmayıb”), ya da fakta (“işıq sarı idi”) etiraz edir. Məntiqi formaya etiraz etmək mümkün deyil.</p>
+    </div>
+    <div class="ex"><span class="tag">⚠️ Real səhv: “şübhəli” satıcı</span>
+      <p>“Bütün fırıldaqçılar inandırıcı danışır. Bu satıcı inandırıcı danışır. Deməli, o, fırıldaqçıdır.”</p>
+      <p>Orta termin (“inandırıcı danışan”) heç bir əsasda tam həcmdə işlənməyib. Birinci əsas “bütün inandırıcı danışanlar fırıldaqçıdır” demir. Dürüst satıcılar da inandırıcı danışa bilər.</p>
+    </div>
   </div>
   <div class="card"><h3>✍️ Tapşırıq: sillogizm düzgündürmü?</h3><div class="quiz" data-quiz="syl"></div></div>
 </section>
@@ -312,6 +392,18 @@ input[type=range]{accent-color:var(--accent);min-width:140px}
     <h2>8. Cəngavərlər və Yalançılar adası</h2>
     <p class="lead">Adada iki cür insan yaşayır: <b>cəngavərlər</b> həmişə doğru danışır, <b>yalançılar</b> həmişə yalan danışır.</p>
     <div class="note"><b>Üsul:</b> hər insan üçün bir mülahizə götür: A = “A cəngavərdir”. A nə deyirsə desin, <span class="sym">A ↔ (A-nın dediyi)</span> doğru olmalıdır. Sonra bütün halları yoxla (doğruluq cədvəli!) və ziddiyyət yaratmayan halı tap.</div>
+    <div class="ex"><span class="tag">📌 Həll nümunəsi addım-addım</span>
+      <p><b>A</b> deyir: “İkimiz də yalançıyıq.”</p>
+      <ol>
+        <li><b>Fərz edək ki, A cəngavərdir.</b> Onda dediyi doğrudur, yəni A yalançıdır. Ziddiyyət! Deməli, bu hal mümkün deyil.</li>
+        <li><b>Deməli, A yalançıdır.</b> Onda dediyi yalandır: “ikimiz də yalançıyıq” doğru deyil. A artıq yalançı olduğu üçün <b>B cəngavər</b> olmalıdır.</li>
+        <li>Yoxlama: A yalançıdır, B cəngavərdir. A-nın sözü (“ikimiz də yalançıyıq”) həqiqətən yalandır. ✓</li>
+      </ol>
+      <p>Bu, aşağıdakı 2-ci tapmacadır. İndi qalanlarını özün həll et.</p>
+    </div>
+    <div class="ex"><span class="tag">📌 Bunun real həyatla əlaqəsi</span>
+      <p>Jurnalist iki mənbədən bir-birinə zidd məlumat alır. Hər ikisi doğru ola bilməz. “Hansı ssenari ziddiyyətsizdir?” sualı tapmacalardakı eyni üsuldur: hər variantı fərz et, nəticələrini çıxar və faktlarla ziddiyyət yaradanı at.</p>
+    </div>
   </div>
   <div class="card" id="kk"></div>
 </section>
@@ -332,6 +424,18 @@ input[type=range]{accent-color:var(--accent);min-width:140px}
     <p>Məntiq 2-dən 3-ə keçidi yoxlayır. Amma 1-dən 2-yə keçid, yəni “linza seçimi”, çox vaxt şüursuz baş verir. Linza səhv seçilibsə, ən dəqiq məntiq də yanlış yerə aparır.</p>
     <div class="note"><b>Linzanın parametrləri:</b> <b>miqyas</b> (bir gün, yoxsa on il?), <b>dəqiqlik</b> (dəqiq rəqəm lazımdır, yoxsa təxmin?) və <b>model</b> (bu məsələ iqtisadidir, psixolojidir, yoxsa texniki?). Eyni vəziyyətə bir neçə linza ilə bax və hansının ən çox kömək etdiyini seç.</div>
     <p><b>Gündəlik məşq:</b> bu gün səni əsəbiləşdirən bir hadisəni götür. Onu üç sütuna ayır: fakt, mənim interpretasiyam, alternativ interpretasiya. Alternativi tapmaq çətin gəlirsə, deməli bir linzaya “ilişib” qalmısan.</p>
+    <div class="ex"><span class="tag">📌 Real nümunə: bir rəqəm, üç linza</span>
+      <p><b>Fakt:</b> “İşsizlik bir il ərzində 5%-dən 6%-ə qalxdı.”</p>
+      <ul>
+        <li><b>İqtisadçının linzası:</b> “Bu, iqtisadi tsiklin normal mərhələsidir, 2–3 ilə bərpa olunur.”</li>
+        <li><b>Siyasi linza:</b> “Hökumətin siyasəti uğursuzdur.”</li>
+        <li><b>Şəxsi linza:</b> “Bəs mənim sahəmdə (IT) vakansiyalar azalıbmı?”</li>
+      </ul>
+      <p>Üç nəticənin üçü də məntiqlidir, amma fərqli suallara cavab verir. İş axtarırsansa, <b>sənin məsələn</b> üçüncü linzanı tələb edir. Qalan ikisi haqqında saatlarla mübahisə etmək sənə iş tapmağa kömək etməyəcək.</p>
+    </div>
+    <div class="ex"><span class="tag">📌 Real nümunə: ailədə</span>
+      <p>Yeniyetmə gecə saat 23:00-da evə gəlir. Ana: “Məni heç saymır.” Ata: “Dostları ilə vaxt keçirməyi öyrənir.” Yeniyetmənin özü: “Avtobus gecikdi.” Fakt birdir (23:00), interpretasiya üçdür. Söhbəti “Saat 23:00 oldu, mən narahat oldum” cümləsi ilə, yəni fakt və hisslə başlamaq ittihamdan daha səmərəlidir.</p>
+    </div>
   </div>
   <div class="card"><h3>✍️ Tapşırıq: fakt, yoxsa interpretasiya?</h3><div class="quiz" data-quiz="lens"></div></div>
 </section>
@@ -347,6 +451,15 @@ input[type=range]{accent-color:var(--accent);min-width:140px}
       <li><b>Praktik nəticə:</b> mürəkkəb sistemdə (bazar, karyera, münasibətlər) hər şey plana uyğun getmirsə, bu, mütləq sənin “səhvin” deyil. Mükəmməl nəzarət tələb etmək əvəzinə, şərtləri yaxşılaşdır və planı tez-tez yenilə.</li>
       <li><b>Xətti izahlara şübhə:</b> “Bunun tək səbəbi X-dir” cümləsi mürəkkəb sistemlərdə demək olar ki, həmişə həddən artıq sadələşdirmədir.</li>
     </ul>
+    <div class="ex"><span class="tag">📌 Real nümunə: hava proqnozu</span>
+      <p>Hava proqnozu 1–3 gün üçün kifayət qədər dəqiqdir. 7 günlük proqnoz artıq təxminidir, 14 günlük proqnoz isə təsadüfə yaxındır. Meteoroloqlar bunu bilir və tez-tez “50 ayrı ssenari” hesablayırlar (ansambl proqnozu). Sonra deyirlər: “yağış ehtimalı 40%-dir.” Bu, xaosla dürüst işləməyin nümunəsidir.</p>
+    </div>
+    <div class="ex"><span class="tag">📌 Real nümunə: “fantom tıxac”</span>
+      <p>Avtomagistralda qəza yoxdur, yol daralmayıb, amma tıxac yaranır. Səbəb: bir sürücü bir anlıq kəskin tormoz basır, arxadakı daha kəskin basır və dalğa geriyə doğru böyüyür. Hər sürücü “qaydaya uyğun” hərəkət edir, amma nəticə xaotikdir. Kiçik səbəb, böyük nəticə.</p>
+    </div>
+    <div class="ex"><span class="tag">📌 Bunu həyatda necə tətbiq etmək olar?</span>
+      <p>5 illik karyera planını dəqiq yazmaq çox vaxt mənasızdır: bir təsadüfi tanışlıq, bir texnologiya, bir böhran hər şeyi dəyişə bilər. Daha yaxşı yanaşma: <b>uzunmüddətli istiqamət</b> (“məlumat analitikası sahəsində böyümək”) və <b>qısa, dəqiq plan</b> (“bu 3 ayda SQL kursunu bitirmək”).</p>
+    </div>
   </div>
   <div class="card">
     <h3>🦋 Laboratoriya: kəpənək effekti</h3>
@@ -375,6 +488,19 @@ input[type=range]{accent-color:var(--accent);min-width:140px}
     </ol>
     <div class="note"><b>Falsifikasiya prinsipi (Karl Popper):</b> nəzəriyyə o zaman elmidir ki, onu təkzib edəcək müşahidəni təsəvvür etmək mümkün olsun. “Sabah ya yağış yağacaq, ya da yox” cümləsi heç vaxt səhv çıxmır, amma heç nə də demir. Bir dənə qara qu quşu “bütün qu quşları ağdır” fikrini təkzib edir (6-cı dərsdəki <span class="sym">∃x ¬P(x)</span>).</div>
     <p><b>Təsdiq meyli</b> (confirmation bias): beyin öz fikrini təsdiqləyən faktları axtarır, təkzib edənləri isə görməzdən gəlir. Bunun dərmanı sadədir: <b>“Səhv olsaydım, nə görərdim?”</b> sualını ver və məhz onu axtar. Mürəkkəb dünyada qalib çox vaxt “mükəmməl nəzəriyyəsi” olan deyil, <b>dürüst yoxlamaları daha sürətlə aparan</b> olur.</p>
+    <div class="ex"><span class="tag">📌 Real nümunə: “Səhərlər yorğun oyanıram”</span>
+      <ol>
+        <li><b>Məsələ:</b> səhərlər yorğunluğu 10 ballıq şkalada 8-dir. Məqsəd 4-dən aşağı olmasıdır.</li>
+        <li><b>Hipotez 1:</b> gec yatıram (saat 01:00-da).</li>
+        <li><b>Proqnoz:</b> 2 həftə 23:00-da yatsam, yorğunluq 5-dən aşağı düşəcək.</li>
+        <li><b>Yoxlama:</b> 2 həftə qeyd apar. Nəticə: yorğunluq 7-dir. Kiçik dəyişiklik oldu, amma hipotez əsas səbəbi izah etmir.</li>
+        <li><b>Hipotez 2:</b> axşam saat 18:00-dan sonra qəhvə içirəm. Yeni yoxlama…</li>
+      </ol>
+      <p>Bir hipotezə “inanmaq” əvəzinə sən onu <b>öldürdün</b> və irəli getdin. Bu, elmi metoddur.</p>
+    </div>
+    <div class="ex"><span class="tag">📌 Real nümunə: onlayn mağaza</span>
+      <p>Komanda mübahisə edir: “Yaşıl düymə daha çox satış gətirər.” Mübahisə əvəzinə A/B test aparırlar. Müştərilərin yarısı köhnə düyməni, yarısı yenisini görür. 2 həftədən sonra rəqəmlər cavab verir. Böyük şirkətlər ildə minlərlə belə test aparır. Bu, biznesdə elmi metoddur.</p>
+    </div>
   </div>
   <div class="card">
     <h3>🔢 Oyun: 2-4-6 tapmacası</h3>
@@ -409,6 +535,18 @@ input[type=range]{accent-color:var(--accent);min-width:140px}
     <p>Alman riyaziyyatçısı Karl Yakobi tələbələrinə deyirdi: <i>“Tərsinə çevir, həmişə tərsinə çevir.”</i> Riyaziyyatda bunun adı <b>əksini fərz etməklə isbatdır</b>: fərz edirik ki, ¬p doğrudur, ziddiyyətə gəlirik və deməli p doğrudur. 4-cü dərsdəki kontrapozisiya (<span class="sym">p → q ≡ ¬q → ¬p</span>) da inversiyadır.</p>
     <div class="note"><b>Premeditatio malorum</b> (latınca “bəlaları əvvəlcədən düşünmək”): stoik filosofların məşqi. Burada məqsəd narahat olmaq deyil, ən pis ssenarini əvvəlcədən görüb ona hazırlıq planı qurmaqdır. Müasir variantı <b>“premortem”</b>dir: layihə başlamazdan əvvəl təsəvvür et ki, o artıq uğursuz olub, və “Niyə?” sualına cavab yaz.</div>
     <p><b>“İkiqat halqa” qaydası:</b> inversiya güzgüyə daxil olmaqdır. Amma güzgüdən mütləq <b>reallığa qayıtmaq</b> lazımdır, yəni hər nəticəni faktlarla yoxlamaq. Əks halda gözəl sxem özünüaldatmaya çevrilir.</p>
+    <div class="ex"><span class="tag">📌 Real nümunə: kafe açmaq (premortem)</span>
+      <p>Leyla kafe açmaq istəyir. “Necə uğur qazanım?” sualı əvəzinə soruşur: <b>“Bir ildən sonra kafe bağlanıb. Niyə?”</b></p>
+      <ul>
+        <li>Kirayə gəlirin 40%-ni aparırdı. → <b>Qayda:</b> kirayə gözlənilən gəlirin 15%-dən çox olmamalıdır.</li>
+        <li>Yerləşmə yeri gözdən uzaq idi. → <b>Qayda:</b> müqavilədən əvvəl həmin küçədən saatda neçə nəfərin keçdiyini 3 gün say.</li>
+        <li>Pul 4 ayda bitdi. → <b>Qayda:</b> ən azı 6 aylıq xərc ehtiyatda olmalıdır.</li>
+      </ul>
+      <p>Üç sual uğur resepti vermədi, amma ən tipik ölümcül səhvləri aradan qaldırdı.</p>
+    </div>
+    <div class="ex"><span class="tag">📌 Real nümunə: şəxsi maliyyə</span>
+      <p>“Necə varlanım?” sualının çoxlu ziddiyyətli cavabı var. İnvers sual “İnsanlar necə kasıblaşır?” isə aydın siyahı verir: yüksək faizli kredit, impulsiv alışlar, ehtiyat fondunun olmaması, “tez varlanma” sxemləri. Bunlardan qaçmaq artıq yarı yoldur.</p>
+    </div>
   </div>
   <div class="card">
     <h3>🔄 Alət: premortem</h3>
@@ -438,6 +576,19 @@ input[type=range]{accent-color:var(--accent);min-width:140px}
     <h3>İsbat və inandırma</h3>
     <p><b>İsbat</b> nəticənin doğruluğunu göstərir. <b>İnandırma</b> isə insanı razı salır. İkisi üst-üstə düşə bilər, amma düşməyə də bilər. Reklam və təbliğat çox vaxt faktlara deyil, <b>kimliyə və dəyərlərə</b> söykənir: “Ağıllı valideynlər X seçir.” Gizli əsas belədir: “Sən ağıllı valideynsən, deməli…”</p>
     <p><b>PAS strukturu</b> (Problem, Agitate, Solution): problemi göstər, onu qabart, sonra həll təklif et. Bu, satış mətnlərinin ən geniş yayılmış şablonudur. Onu tanıyanda manipulyasiyaya daha az uyursan. Öz nitqində isə ondan dürüst istifadə edə bilərsən: problem real olmalı, həll də işləməlidir.</p>
+    <div class="ex"><span class="tag">📌 Real nümunələr: gizli əsası aç</span>
+      <div class="scroll"><table class="tt" style="font-family:inherit">
+        <tr><th>Deyilən</th><th>Gizli əsas</th><th>Yoxlama</th></tr>
+        <tr><td>“Artıq 10 000 müştəri bizi seçib!”</td><td>Çox adamın seçdiyi şey keyfiyyətlidir</td><td>Bəs bir ildə neçə müştəri imtina edib?</td></tr>
+        <tr><td>“Bu qanunu müxalifət dəstəkləyir, deməli zərərlidir.”</td><td>Müxalifətin dəstəklədiyi hər şey zərərlidir</td><td>Qanunun özü nə deyir?</td></tr>
+        <tr><td>“Ənənəvi üsulla müalicə, babalarımız belə edib.”</td><td>Köhnə olan hər şey işləyir</td><td>Babalarımızın orta ömrü neçə il idi?</td></tr>
+        <tr><td>“Xaricdə oxuyub, yaxşı mütəxəssisdir.”</td><td>Xaricdə oxuyan hər kəs yaxşı mütəxəssisdir</td><td>Konkret nəticələri nədir?</td></tr>
+      </table></div>
+    </div>
+    <div class="ex"><span class="tag">📌 Real nümunə: PAS reklamda</span>
+      <p><b>P (problem):</b> “Saçlarınız tökülür?”<br><b>A (qabartma):</b> “Hər gün daraqda daha çox saç… Güzgüyə baxmaq istəmirsiniz…”<br><b>S (həll):</b> “X şampunu 2 həftəyə nəticə verir!”</p>
+      <p>Məntiqi suallar: “2 həftəyə nəticə” iddiasını kim, necə yoxlayıb? Saç tökülməsinin səbəbi stressdirsə, şampun kömək edəcəkmi? Qabartma (A) addımı yalnız emosiyaya işləyir, heç bir fakt əlavə etmir.</p>
+    </div>
   </div>
   <div class="card"><h3>✍️ Tapşırıq: gizli əsası tap</h3><div class="quiz" data-quiz="enth"></div></div>
 </section>
@@ -455,6 +606,14 @@ input[type=range]{accent-color:var(--accent);min-width:140px}
       <li>Hər sahə üçün soruş: hazırda nəticəni ən çox nə məhdudlaşdırır? İnversiyadan istifadə et: “Bu sahə hansı yolla hər şeyi məhv edə bilər?”</li>
       <li>Darboğazla qısa dövrlərlə işlə: bir həftə yaxşılaşdır, ölç və darboğazın başqa yerə keçib-keçmədiyinə bax.</li>
     </ol>
+    <div class="ex"><span class="tag">📌 Real nümunə: toy təşkili</span>
+      <p><b>Siyahı yanaşması:</b> 80 ayrı tapşırıq (dəvətnamə, gül, musiqiçi, tort…), və bilmirsən haradan başlayasan.</p>
+      <p><b>Sistem yanaşması:</b> 4 sahə: <i>qonaqlar</i> (siyahı, dəvət), <i>məkan</i> (zal, tarix), <i>proqram</i> (musiqi, aparıcı), <i>büdcə</i>. Əlaqələr dərhal görünür: qonaq sayı zalı müəyyən edir, zal tarixi müəyyən edir, tarix musiqiçinin boş olub-olmamasını müəyyən edir.</p>
+      <p><b>Darboğaz:</b> istədiyin tarixdə boş zal. Deməli, ilk iş zalı bron etməkdir, gülləri yox. Qalan hər şey bundan asılıdır.</p>
+    </div>
+    <div class="ex"><span class="tag">📌 Real nümunə: dil öyrənmək</span>
+      <p>Hər gün 50 yeni söz əzbərləyirsən, amma danışa bilmirsən. Sistem: <i>lüğət, qrammatika, dinləmə, danışıq</i>. Darboğaz lüğət deyil, <b>danışıq praktikasının olmamasıdır</b>. Sözlərə ayrılan vaxtı ikiqat artırmaq heç nə dəyişməyəcək. Həftədə 2 dəfə danışıq klubuna getmək isə hər şeyi dəyişəcək.</p>
+    </div>
   </div>
   <div class="card">
     <h3>🏭 Simulyator: darboğazı tap</h3>
@@ -485,6 +644,15 @@ input[type=range]{accent-color:var(--accent);min-width:140px}
       <li>Mübahisə sistem daxilində həll olunmursa, <b>bir pillə yuxarı qalx</b>. Soruş: “Biz ümumiyyətlə nəyə görə razılaşmalıyıq? Hansı xarici meyar ilə qərar verək?”</li>
       <li>Natamam bilik normaldır. “Bilmirəm” demək zəiflik deyil, dürüstlükdür.</li>
     </ul>
+    <div class="ex"><span class="tag">📌 Real nümunə: futbol qaydaları</span>
+      <p>Futbol qaydaları yüz ildən çoxdur ki, yazılır və təkmilləşdirilir. Buna baxmayaraq, hər mövsüm qaydaların birmənalı cavab vermədiyi hallar yaranır. Məsələn, topun əl ilə “təsadüfən” toxunması. Bu halda hakimə qaydaların <b>məqsədinə</b> (ədalətli oyun) uyğun qərar vermək səlahiyyəti verilir. Bu, meta-səviyyəyə qalxmaqdır: qayda kifayət etmədikdə, qaydanın niyə yazıldığına baxırıq.</p>
+    </div>
+    <div class="ex"><span class="tag">📌 Real nümunə: proqramlaşdırma</span>
+      <p>Alan Türinq 1936-cı ildə Gödelə yaxın bir nəticəni isbat etdi. Elə bir proqram yazmaq mümkün deyil ki, istənilən proqram haqqında “bu proqram nə vaxtsa dayanacaqmı, yoxsa sonsuza qədər işləyəcək?” sualına həmişə düzgün cavab versin. Buna görə də antivirus proqramları heç vaxt 100% mükəmməl ola bilməz. Bu, mühəndislərin pis işləməsi ilə yox, riyazi sərhədlə bağlıdır.</p>
+    </div>
+    <div class="ex"><span class="tag">📌 Real nümunə: hüquqda normalar iyerarxiyası</span>
+      <p>İki qanun bir-biri ilə ziddiyyət təşkil edəndə, hüquq sistemi “bu qanunlardan hansı doğrudur?” sualını həmin qanunların öz daxilində həll etmir. Daha yüksək səviyyəyə, yəni Konstitusiyaya müraciət edir. Bu, Tarskinin metadil ideyasının praktik analoqudur.</p>
+    </div>
   </div>
   <div class="card"><h3>✍️ Tapşırıq</h3><div class="quiz" data-quiz="godel"></div></div>
 </section>
@@ -502,6 +670,15 @@ input[type=range]{accent-color:var(--accent);min-width:140px}
     </ul>
     <div class="note"><b>Aysberq modeli:</b> səthdə <i>hadisələr</i> görünür (“bu ay satış düşdü”). Altında <i>qanunauyğunluqlar</i> (“hər yay düşür”), daha dərində <i>strukturlar</i> (“yayda komandanın yarısı məzuniyyətdə olur”), ən dibində isə <i>zehni modellər</i> durur (“yayda heç kim alış-veriş etmir”). Ən böyük təsiri dərin qatlarda etmək olar.</div>
     <p><b>“Kobra effekti”</b>: rəvayətə görə, müstəmləkə Hindistanında hakimiyyət ölü kobralar üçün mükafat təyin edir. İnsanlar mükafat almaq üçün kobra yetişdirməyə başlayır. Proqram ləğv olunanda isə kobraları buraxırlar. Nəticədə kobra daha da çox olur. Gizli bir halqanı nəzərə almamaq bu cür nəticə verir.</p>
+    <div class="ex"><span class="tag">📌 Real nümunə: satış planı</span>
+      <p>Rəhbər satış planını 30% artırır və satıcılara bonus vəd edir. Satıcılar planı doldurmaq üçün müştərilərə böyük endirimlər verməyə başlayır. Satış həcmi artır, <b>mənfəət isə düşür</b>. Gələn il müştərilər endirimsiz almaq istəmir. Hadisə (“plan doldu”) uğur kimi görünürdü, struktur (bonus yalnız həcmə görədir) isə problem yaratdı.</p>
+    </div>
+    <div class="ex"><span class="tag">📌 Real nümunə: Mərkəzi bank və gecikmə</span>
+      <p>Mərkəzi bank inflyasiyanı azaltmaq üçün faiz dərəcəsini qaldırır. Amma bunun iqtisadiyyata təsiri 6–18 ay sonra görünür. Bank nəticəni gözləmədən faizi daha da qaldırarsa, iqtisadiyyat “soyuq su” altında qalır: tənəzzül başlayır. Bu, aşağıdakı “duş” simulyatorunun eynisidir, sadəcə miqyası böyükdür.</p>
+    </div>
+    <div class="ex"><span class="tag">📌 Real nümunə: gücləndirici halqa həyatda</span>
+      <p>Bir az idman edirsən, enerjin artır, daha çox idman etmək istəyirsən. Bu, müsbət spiraldır. Əksinə də olur: yorğunsan, idman etmirsən, daha çox yorulursan. Hər iki halda eyni struktur (R halqası) işləyir. Ona görə ilk addım, hətta 10 dəqiqəlik gəzinti də, halqanı düzgün istiqamətə çevirmək üçün vacibdir.</p>
+    </div>
   </div>
   <div class="card">
     <h3>🚿 Simulyator: gecikməli duş</h3>
@@ -529,6 +706,21 @@ input[type=range]{accent-color:var(--accent);min-width:140px}
     <h3>Bayes teoremi: yeni məlumatla fikri yeniləmək</h3>
     <p><span class="sym">P(H | E) = P(E | H) · P(H) / P(E)</span>. Yəni sübutdan (E) sonrakı inam ilkin inamdan (P(H)) və sübutun nə qədər “ayırd edici” olmasından asılıdır.</p>
     <div class="note"><b>Baza tezliyi tələsi.</b> Test 99% dəqiqdir və nəticən müsbət çıxıb. Xəstə olma ehtimalın neçə faizdir? Çoxları “99%” deyir. Amma xəstəlik nadirdirsə, cavab çox aşağı ola bilər. Aşağıdakı kalkulyatorda özün yoxla.</div>
+    <div class="ex"><span class="tag">📌 Real nümunə: sağ qalanlar xətası</span>
+      <p>İkinci Dünya müharibəsində döyüşdən qayıdan təyyarələrin qanadlarında çoxlu güllə izi var idi. Komandirlər qanadları gücləndirmək istəyirdi. Statistik Abraham Vald isə əksini təklif etdi: <b>mühərrikləri gücləndirmək lazımdır</b>. Səbəb: mühərrikinə güllə dəyən təyyarələr ümumiyyətlə geri qayıtmırdı, ona görə də onları görmürdülər.</p>
+      <p>Bu gün də eyni xəta var: “Bill Qeyts universiteti atıb və milyarder olub, deməli universitet lazım deyil.” Universiteti atıb uğursuz olan minlərlə insan haqqında jurnallar yazmır.</p>
+    </div>
+    <div class="ex"><span class="tag">📌 Real nümunə: qərar bir mərcdir</span>
+      <p>Proqnozda deyilir ki, yağış ehtimalı 30%-dir. Çətir götürürsən? Öz “ödəniş cədvəlini” düşün:</p>
+      <ul>
+        <li>Çətir götürmək xərci kiçikdir (çantada bir az yer tutur).</li>
+        <li>Yağışda islanmaq xərci böyükdür (vacib görüşə islanmış paltarla getmək).</li>
+      </ul>
+      <p>Ehtimal 30% olsa da, itkilər asimmetrikdir. Ona görə çətir götürmək rasional qərardır. Yağış yağmasa, qərarın <b>səhv olduğu</b> demək deyil.</p>
+    </div>
+    <div class="ex"><span class="tag">📌 Real nümunə: “mən bunu bilirdim” effekti</span>
+      <p>Futbol matçından sonra hamı “ekspert” olur: “Aydın idi ki, məşqçi əvəzetməni gec etdi!” Amma matçdan əvvəl heç kim bunu yazmamışdı. Öz qərarlarını təhlil edərkən soruş: “Qərar verdiyim anda nə bilirdim?” Sonradan öyrəndiklərin “o vaxt bilməli idim” mənasına gəlmir.</p>
+    </div>
   </div>
   <div class="card">
     <h3>🧮 Bayes kalkulyatoru</h3>
@@ -554,6 +746,15 @@ input[type=range]{accent-color:var(--accent);min-width:140px}
     <p>Hansı normanı seçdiyin nəticəni dəyişir. <b>min</b> “ən zəif halqa” prinsipidir: bir zəif cəhət bütün qiyməti aşağı salır. <b>Hasil</b> isə hər zəif cəhəti “cərimələyir”. Əslində norma seçmək <b>dəyər seçimidir</b>: sənin üçün nə daha vacibdir?</p>
     <h3>“Qeyri-müəyyən” vədlərə immunitet</h3>
     <p><b>Forer effekti:</b> insanlar ümumi, hamıya uyğun gələn təsvirləri (“Bəzən özünə qarşı çox tələbkarsan”) şəxsən özləri haqqında dəqiq təsvir kimi qəbul edirlər. Ulduz falları belə işləyir. <b>Apofeniya</b> isə təsadüfi məlumatda məna və qanunauyğunluq görmək meylidir.</p>
+    <div class="ex"><span class="tag">📌 Real nümunə: paltaryuyan maşın və kondisioner</span>
+      <p>1990-cı illərdən bəri bir çox paltaryuyan maşın və kondisioner qeyri-səlis məntiqlə işləyir. Maşın “paltar çirklidir: bəli/xeyr” demir. O, “çirklilik 0.7, yük 0.4” qiymətlərini birləşdirib su miqdarını və vaxtı seçir. Nəticədə enerji və su qənaəti əldə olunur.</p>
+    </div>
+    <div class="ex"><span class="tag">📌 Real nümunə: bank krediti</span>
+      <p>Bank müştəriyə kredit verib-verməməyə qərar verir. Gəlir “yüksəkdir” 0.6 dərəcədə, kredit tarixçəsi “yaxşıdır” 0.9 dərəcədə, iş stajı “kifayətdir” 0.5 dərəcədə. Bank ehtiyatlıdırsa, <b>min</b> normasını seçir: ən zəif cəhət 0.5-dir və qərar sərhəddədir. Daha liberal bank orta qiymətə baxa bilər. Norma seçimi bankın risk siyasətidir.</p>
+    </div>
+    <div class="ex"><span class="tag">📌 Real nümunə: ulduz falı</span>
+      <p>“Bu həftə maliyyə məsələlərində diqqətli olun. Yaxın birindən gözlənilməz xəbər ala bilərsiniz.” Bu cümlə istənilən insana, istənilən həftəyə uyğun gəlir. Bu, doğruluq dərəcəsi 1-ə yaxın, informasiya dəyəri isə 0-a yaxın olan cümlədir. Nə qədər çox halda doğru çıxırsa, bir o qədər az şey deyir.</p>
+    </div>
   </div>
   <div class="card">
     <h3>🌡️ Laboratoriya: “isti” nə qədər istidir?</h3>
@@ -596,6 +797,20 @@ input[type=range]{accent-color:var(--accent);min-width:140px}
       <li>Hansı müşahidə onun fikrini təkzib edərdi? (11-ci dərs)</li>
       <li>Gizli əsas nədir? (13-cü dərs)</li>
     </ol>
+    <div class="ex"><span class="tag">📌 Real nümunə: məhkəmədə sıfır hipotezi</span>
+      <p><b>Təqsirsizlik prezumpsiyası</b> sıfır hipotezinin hüquqi formasıdır. H₀: “Təqsirləndirilən şəxs günahsızdır.” Onu yalnız “şübhə doğurmayan” sübut olduqda rədd edirik.</p>
+      <ul>
+        <li>I növ səhv: <b>günahsızı məhkum etmək</b>.</li>
+        <li>II növ səhv: <b>günahkarı buraxmaq</b>.</li>
+      </ul>
+      <p>Cəmiyyət şüurlu seçim edib: I növ səhv daha ağırdır. Ona görə sübut həddi yüksək qoyulub, bunun nəticəsində bəzən günahkarlar da azadlığa çıxır.</p>
+    </div>
+    <div class="ex"><span class="tag">📌 Real nümunə: spam filtri</span>
+      <p>Filtr çox sərtdirsə, işəgötürənin vacib məktubu spam qovluğuna düşür (I növ səhv). Çox yumşaqdırsa, poçt reklamla dolur (II növ). Yaxşı filtr hansı səhvin daha baha başa gəldiyini nəzərə alır.</p>
+    </div>
+    <div class="ex"><span class="tag">📌 Real nümunə: gündəlik rəqəm və trend</span>
+      <p>Pandemiya dövründə xəbərlər hər gün yeni yoluxma sayını deyirdi: “dünən 820, bu gün 910, artım!” Amma bazar ertəsi rəqəmlər həmişə az olurdu (həftəsonu az test edilirdi). Siqnal <b>7 günlük orta göstəricidə</b> idi, gündəlik rəqəmlərdə isə küy çox idi. Valyuta, səhm və çəki ilə də eyni şeydir: gündəlik dəyişikliyə deyil, trendə bax.</p>
+    </div>
   </div>
   <div class="card">
     <h3>🪙 Təcrübə: təsadüf necə görünür?</h3>
@@ -626,6 +841,14 @@ input[type=range]{accent-color:var(--accent);min-width:140px}
       <li><b>Sparrinq-partnyor:</b> “Mənim arqumentimin ən zəif yeri haradadır?”, “Bu plana premortem et.” Burada süni intellekt sənin düşüncəni gücləndirir.</li>
     </ul>
     <div class="note"><b>Meta-çərçivə:</b> tapşırıq verməzdən əvvəl kontekst, məqsəd, uğur meyarları və məhdudiyyətləri yaz. Bu, həm süni intellektə, həm də sənə nə istədiyini aydınlaşdırmağa kömək edir. Bunun özü artıq məntiqi məşqdir.</div>
+    <div class="ex"><span class="tag">📌 Real nümunə: zəif və güclü sorğu</span>
+      <p><b>Zəif:</b> “Mənə biznes planı yaz.”</p>
+      <p><b>Meta-çərçivə ilə:</b> “Gəncədə 40 yerlik kafe açmaq istəyirəm. Büdcəm 60 000 ₼-dır. Məqsəd 18 aya xərcləri ödəməkdir. Mənə 1 illik xərc və gəlir cədvəli lazımdır. Hər rəqəmin hansı fərziyyəyə əsaslandığını göstər. Sonra bu plana premortem et: kafe hansı 5 səbəbdən bağlana bilər?”</p>
+      <p>İkinci sorğu yazanda sən artıq düşünmüsən: məqsəd, məhdudiyyətlər, yoxlama. Süni intellekt isə bu düşüncəni sürətləndirir.</p>
+    </div>
+    <div class="ex"><span class="tag">⚠️ Real səhv: uydurma mənbə</span>
+      <p>Tələbə referatında süni intellektin tövsiyə etdiyi “2019-cu il Harvard tədqiqatı”na istinad edir. Müəllim yoxlayır: belə tədqiqat yoxdur. Model inandırıcı adı “uydurub”. Qayda: <b>hər fakt, rəqəm və istinad müstəqil mənbədən yoxlanılmalıdır.</b> Bu, 11-ci dərsdəki elmi metodun tətbiqidir.</p>
+    </div>
   </div>
   <div class="card"><h3>✍️ Tapşırıq</h3><div class="quiz" data-quiz="ai"></div></div>
 </section>
@@ -643,6 +866,12 @@ input[type=range]{accent-color:var(--accent);min-width:140px}
     </ol>
     <div class="note"><b>Naviqator prinsipi:</b> GPS sənə bütün yolu əvvəlcədən dəqiq vermir. O, istiqaməti bilir və hər dönüşdən sonra marşrutu yenidən hesablayır. Həyat məqsədləri üçün də sərt plan əvəzinə <b>istiqamət + tez-tez korreksiya</b> daha davamlı nəticə verir. Çox dəqiq, sərt hədəflər (məsələn, SMART) dəyişən mühitdə tələyə çevrilə bilər: şərtlər dəyişib, sən isə hələ də köhnə rəqəmin arxasınca gedirsən.</div>
     <p><b>Fitnes-siqnalları</b> düzgün istiqamətdə getdiyini göstərən kiçik, tez görünən əlamətlərdir. Məsələn, dil öyrənəndə: “Bu həftə filmi altyazısız daha çox başa düşdüm.” <b>Kimlik məhdudiyyəti:</b> “Mən riyaziyyatçı deyiləm” kimi fikirlər bəzi variasiyaları əvvəlcədən qadağan edir və təkamülü dayandırır.</p>
+    <div class="ex"><span class="tag">📌 Real nümunə: restoran menyusu</span>
+      <p>Aşpaz hər ay menyuya 2 yeni yemək əlavə edir (<b>variasiya</b>). Ay sonunda satış rəqəmlərinə və müştəri rəylərinə baxır (<b>fitnes-funksiya</b>). Ən az satılan 2 yeməyi çıxarır, uğurlu yeməklərin üslubunda yeniləri hazırlayır (<b>seçmə və irsiyyət</b>). Bir ildən sonra menyu “planlaşdırılmadan” müştərilərə tam uyğunlaşır.</p>
+    </div>
+    <div class="ex"><span class="tag">📌 Real nümunə: karyera dəyişikliyi</span>
+      <p>Mühasib proqramçı olmaq istəyir. <b>Sərt plan:</b> işdən çıxıb bir illik bahalı kursa yazılmaq. Risk yüksəkdir, uğursuz olsa, geri dönmək çətindir. <b>Təkamül yanaşması:</b> işi saxlayıb axşamlar Excel makroları yazmaq, sonra Python-da kiçik bir layihə, sonra frilans sifariş. Hər addım ucuz təcrübədir və <b>fitnes-siqnalı</b> verir (“bu mənə maraqlıdır?”, “pul ödəyən varmı?”). Uğurlu addımlar növbəti addımın əsası olur.</p>
+    </div>
   </div>
   <div class="card">
     <h3>🧬 Simulyator: təsadüfdən mənaya</h3>
@@ -685,6 +914,18 @@ input[type=range]{accent-color:var(--accent);min-width:140px}
       <tr><td>Mühit plandan tez dəyişir</td><td>Variasiya, fitnes-siqnallar, naviqator</td><td>21</td></tr>
     </table></div>
     <div class="note"><b>Ümumi alqoritm:</b> 1) Məsələni tanı: well-defined, yoxsa ill-defined? 2) Linzanı seç. 3) Aləti seç. 4) Qısa dövrlə tətbiq et və nəticəni yoxla. 5) Lazım olsa, meta-səviyyəyə qalx və başqa alət götür.</div>
+    <div class="ex"><span class="tag">📌 Bütün alətlər bir nümunədə: “Almaniyaya köçməliyəmmi?”</span>
+      <ol>
+        <li><b>Tanı:</b> ill-defined məsələ. Məlumat natamamdır, meyarlar çoxdur.</li>
+        <li><b>Linza (9):</b> bu, maliyyə məsələsidir, karyera məsələsidir, yoxsa ailə məsələsi? Ən vacib 3 meyarı seç: maaş, uşaqların təhsili, valideynlərə yaxınlıq.</li>
+        <li><b>Qeyri-səlis qiymət (18):</b> hər meyarı 0–1 arasında qiymətləndir. Valideynlər üçün “yaxınlıq” vacibdirsə, min normasından istifadə et: bu meyar zəifdirsə, ümumi qiymət də aşağı olacaq.</li>
+        <li><b>İnversiya (12):</b> “İki ildən sonra geri qayıtdım. Niyə?” Dil maneəsi, sənədlərin tanınmaması, tənhalıq.</li>
+        <li><b>Ehtimal (17):</b> “İlk 6 ayda öz sahəmdə iş tapma ehtimalım nə qədərdir?” Oradakı tanışlardan real rəqəmləri soruş.</li>
+        <li><b>Elmi metod (11) və təkamül (21):</b> birdən köçmək əvəzinə əvvəlcə ucuz bir təcrübə et: 3 həftəlik səfər, 2 iş müsahibəsi, A2 səviyyəsində dil kursu.</li>
+        <li><b>Siqnal və küy (19):</b> forumlardakı ən emosional hekayələrə deyil, statistikaya və bir neçə müstəqil mənbəyə bax.</li>
+      </ol>
+      <p>Bu yolla qərar “ürək hiss edir” və ya “hamı köçür” üzərində deyil, aydın struktur üzərində qurulur. Qeyri-müəyyənlik isə dürüst şəkildə nəzərə alınır.</p>
+    </div>
   </div>
   <div class="card"><h3>✍️ Tapşırıq: məsələni tanı</h3><div class="quiz" data-quiz="meta"></div></div>
 </section>
