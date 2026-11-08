@@ -46,9 +46,9 @@ akademiya/
 
 ## Telefona quraşdırılan versiya (PWA)
 
-- Ünvan: https://tardigrade23.github.io/DigitalNation/akademiya/ (GitHub Pages, əsas branch-a hər push-dan sonra yenilənir).
-- `.github/workflows/deploy-pages.yml` → `bash akademiya/tools/build_pwa.sh _site/akademiya`: `pwa/head.html` + `index.html` tam sənədə çevrilir, `sw.js`-də `__BUILD__` commit hash ilə əvəz olunur.
+- Öz repozitoriyası: `tardigrade23/akademiya` (bu qovluq həmin reponun kökü olur). Ünvan: https://tardigrade23.github.io/akademiya/
+- `.github/workflows/pages.yml` əsas branch-a hər push-dan sonra `bash tools/build_pwa.sh _site` icra edib GitHub Pages-də dərc edir: `pwa/head.html` + `index.html` tam sənədə çevrilir, `sw.js`-də `__BUILD__` commit hash ilə əvəz olunur.
 - `sw.js` quraşdırılanda kataloqdakı bütün kursları keşə yükləyir, ona görə dərslər oflayn açılır. Yeni kurs əlavə edəndə SW-də heç nə dəyişmək lazım deyil.
 - PWA-da irəliləyiş cihazda (`localStorage`) saxlanılır; ana səhifədəki “Yedək nüsxə” ilə faylda saxlanılır/bərpa olunur.
-- Səhifə `noindex` ilə axtarış sistemlərindən gizlədilib, amma ünvanı bilən hər kəs dərs məzmununu aça bilər (irəliləyiş və qeydlər yalnız cihazda qalır).
-- İkonlar: `python3 akademiya/tools/make_icons.py`.
+- Səhifə `noindex` ilə axtarış sistemlərindən gizlədilib, amma pulsuz GitHub Pages üçün repo public olmalıdır: ünvanı bilən hər kəs dərs məzmununu aça bilər (irəliləyiş və qeydlər yalnız cihazda qalır).
+- İkonlar: `python3 tools/make_icons.py`.

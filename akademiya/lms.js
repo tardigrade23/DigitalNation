@@ -173,7 +173,7 @@
   }
 
   // ---------- install as app + backup ----------
-  const PWA_URL = 'https://tardigrade23.github.io/DigitalNation/akademiya/';
+  const PWA_URL = 'https://tardigrade23.github.io/akademiya/';
   const inClaude = !!(window.claude && typeof window.claude.use === 'function');
   const standalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
