@@ -1,0 +1,40 @@
+<title>Şəxsi Akademiya</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&family=Noto+Serif:wght@600;700&display=swap">
+<link rel="stylesheet" href="lms.css">
+
+<header class="topbar">
+  <a class="brand" href="#" id="brand"><span class="seal">A</span><span class="name">Şəxsi Akademiya</span></a>
+  <div class="crumb" id="crumb"></div>
+  <span class="sync" id="sync">Yalnız bu cihazda</span>
+  <button class="iconbtn" id="themeBtn" title="Açıq/qaranlıq mövzu" aria-label="Mövzunu dəyiş">◐</button>
+</header>
+
+<div class="wrap">
+  <main id="home" class="home" aria-live="polite">
+    <div class="greet"><h1 id="greetH">Xoş gəldin</h1><p>Öyrənməyə qaldığın yerdən davam et.</p></div>
+    <div id="continueBox"></div>
+    <div class="stats" id="stats"></div>
+    <div class="shelf-h"><h2>Kurslarım</h2><span class="fb" id="shelfCount"></span></div>
+    <div class="shelf" id="shelf"><div class="card">Kurslar yüklənir…</div></div>
+  </main>
+
+  <div id="courseView" class="course" hidden>
+    <aside class="side" id="side"></aside>
+    <div class="reading">
+      <div id="lessonHost"></div>
+      <div id="notesView" hidden></div>
+      <div class="card notes-card" id="notesCard" hidden>
+        <h3>Qeydlərim</h3>
+        <textarea id="noteText" placeholder="Bu dərs haqqında öz sözlərinlə qısa xülasə, suallar, öz həyatından nümunələr…"></textarea>
+        <div class="fb" id="noteState">Qeydlər avtomatik saxlanılır.</div>
+      </div>
+      <div class="pager" id="pager"></div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script src="lms.js"></script>

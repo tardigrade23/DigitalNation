@@ -1,0 +1,13 @@
+{
+  "courses": [
+    {
+      "id": "mentiq",
+      "title": "Məntiq: düşüncənin təməli",
+      "mark": "∴",
+      "description": "Klassik məntiqdən xaos, ehtimal, qeyri-səlis məntiq və sistem düşüncəsinə qədər. Real nümunələr, simulyatorlar və testlər.",
+      "lessons": 23,
+      "parts": { "0": "I hissə · Klassik məntiq", "8": "II hissə · Müasir düşüncə", "22": "Yekun" },
+      "added": "2026-11-08"
+    }
+  ]
+}
