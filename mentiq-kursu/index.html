@@ -1,0 +1,680 @@
+<!doctype html>
+<html lang="az">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Məntiq Kursu</title>
+<style>
+:root{
+  --bg:#f6f4ef; --panel:#ffffff; --ink:#1d1b26; --muted:#6b6878; --line:#e3e0d8;
+  --accent:#5b4bdb; --accent-soft:#ece9ff; --ok:#1f8a4c; --ok-soft:#e2f5ea;
+  --bad:#c0392b; --bad-soft:#fbe5e2; --warn:#b7791f; --code:#f1eff8;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14131a; --panel:#1d1c25; --ink:#ecebf3; --muted:#a09dae; --line:#2f2d3a;
+    --accent:#9d90ff; --accent-soft:#2a2645; --ok:#4fd18b; --ok-soft:#173326;
+    --bad:#ff7b6b; --bad-soft:#3a1f1c; --warn:#f0b955; --code:#262433;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14131a; --panel:#1d1c25; --ink:#ecebf3; --muted:#a09dae; --line:#2f2d3a;
+  --accent:#9d90ff; --accent-soft:#2a2645; --ok:#4fd18b; --ok-soft:#173326;
+  --bad:#ff7b6b; --bad-soft:#3a1f1c; --warn:#f0b955; --code:#262433;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{position:sticky;top:0;z-index:5;background:var(--panel);border-bottom:1px solid var(--line);padding:10px 16px;display:flex;align-items:center;gap:12px}
+header h1{font-size:18px;margin:0;flex:1}
+.progress{flex:0 0 160px;height:8px;background:var(--line);border-radius:4px;overflow:hidden}
+.progress>div{height:100%;background:var(--accent);width:0;transition:width .3s}
+#pct{font-size:13px;color:var(--muted);min-width:38px;text-align:right}
+.layout{display:grid;grid-template-columns:260px 1fr;max-width:1180px;margin:0 auto;gap:24px;padding:24px 16px}
+nav{position:sticky;top:70px;align-self:start}
+nav button{display:flex;width:100%;text-align:left;gap:10px;align-items:center;background:none;border:0;color:var(--ink);padding:9px 12px;border-radius:8px;font:inherit;font-size:15px;cursor:pointer}
+nav button:hover{background:var(--accent-soft)}
+nav button.active{background:var(--accent);color:#fff}
+nav .num{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:12px;border:1px solid currentColor;flex:0 0 24px}
+nav button.done .num{background:var(--ok);border-color:var(--ok);color:#fff}
+main{min-width:0}
+section.lesson{display:none}
+section.lesson.show{display:block}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin-bottom:18px}
+h2{margin:0 0 6px;font-size:26px}
+h3{margin:0 0 10px;font-size:18px}
+.lead{color:var(--muted);margin-top:0}
+.sym{font-family:ui-monospace,Menlo,Consolas,monospace;background:var(--code);padding:1px 6px;border-radius:5px}
+.note{border-left:4px solid var(--accent);background:var(--accent-soft);padding:10px 14px;border-radius:0 8px 8px 0;margin:12px 0}
+table.tt{border-collapse:collapse;margin:10px 0;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px}
+table.tt th,table.tt td{border:1px solid var(--line);padding:5px 10px;text-align:center}
+table.tt th{background:var(--code)}
+.T{color:var(--ok);font-weight:700}.F{color:var(--bad);font-weight:700}
+td.res{background:var(--accent-soft)}
+.scroll{overflow-x:auto}
+.btn{background:var(--accent);color:#fff;border:0;border-radius:8px;padding:8px 16px;font:inherit;font-size:15px;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.btn:disabled{opacity:.5;cursor:default}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+input[type=text],textarea{font:15px ui-monospace,Menlo,Consolas,monospace;padding:9px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);width:100%}
+textarea{min-height:90px}
+.keys{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.keys button{font:16px ui-monospace,Menlo,monospace;min-width:40px;padding:5px 8px;border-radius:7px;border:1px solid var(--line);background:var(--code);color:var(--ink);cursor:pointer}
+.toggle{min-width:90px;padding:10px 14px;border-radius:10px;border:2px solid var(--line);font:inherit;font-weight:700;cursor:pointer;background:var(--panel);color:var(--ink)}
+.toggle.on{border-color:var(--ok);background:var(--ok-soft);color:var(--ok)}
+.toggle.off{border-color:var(--bad);background:var(--bad-soft);color:var(--bad)}
+.q{border-top:1px solid var(--line);padding:14px 0}
+.q:first-child{border-top:0;padding-top:0}
+.opts{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.opts button{border:1px solid var(--line);background:var(--bg);color:var(--ink);padding:7px 14px;border-radius:8px;font:inherit;cursor:pointer;text-align:left}
+.opts button.right{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+.opts button.wrong{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.fb{margin-top:8px;font-size:14px;color:var(--muted)}
+.msg{margin-top:10px;padding:10px 14px;border-radius:8px;font-size:15px}
+.msg.ok{background:var(--ok-soft);color:var(--ok)}
+.msg.bad{background:var(--bad-soft);color:var(--bad)}
+.msg.info{background:var(--accent-soft);color:var(--ink)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cell-btn{cursor:pointer;user-select:none;min-width:44px}
+.cell-btn:hover{outline:2px solid var(--accent)}
+.person{display:flex;align-items:center;gap:10px;margin:6px 0;flex-wrap:wrap}
+.person b{min-width:24px}
+.pager{display:flex;justify-content:space-between;gap:10px;margin-top:8px}
+.score{font-size:15px;color:var(--muted);margin-top:6px}
+ul{padding-left:22px}
+@media (max-width:820px){
+  .layout{grid-template-columns:1fr;padding:16px}
+  nav{position:static;display:flex;overflow-x:auto;gap:6px;padding-bottom:4px}
+  nav button{width:auto;white-space:nowrap;flex:0 0 auto}
+  .progress{flex-basis:80px}
+  .grid2{grid-template-columns:1fr}
+  .card{padding:16px}
+  h2{font-size:22px}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>🧠 Məntiq Kursu</h1>
+  <div class="progress"><div id="bar"></div></div>
+  <span id="pct">0%</span>
+  <button class="btn ghost" id="themeBtn" title="Mövzunu dəyiş" style="padding:5px 10px">◐</button>
+</header>
+<div class="layout">
+  <nav id="nav"></nav>
+  <main id="main">
+
+<!-- 1 -->
+<section class="lesson" data-title="Mülahizə nədir?">
+  <div class="card">
+    <h2>1. Mülahizə nədir?</h2>
+    <p class="lead">Məntiq düzgün düşünmənin qaydalarını öyrənən elmdir. Onun “atomu” mülahizədir.</p>
+    <p><b>Mülahizə</b> ya <span class="T">doğru (D)</span>, ya da <span class="F">yalan (Y)</span> olan nəqli cümlədir. Üçüncü hal yoxdur. Buna <i>üçüncünün istisnası qanunu</i> deyilir.</p>
+    <ul>
+      <li>“Bakı Azərbaycanın paytaxtıdır.” — mülahizədir (D)</li>
+      <li>“2 + 2 = 5” — mülahizədir (Y)</li>
+      <li>“Qapını bağla!” — mülahizə <b>deyil</b>, çünki əmrdir</li>
+      <li>“Saat neçədir?” — mülahizə <b>deyil</b>, çünki sualdır</li>
+      <li>“x &gt; 3” — mülahizə <b>deyil</b>, çünki x bilinmir (bu, <i>predikatdır</i>, 6-cı dərsdə görəcəyik)</li>
+    </ul>
+    <div class="note">Mülahizələri adətən kiçik hərflərlə işarə edirik: <span class="sym">p</span>, <span class="sym">q</span>, <span class="sym">r</span>. Məsələn, p = “Yağış yağır”.</div>
+  </div>
+  <div class="card"><h3>✍️ Tapşırıq: hansı cümlə mülahizədir?</h3><div class="quiz" data-quiz="props"></div></div>
+</section>
+
+<!-- 2 -->
+<section class="lesson" data-title="Məntiqi bağlayıcılar">
+  <div class="card">
+    <h2>2. Məntiqi bağlayıcılar</h2>
+    <p class="lead">Sadə mülahizələri birləşdirib mürəkkəb mülahizələr qururuq.</p>
+    <div class="scroll"><table class="tt">
+      <tr><th>İşarə</th><th>Adı</th><th>Oxunuşu</th><th>Nə vaxt doğrudur?</th></tr>
+      <tr><td>¬p</td><td>İnkar</td><td>“p deyil”</td><td>p yalan olduqda</td></tr>
+      <tr><td>p ∧ q</td><td>Konyunksiya</td><td>“p və q”</td><td>hər ikisi doğru olduqda</td></tr>
+      <tr><td>p ∨ q</td><td>Dizyunksiya</td><td>“p və ya q”</td><td>ən azı biri doğru olduqda</td></tr>
+      <tr><td>p → q</td><td>İmplikasiya</td><td>“p-dirsə, q-dur”</td><td>yalnız “D → Y” halında yalandır</td></tr>
+      <tr><td>p ↔ q</td><td>Ekvivalentlik</td><td>“p ancaq və ancaq q olduqda”</td><td>ikisinin qiyməti eyni olduqda</td></tr>
+    </table></div>
+    <div class="note"><b>İmplikasiya ən çox səhv salınan bağlayıcıdır.</b> “Əgər imtahandan 90 alsan, sənə velosiped alaram” vədini düşün. Vəd yalnız bir halda pozulur: sən 90 aldın (D), velosiped alınmadı (Y). 90 almasan, nə olursa olsun vəd pozulmayıb. Ona görə yalan əsasdan istənilən nəticə “doğru” sayılır.</div>
+  </div>
+  <div class="card">
+    <h3>🎛️ Laboratoriya: p və q qiymətlərini dəyiş</h3>
+    <div class="row" style="gap:16px;margin-bottom:12px">
+      <div>p = <button class="toggle on" id="pT">D</button></div>
+      <div>q = <button class="toggle on" id="qT">D</button></div>
+    </div>
+    <div class="scroll"><table class="tt" id="labTable"></table></div>
+  </div>
+  <div class="card"><h3>✍️ Tapşırıq</h3><div class="quiz" data-quiz="conn"></div></div>
+</section>
+
+<!-- 3 -->
+<section class="lesson" data-title="Doğruluq cədvəlləri">
+  <div class="card">
+    <h2>3. Doğruluq cədvəlləri</h2>
+    <p class="lead">Mürəkkəb mülahizənin bütün mümkün hallarda qiymətini göstərən cədvəl.</p>
+    <p>n dəyişən varsa, cədvəldə <b>2ⁿ</b> sətir olur: 2 dəyişəndə 4, 3 dəyişəndə 8 sətir. Formulu hissə-hissə, içəridən çölə doğru hesablayırıq.</p>
+    <p>Bağlayıcıların gücü (güclüdən zəifə): <span class="sym">¬</span> → <span class="sym">∧</span> → <span class="sym">∨</span> → <span class="sym">→</span> → <span class="sym">↔</span>. Yəni <span class="sym">¬p ∨ q ∧ r</span> belə oxunur: <span class="sym">(¬p) ∨ (q ∧ r)</span>.</p>
+  </div>
+  <div class="card">
+    <h3>🛠️ Cədvəl generatoru</h3>
+    <p class="fb">Formul yaz. Klaviaturadan da yaza bilərsən: <span class="sym">!</span> ¬, <span class="sym">&amp;</span> ∧, <span class="sym">|</span> ∨, <span class="sym">-&gt;</span> →, <span class="sym">&lt;-&gt;</span> ↔</p>
+    <input type="text" id="genIn" value="(p → q) ∧ p → q">
+    <div class="keys" data-target="genIn"></div>
+    <button class="btn" id="genBtn">Cədvəl qur</button>
+    <div id="genOut"></div>
+  </div>
+  <div class="card">
+    <h3>✍️ Məşq: nəticə sütununu özün doldur</h3>
+    <p class="fb">Son sütundakı xanalara klikləyib D/Y seç, sonra yoxla.</p>
+    <div id="fillF" style="font-size:18px;margin-bottom:6px"></div>
+    <div class="scroll" id="fillTable"></div>
+    <div class="row" style="margin-top:10px"><button class="btn" id="fillCheck">Yoxla</button><button class="btn ghost" id="fillNext">Yeni formul</button></div>
+    <div id="fillMsg"></div>
+    <div class="score" id="fillScore"></div>
+  </div>
+</section>
+
+<!-- 4 -->
+<section class="lesson" data-title="Qanunlar və ekvivalentlik">
+  <div class="card">
+    <h2>4. Tavtologiya, ziddiyyət və ekvivalentlik</h2>
+    <ul>
+      <li><b>Tavtologiya</b>: həmişə doğru olan formul. Məsələn <span class="sym">p ∨ ¬p</span>.</li>
+      <li><b>Ziddiyyət</b>: həmişə yalan olan formul. Məsələn <span class="sym">p ∧ ¬p</span>.</li>
+      <li><b>Mümkün (icra oluna bilən)</b>: ən azı bir halda doğru olan formul.</li>
+      <li>İki formul bütün hallarda eyni qiyməti alırsa, onlar <b>ekvivalentdir</b> (≡).</li>
+    </ul>
+    <h3>Əsas qanunlar</h3>
+    <div class="scroll"><table class="tt">
+      <tr><th>Qanun</th><th>Formul</th></tr>
+      <tr><td>İkiqat inkar</td><td>¬¬p ≡ p</td></tr>
+      <tr><td>De Morqan 1</td><td>¬(p ∧ q) ≡ ¬p ∨ ¬q</td></tr>
+      <tr><td>De Morqan 2</td><td>¬(p ∨ q) ≡ ¬p ∧ ¬q</td></tr>
+      <tr><td>İmplikasiyanın açılışı</td><td>p → q ≡ ¬p ∨ q</td></tr>
+      <tr><td>Kontrapozisiya</td><td>p → q ≡ ¬q → ¬p</td></tr>
+      <tr><td>Paylama</td><td>p ∧ (q ∨ r) ≡ (p ∧ q) ∨ (p ∧ r)</td></tr>
+      <tr><td>İmplikasiyanın inkarı</td><td>¬(p → q) ≡ p ∧ ¬q</td></tr>
+    </table></div>
+    <div class="note">De Morqan gündəlik dildə: “Çay <b>və</b> qəhvə içmədim” cümləsinin inkarı “Çay <b>və ya</b> qəhvə içmişəm” olur, yəni “ən azı birini içmişəm”.</div>
+  </div>
+  <div class="card">
+    <h3>⚖️ Ekvivalentlik yoxlayıcısı</h3>
+    <div class="grid2">
+      <div><input type="text" id="eqA" value="¬(p ∧ q)"><div class="keys" data-target="eqA"></div></div>
+      <div><input type="text" id="eqB" value="¬p ∨ ¬q"><div class="keys" data-target="eqB"></div></div>
+    </div>
+    <button class="btn" id="eqBtn">Müqayisə et</button>
+    <div id="eqOut"></div>
+  </div>
+  <div class="card"><h3>✍️ Tapşırıq</h3><div class="quiz" data-quiz="laws"></div></div>
+</section>
+
+<!-- 5 -->
+<section class="lesson" data-title="Nəticəçıxarma">
+  <div class="card">
+    <h2>5. Nəticəçıxarma qaydaları</h2>
+    <p class="lead">Arqument əsaslardan (premisalardan) və nəticədən ibarətdir. Əsaslar doğru olduqda nəticə də <b>mütləq</b> doğrudursa, arqument <b>düzgündür</b> (valid).</p>
+    <div class="scroll"><table class="tt">
+      <tr><th>Qayda</th><th>Əsaslar</th><th>Nəticə</th></tr>
+      <tr><td>Modus ponens</td><td>p → q, p</td><td>q</td></tr>
+      <tr><td>Modus tollens</td><td>p → q, ¬q</td><td>¬p</td></tr>
+      <tr><td>Hipotetik sillogizm</td><td>p → q, q → r</td><td>p → r</td></tr>
+      <tr><td>Dizyunktiv sillogizm</td><td>p ∨ q, ¬p</td><td>q</td></tr>
+      <tr><td>Konstruktiv dilemma</td><td>p → q, r → s, p ∨ r</td><td>q ∨ s</td></tr>
+    </table></div>
+    <h3 style="margin-top:14px">⚠️ Tipik məntiqi səhvlər</h3>
+    <ul>
+      <li><b>Nəticənin təsdiqi:</b> p → q, q ⊢ p. Yanlışdır. “Yağış yağırsa, yol yaşdır. Yol yaşdır, deməli yağış yağıb.” Yolu suvarma maşını da isladıb ola bilər.</li>
+      <li><b>Əsasın inkarı:</b> p → q, ¬p ⊢ ¬q. Bu da yanlışdır.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>🔍 Arqument yoxlayıcısı</h3>
+    <p class="fb">Hər sətirə bir əsas yaz, sonra nəticəni yaz. Arqument yanlışdırsa, əks-nümunə göstəriləcək.</p>
+    <textarea id="argP">p → q
+¬q</textarea>
+    <div class="keys" data-target="argP"></div>
+    <input type="text" id="argC" value="¬p" style="margin-top:8px">
+    <div class="keys" data-target="argC"></div>
+    <button class="btn" id="argBtn">Yoxla</button>
+    <div id="argOut"></div>
+  </div>
+  <div class="card"><h3>✍️ Tapşırıq: arqument düzgündürmü?</h3><div class="quiz" data-quiz="args"></div></div>
+</section>
+
+<!-- 6 -->
+<section class="lesson" data-title="Predikatlar və kvantorlar">
+  <div class="card">
+    <h2>6. Predikatlar və kvantorlar</h2>
+    <p class="lead">“x tələbədir” özü-özlüyündə nə doğru, nə yalandır. Bu, <b>predikatdır</b>: P(x). x-in yerinə konkret obyekt qoyanda mülahizə alınır.</p>
+    <ul>
+      <li><span class="sym">∀x P(x)</span>: <b>ümumilik kvantoru</b>, “bütün x-lər üçün P(x)”</li>
+      <li><span class="sym">∃x P(x)</span>: <b>varlıq kvantoru</b>, “elə x var ki, P(x)”</li>
+    </ul>
+    <h3>Kvantorların inkarı</h3>
+    <div class="scroll"><table class="tt">
+      <tr><td>¬∀x P(x)</td><td>≡</td><td>∃x ¬P(x)</td><td>“Hamı deyil” = “kimsə deyil”</td></tr>
+      <tr><td>¬∃x P(x)</td><td>≡</td><td>∀x ¬P(x)</td><td>“Heç kim” = “hər kəs deyil”</td></tr>
+    </table></div>
+    <div class="note">“Bütün qu quşları ağdır” fikrini təkzib etmək üçün <b>bir</b> qara qu quşu tapmaq kifayətdir. Bu, <span class="sym">∃x ¬Ağ(x)</span> deməkdir.</div>
+    <h3>Tərcümə nümunələri</h3>
+    <ul>
+      <li>“Bütün pişiklər məməlidir”: <span class="sym">∀x (Pişik(x) → Məməli(x))</span></li>
+      <li>“Bəzi tələbələr riyaziyyatı sevir”: <span class="sym">∃x (Tələbə(x) ∧ Sevir(x))</span></li>
+    </ul>
+    <p class="fb">Diqqət: ∀ ilə adətən →, ∃ ilə isə ∧ işlənir.</p>
+  </div>
+  <div class="card"><h3>✍️ Tapşırıq</h3><div class="quiz" data-quiz="quant"></div></div>
+</section>
+
+<!-- 7 -->
+<section class="lesson" data-title="Aristotel sillogizmi">
+  <div class="card">
+    <h2>7. Aristotel sillogizmi</h2>
+    <p class="lead">Klassik məntiqdə dörd növ hökm var:</p>
+    <div class="scroll"><table class="tt">
+      <tr><th>Növ</th><th>Forma</th><th>Nümunə</th></tr>
+      <tr><td>A</td><td>Bütün S P-dir</td><td>Bütün insanlar ölümlüdür</td></tr>
+      <tr><td>E</td><td>Heç bir S P deyil</td><td>Heç bir balıq quş deyil</td></tr>
+      <tr><td>I</td><td>Bəzi S P-dir</td><td>Bəzi tələbələr idmançıdır</td></tr>
+      <tr><td>O</td><td>Bəzi S P deyil</td><td>Bəzi quşlar uça bilmir</td></tr>
+    </table></div>
+    <p><b>Sillogizm</b> iki əsas və bir nəticədən ibarətdir:</p>
+    <div class="note">Bütün insanlar ölümlüdür. (A)<br>Sokrat insandır.<br><b>Deməli, Sokrat ölümlüdür.</b></div>
+    <h3>Yoxlama qaydaları</h3>
+    <ul>
+      <li>Orta termin (iki əsasda təkrarlanan və nəticədə olmayan termin) ən azı bir əsasda tam həcmdə (“bütün” və ya “heç bir” ilə) işlənməlidir.</li>
+      <li>İki inkar əsasdan nəticə çıxmır.</li>
+      <li>İki “bəzi” əsasdan nəticə çıxmır.</li>
+      <li>Əsaslardan biri inkardırsa, nəticə də inkar olmalıdır.</li>
+    </ul>
+  </div>
+  <div class="card"><h3>✍️ Tapşırıq: sillogizm düzgündürmü?</h3><div class="quiz" data-quiz="syl"></div></div>
+</section>
+
+<!-- 8 -->
+<section class="lesson" data-title="Məntiq tapmacaları">
+  <div class="card">
+    <h2>8. Cəngavərlər və Yalançılar adası</h2>
+    <p class="lead">Adada iki cür insan yaşayır: <b>cəngavərlər</b> həmişə doğru danışır, <b>yalançılar</b> həmişə yalan danışır.</p>
+    <div class="note"><b>Üsul:</b> hər insan üçün bir mülahizə götür: A = “A cəngavərdir”. A nə deyirsə desin, <span class="sym">A ↔ (A-nın dediyi)</span> doğru olmalıdır. Sonra bütün halları yoxla (doğruluq cədvəli!) və ziddiyyət yaratmayan halı tap.</div>
+  </div>
+  <div class="card" id="kk"></div>
+</section>
+
+<!-- 9 -->
+<section class="lesson" data-title="Yekun imtahan">
+  <div class="card">
+    <h2>9. Yekun imtahan</h2>
+    <p class="lead">Bütün mövzulardan 10 sual. 8 və daha çox düzgün cavab = kurs tamamlandı 🎓</p>
+    <div class="quiz" data-quiz="final"></div>
+  </div>
+</section>
+
+  </main>
+</div>
+
+<script>
+// ===================== Formula parser =====================
+function normalize(s){
+  return s.replace(/<->|<=>/g,'↔').replace(/->|=>/g,'→').replace(/[!~]/g,'¬')
+          .replace(/&&?|\^/g,'∧').replace(/\|\|?/g,'∨');
+}
+function tokenize(s){
+  s=normalize(s); const t=[];
+  for(const ch of s){
+    if(/\s/.test(ch)) continue;
+    if('¬∧∨→↔()'.includes(ch)) t.push(ch);
+    else if(/[a-zA-Z]/.test(ch)) t.push({v:ch.toLowerCase()});
+    else if(ch==='1'||ch==='0') t.push({c:ch==='1'});
+    else throw new Error('Tanınmayan simvol: “'+ch+'”');
+  }
+  return t;
+}
+function parse(src){
+  const t=tokenize(src); let i=0;
+  const peek=()=>t[i], eat=x=>{ if(t[i]!==x) throw new Error('“'+x+'” gözlənilirdi'); i++; };
+  function iff(){ let l=imp(); while(peek()==='↔'){i++; l={op:'↔',a:l,b:imp()};} return l; }
+  function imp(){ const l=or(); if(peek()==='→'){i++; return {op:'→',a:l,b:imp()};} return l; }
+  function or(){ let l=and(); while(peek()==='∨'){i++; l={op:'∨',a:l,b:and()};} return l; }
+  function and(){ let l=not(); while(peek()==='∧'){i++; l={op:'∧',a:l,b:not()};} return l; }
+  function not(){ if(peek()==='¬'){i++; return {op:'¬',a:not()};} return prim(); }
+  function prim(){
+    const x=peek();
+    if(x==='('){i++; const e=iff(); eat(')'); return e;}
+    if(x&&x.v){i++; return {v:x.v};}
+    if(x&&x.c!==undefined){i++; return {c:x.c};}
+    throw new Error(x===undefined?'Formul yarımçıq qalıb':'Gözlənilməz simvol: “'+x+'”');
+  }
+  if(!t.length) throw new Error('Formul boşdur');
+  const e=iff(); if(i<t.length) throw new Error('Artıq simvol: “'+(t[i].v||t[i])+'”');
+  return e;
+}
+function ev(n,env){
+  if(n.v) return env[n.v]; if(n.c!==undefined) return n.c;
+  const a=ev(n.a,env);
+  switch(n.op){
+    case '¬': return !a;
+    case '∧': return a&&ev(n.b,env);
+    case '∨': return a||ev(n.b,env);
+    case '→': return !a||ev(n.b,env);
+    case '↔': return a===ev(n.b,env);
+  }
+}
+const prec={'↔':1,'→':2,'∨':3,'∧':4,'¬':5};
+function str(n,parent){
+  if(n.v) return n.v; if(n.c!==undefined) return n.c?'1':'0';
+  let s = n.op==='¬' ? '¬'+str(n.a,5) : str(n.a,prec[n.op]+(n.op==='→'?0.5:0))+' '+n.op+' '+str(n.b,prec[n.op]);
+  return (parent!==undefined && prec[n.op]<parent) || (parent!==undefined && n.op!=='¬' && prec[n.op]===parent && n.op==='→') ? '('+s+')' : s;
+}
+function vars(n,set=new Set()){ if(n.v) set.add(n.v); if(n.a) vars(n.a,set); if(n.b) vars(n.b,set); return set; }
+function subs(n,out=[]){ if(n.a) subs(n.a,out); if(n.b) subs(n.b,out); if(n.op && !out.some(o=>str(o)===str(n))) out.push(n); return out; }
+function rows(vs){ const r=[]; const k=vs.length; for(let m=0;m<(1<<k);m++){ const env={}; vs.forEach((v,j)=>env[v]=!((m>>(k-1-j))&1)); r.push(env);} return r; }
+const DY=b=>`<span class="${b?'T':'F'}">${b?'D':'Y'}</span>`;
+const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+// ===================== Progress =====================
+const LS='mentiq-kursu-v1';
+let state={done:{},lesson:0};
+try{ const s=JSON.parse(localStorage.getItem(LS)); if(s) state=Object.assign(state,s);}catch(e){}
+function save(){ try{localStorage.setItem(LS,JSON.stringify(state));}catch(e){} }
+const lessons=[...document.querySelectorAll('section.lesson')];
+function markDone(i){ state.done[i]=true; save(); renderNav(); }
+function renderNav(){
+  const nav=document.getElementById('nav'); nav.innerHTML='';
+  lessons.forEach((s,i)=>{
+    const b=document.createElement('button');
+    b.className=(i===state.lesson?'active ':'')+(state.done[i]?'done':'');
+    b.innerHTML=`<span class="num">${state.done[i]?'✓':i+1}</span>${s.dataset.title}`;
+    b.onclick=()=>show(i); nav.appendChild(b);
+  });
+  const n=Object.keys(state.done).length, p=Math.round(100*n/lessons.length);
+  document.getElementById('bar').style.width=p+'%'; document.getElementById('pct').textContent=p+'%';
+}
+function show(i){
+  state.lesson=i; save();
+  lessons.forEach((s,j)=>s.classList.toggle('show',j===i));
+  if(!lessons[i].querySelector('.pager')){
+    const pg=document.createElement('div'); pg.className='pager';
+    pg.innerHTML=(i>0?`<button class="btn ghost" data-go="${i-1}">← Əvvəlki</button>`:'<span></span>')+
+                 (i<lessons.length-1?`<button class="btn" data-go="${i+1}">Növbəti →</button>`:'');
+    pg.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{show(+b.dataset.go);});
+    lessons[i].appendChild(pg);
+  }
+  renderNav(); window.scrollTo({top:0,behavior:'smooth'});
+}
+lessons.forEach((s,i)=>s.dataset.idx=i);
+
+// ===================== Theme =====================
+document.getElementById('themeBtn').onclick=()=>{
+  const r=document.documentElement, dark=matchMedia('(prefers-color-scheme: dark)').matches;
+  const cur=r.dataset.theme||(dark?'dark':'light'); r.dataset.theme=cur==='dark'?'light':'dark';
+};
+
+// ===================== Symbol keyboards =====================
+document.querySelectorAll('.keys').forEach(k=>{
+  const target=document.getElementById(k.dataset.target);
+  ['¬','∧','∨','→','↔','(',')','p','q','r','⌫'].forEach(sym=>{
+    const b=document.createElement('button'); b.type='button'; b.textContent=sym;
+    b.onclick=()=>{
+      const s=target.selectionStart??target.value.length, e=target.selectionEnd??s;
+      if(sym==='⌫'){ if(s===e&&s>0){target.value=target.value.slice(0,s-1)+target.value.slice(e); target.setSelectionRange(s-1,s-1);} else {target.value=target.value.slice(0,s)+target.value.slice(e); target.setSelectionRange(s,s);} }
+      else { const ins=['∧','∨','→','↔'].includes(sym)?' '+sym+' ':sym; target.value=target.value.slice(0,s)+ins+target.value.slice(e); target.setSelectionRange(s+ins.length,s+ins.length); }
+      target.focus();
+    };
+    k.appendChild(b);
+  });
+});
+
+// ===================== Quizzes =====================
+const QUIZ={
+  props:[
+    {q:'“Yer Günəş ətrafında fırlanır.”',o:['Mülahizədir','Mülahizə deyil'],a:0,e:'Nəqli cümlədir və doğrudur.'},
+    {q:'“Dərsini oxu!”',o:['Mülahizədir','Mülahizə deyil'],a:1,e:'Əmr cümləsi doğru və ya yalan ola bilməz.'},
+    {q:'“7 cüt ədəddir.”',o:['Mülahizədir','Mülahizə deyil'],a:0,e:'Yalan da olsa mülahizədir. Mülahizənin doğru olması vacib deyil, qiymətinin olması vacibdir.'},
+    {q:'“Sən haralısan?”',o:['Mülahizədir','Mülahizə deyil'],a:1,e:'Sual cümləsidir.'},
+    {q:'“x + 1 = 5”',o:['Mülahizədir','Mülahizə deyil'],a:1,e:'x məlum olmadığı üçün qiyməti yoxdur. Bu, predikatdır.'},
+    {q:'“Bu cümlə yalandır.”',o:['Mülahizədir','Mülahizə deyil'],a:1,e:'Bu, “Yalançı paradoksu”dur. Doğru desək yalan olur, yalan desək doğru olur. Ona görə klassik məntiqdə mülahizə sayılmır.'},
+  ],
+  conn:[
+    {q:'p = D, q = Y olduqda p → q nədir?',o:['D','Y'],a:1,e:'İmplikasiya yalnız D → Y halında yalandır.'},
+    {q:'p = Y, q = Y olduqda p → q nədir?',o:['D','Y'],a:0,e:'Yalan əsasdan hər şey alınır, yəni implikasiya doğrudur.'},
+    {q:'p = D, q = Y olduqda p ∨ q nədir?',o:['D','Y'],a:0,e:'Ən azı biri doğrudur.'},
+    {q:'p = D, q = Y olduqda ¬p ↔ q nədir?',o:['D','Y'],a:0,e:'¬p = Y, q = Y. İkisi eynidir, deməli D.'},
+    {q:'“Yağış yağmır və hava soyuqdur” (p = yağış yağır, q = hava soyuqdur)',o:['¬p ∧ q','¬(p ∧ q)','p ∨ ¬q','¬p → q'],a:0,e:'“yağmır” = ¬p, “və” = ∧.'},
+    {q:'“Əgər çalışsan, uğur qazanarsan” (p = çalışırsan, q = uğur)',o:['q → p','p → q','p ∧ q','p ↔ q'],a:1,e:'“Əgər p, onda q” = p → q.'},
+  ],
+  laws:[
+    {q:'¬(p ∨ q) nəyə ekvivalentdir?',o:['¬p ∨ ¬q','¬p ∧ ¬q','p ∧ q','¬p → q'],a:1,e:'De Morqan: ∨-un inkarı inkarların ∧-sidir.'},
+    {q:'p → q nəyə ekvivalentdir?',o:['q → p','¬p → ¬q','¬q → ¬p','p ∧ ¬q'],a:2,e:'Kontrapozisiya. Diqqət: q → p (tərs) və ¬p → ¬q (əks) ekvivalent DEYİL!'},
+    {q:'p ∨ ¬p formulu nədir?',o:['Tavtologiya','Ziddiyyət','Mümkün, amma tavtologiya deyil'],a:0,e:'Üçüncünün istisnası qanunu: həmişə doğrudur.'},
+    {q:'(p → q) ∧ p ∧ ¬q formulu nədir?',o:['Tavtologiya','Ziddiyyət','Mümkün, amma tavtologiya deyil'],a:1,e:'p və ¬q doğrudursa, p → q yalandır. Heç vaxt doğru ola bilməz. Generatorda yoxla!'},
+    {q:'“Doğru deyil ki, həm ac, həm də yorğunam” nə deməkdir?',o:['Nə acam, nə yorğun','Ya ac deyiləm, ya da yorğun deyiləm','Acam, amma yorğun deyiləm'],a:1,e:'¬(a ∧ y) ≡ ¬a ∨ ¬y.'},
+  ],
+  args:[
+    {q:'Əgər Əli imtahanı keçibsə, sevinir. Əli imtahanı keçib. ⇒ Əli sevinir.',o:['Düzgün','Yanlış'],a:0,e:'Modus ponens.'},
+    {q:'Əgər Əli imtahanı keçibsə, sevinir. Əli sevinir. ⇒ Əli imtahanı keçib.',o:['Düzgün','Yanlış'],a:1,e:'Nəticənin təsdiqi səhvi. Başqa səbəbdən də sevinə bilər.'},
+    {q:'Əgər telefon şarjdadırsa, işıq yanır. İşıq yanmır. ⇒ Telefon şarjda deyil.',o:['Düzgün','Yanlış'],a:0,e:'Modus tollens.'},
+    {q:'Əgər qar yağırsa, məktəb bağlanır. Qar yağmır. ⇒ Məktəb bağlanmır.',o:['Düzgün','Yanlış'],a:1,e:'Əsasın inkarı səhvi. Məktəb başqa səbəbdən bağlana bilər.'},
+    {q:'Ya çay içəcəyəm, ya qəhvə. Çay içmədim. ⇒ Qəhvə içdim.',o:['Düzgün','Yanlış'],a:0,e:'Dizyunktiv sillogizm.'},
+    {q:'Oxusam, bilərəm. Bilsəm, keçərəm. ⇒ Oxusam, keçərəm.',o:['Düzgün','Yanlış'],a:0,e:'Hipotetik sillogizm (zəncir qaydası).'},
+  ],
+  quant:[
+    {q:'“Bütün tələbələr çalışqandır” fikrinin inkarı:',o:['Heç bir tələbə çalışqan deyil','Bəzi tələbələr çalışqan deyil','Bütün tələbələr tənbəldir'],a:1,e:'¬∀x P(x) ≡ ∃x ¬P(x).'},
+    {q:'“Heç kim mükəmməl deyil” fikrinin inkarı:',o:['Hamı mükəmməldir','Kimsə mükəmməldir','Kimsə mükəmməl deyil'],a:1,e:'¬∀x ¬M(x) ≡ ∃x M(x).'},
+    {q:'“Bəzi quşlar uça bilmir”:',o:['∀x (Quş(x) → ¬Uçur(x))','∃x (Quş(x) ∧ ¬Uçur(x))','∃x (Quş(x) → ¬Uçur(x))'],a:1,e:'∃ ilə ∧ işlənir. ∃x (Quş(x) → …) quş olmayan istənilən obyektlə də doğru olardı.'},
+    {q:'Natural ədədlərdə ∀x ∃y (y > x) doğrudurmu?',o:['Doğru','Yalan'],a:0,e:'Hər ədəddən böyük ədəd var (məsələn, x+1).'},
+    {q:'Natural ədədlərdə ∃y ∀x (y > x) doğrudurmu?',o:['Doğru','Yalan'],a:1,e:'Bütün ədədlərdən böyük ədəd yoxdur. Kvantorların sırası mənanı dəyişir!'},
+  ],
+  syl:[
+    {q:'Bütün itlər məməlidir. Bütün məməlilər heyvandır. ⇒ Bütün itlər heyvandır.',o:['Düzgün','Yanlış'],a:0,e:'Barbara forması (AAA).'},
+    {q:'Bütün pişiklər heyvandır. Bütün itlər heyvandır. ⇒ Bütün pişiklər itdir.',o:['Düzgün','Yanlış'],a:1,e:'Orta termin (“heyvan”) heç bir əsasda tam həcmdə işlənməyib.'},
+    {q:'Heç bir balıq məməli deyil. Bütün köpəkbalıqları balıqdır. ⇒ Heç bir köpəkbalığı məməli deyil.',o:['Düzgün','Yanlış'],a:0,e:'Celarent forması (EAE).'},
+    {q:'Bəzi tələbələr idmançıdır. Bəzi idmançılar musiqiçidir. ⇒ Bəzi tələbələr musiqiçidir.',o:['Düzgün','Yanlış'],a:1,e:'İki “bəzi” əsasdan nəticə çıxmır.'},
+    {q:'Heç bir sürünən quş deyil. Heç bir quş balıq deyil. ⇒ Heç bir sürünən balıq deyil.',o:['Düzgün','Yanlış'],a:1,e:'İki inkar əsasdan nəticə çıxmır (nəticə bu halda doğru olsa da, arqument düzgün deyil).'},
+  ],
+  final:[
+    {q:'Hansı mülahizədir?',o:['Pəncərəni aç!','Ay Yerin peykidir.','Necəsən?'],a:1,e:'Yalnız nəqli cümlə mülahizədir.'},
+    {q:'p = Y, q = D olduqda p ∧ q nədir?',o:['D','Y'],a:1,e:'∧ üçün hər ikisi doğru olmalıdır.'},
+    {q:'3 dəyişənli formulun doğruluq cədvəlində neçə sətir var?',o:['3','6','8','9'],a:2,e:'2³ = 8.'},
+    {q:'p → q formulunun tərsi (q → p) ona ekvivalentdirmi?',o:['Bəli','Xeyr'],a:1,e:'p = Y, q = D halında p → q doğru, q → p isə yalandır.'},
+    {q:'¬(p → q) ≡ ?',o:['¬p → ¬q','p ∧ ¬q','¬p ∨ q'],a:1,e:'İmplikasiya yalnız “p doğru, q yalan” halında yalandır.'},
+    {q:'p → q, ¬q ⊢ ?',o:['p','¬p','q'],a:1,e:'Modus tollens.'},
+    {q:'“Bütün qızılgüllərin tikanı var” fikrinin inkarı:',o:['Heç bir qızılgülün tikanı yoxdur','Bəzi qızılgüllərin tikanı yoxdur','Bəzi qızılgüllərin tikanı var'],a:1,e:'¬∀ ≡ ∃¬.'},
+    {q:'(p ∧ q) → p formulu nədir?',o:['Tavtologiya','Ziddiyyət','Nə o, nə bu'],a:0,e:'p ∧ q doğrudursa, p mütləq doğrudur.'},
+    {q:'A deyir: “Mən yalançıyam.” Cəngavərlər adasında bu mümkündürmü?',o:['Bəli, A yalançıdır','Bəli, A cəngavərdir','Xeyr, bunu heç kim deyə bilməz'],a:2,e:'Cəngavər bunu desə yalan danışmış olar, yalançı desə doğru danışmış olar. İkisi də mümkün deyil.'},
+    {q:'Bəzi S P-dir. Bütün P M-dir. ⇒ Bəzi S M-dir.',o:['Düzgün','Yanlış'],a:0,e:'Orta termin P ikinci əsasda tam həcmdə işlənib. Bu, düzgün formadır (Darii).'},
+  ],
+};
+function buildQuiz(el){
+  const key=el.dataset.quiz, qs=QUIZ[key], section=+el.closest('section').dataset.idx;
+  let answered=0, right=0;
+  qs.forEach((it,qi)=>{
+    const d=document.createElement('div'); d.className='q';
+    d.innerHTML=`<div><b>${qi+1}.</b> ${esc(it.q)}</div><div class="opts"></div><div class="fb"></div>`;
+    const opts=d.querySelector('.opts'), fb=d.querySelector('.fb');
+    it.o.forEach((o,oi)=>{
+      const b=document.createElement('button'); b.textContent=o;
+      b.onclick=()=>{
+        if(d.dataset.done) return; d.dataset.done=1; answered++;
+        const ok=oi===it.a; if(ok) right++;
+        b.classList.add(ok?'right':'wrong'); opts.children[it.a].classList.add('right');
+        fb.innerHTML=(ok?'✅ Düzgün! ':'❌ Səhv. ')+esc(it.e);
+        if(answered===qs.length) finish();
+      };
+      opts.appendChild(b);
+    });
+    el.appendChild(d);
+  });
+  const res=document.createElement('div'); el.appendChild(res);
+  function finish(){
+    const pass = key==='final' ? right>=8 : right>=Math.ceil(qs.length*0.6);
+    res.className='msg '+(pass?'ok':'bad');
+    res.innerHTML=`Nəticə: ${right} / ${qs.length}. `+(pass?(key==='final'?'🎓 Təbriklər! Kursu tamamladın.':'Dərs tamamlandı ✓'):'Mövzunu yenidən oxu və təkrar cəhd et.')+
+      ' <button class="btn ghost" style="margin-left:8px;padding:4px 10px">Yenidən</button>';
+    res.querySelector('button').onclick=()=>{ el.innerHTML=''; buildQuiz(el); };
+    if(pass) markDone(section);
+  }
+}
+document.querySelectorAll('.quiz').forEach(buildQuiz);
+
+// ===================== Connective lab =====================
+let P=true,Q=true;
+function lab(){
+  const pb=document.getElementById('pT'), qb=document.getElementById('qT');
+  pb.textContent=P?'D':'Y'; pb.className='toggle '+(P?'on':'off');
+  qb.textContent=Q?'D':'Y'; qb.className='toggle '+(Q?'on':'off');
+  const f=[['¬p',!P],['¬q',!Q],['p ∧ q',P&&Q],['p ∨ q',P||Q],['p → q',!P||Q],['q → p',!Q||P],['p ↔ q',P===Q]];
+  document.getElementById('labTable').innerHTML='<tr>'+f.map(x=>`<th>${x[0]}</th>`).join('')+'</tr><tr>'+f.map(x=>`<td>${DY(x[1])}</td>`).join('')+'</tr>';
+}
+document.getElementById('pT').onclick=()=>{P=!P;lab();};
+document.getElementById('qT').onclick=()=>{Q=!Q;lab();};
+lab();
+
+// ===================== Truth table generator =====================
+function classify(vals){ return vals.every(x=>x)?['Tavtologiya: həmişə doğrudur','ok']:vals.every(x=>!x)?['Ziddiyyət: həmişə yalandır','bad']:['Mümkün: bəzi hallarda doğru, bəzilərində yalandır','info']; }
+function ttHTML(ast){
+  const vs=[...vars(ast)].sort(), sb=subs(ast), rs=rows(vs);
+  let h='<div class="scroll"><table class="tt"><tr>'+vs.map(v=>`<th>${v}</th>`).join('')+sb.map((s,i)=>`<th>${esc(str(s))}</th>`).join('')+'</tr>';
+  const vals=[];
+  rs.forEach(env=>{ const r=ev(ast,env); vals.push(r);
+    h+='<tr>'+vs.map(v=>`<td>${DY(env[v])}</td>`).join('')+sb.map((s,i)=>`<td class="${i===sb.length-1?'res':''}">${DY(ev(s,env))}</td>`).join('')+'</tr>'; });
+  h+='</table></div>'; const c=classify(vals);
+  return h+`<div class="msg ${c[1]}">${c[0]}</div>`;
+}
+function gen(){
+  const out=document.getElementById('genOut');
+  try{ const a=parse(document.getElementById('genIn').value); out.innerHTML=ttHTML(a); }
+  catch(e){ out.innerHTML=`<div class="msg bad">Xəta: ${esc(e.message)}</div>`; }
+}
+document.getElementById('genBtn').onclick=gen;
+document.getElementById('genIn').onkeydown=e=>{if(e.key==='Enter')gen();};
+gen();
+
+// ===================== Fill-in exercise =====================
+const FILL=['p → q','¬p ∨ q','p ∧ ¬q','(p ∨ q) ∧ ¬p','p ↔ ¬q','¬(p ∧ q)','q → ¬p','(p → q) ∧ (q → p)','p ∨ q → r','(p ∧ q) ∨ ¬r'];
+let fillIdx=-1, fillUser=[], fillAst, fillRows, fillOk=0, fillTry=0;
+function fillNew(){
+  let n; do{ n=Math.floor(Math.random()*FILL.length);}while(n===fillIdx && FILL.length>1); fillIdx=n;
+  fillAst=parse(FILL[n]); const vs=[...vars(fillAst)].sort(); fillRows=rows(vs); fillUser=fillRows.map(()=>null);
+  document.getElementById('fillF').innerHTML=`<span class="sym">${esc(FILL[n])}</span>`;
+  document.getElementById('fillMsg').innerHTML='';
+  const tb=document.getElementById('fillTable');
+  tb.innerHTML='<table class="tt"><tr>'+vs.map(v=>`<th>${v}</th>`).join('')+`<th>${esc(FILL[n])}</th></tr>`+
+    fillRows.map((env,i)=>'<tr>'+vs.map(v=>`<td>${DY(env[v])}</td>`).join('')+`<td class="res cell-btn" data-i="${i}">?</td></tr>`).join('')+'</table>';
+  tb.querySelectorAll('.cell-btn').forEach(td=>td.onclick=()=>{
+    const i=+td.dataset.i; fillUser[i]= fillUser[i]===null?true:!fillUser[i];
+    td.innerHTML=DY(fillUser[i]); td.style.outline='';
+  });
+}
+document.getElementById('fillNext').onclick=fillNew;
+document.getElementById('fillCheck').onclick=()=>{
+  const m=document.getElementById('fillMsg');
+  if(fillUser.some(x=>x===null)){ m.innerHTML='<div class="msg info">Bütün xanaları doldur.</div>'; return; }
+  let wrong=0; document.querySelectorAll('#fillTable .cell-btn').forEach((td,i)=>{
+    const ok=fillUser[i]===ev(fillAst,fillRows[i]); if(!ok){wrong++; td.style.outline='2px solid var(--bad)';} else td.style.outline='2px solid var(--ok)';
+  });
+  fillTry++; if(!wrong) fillOk++;
+  m.innerHTML=wrong?`<div class="msg bad">${wrong} xana səhvdir (qırmızı). Düzəlt və yenidən yoxla.</div>`:'<div class="msg ok">Əla! Hamısı düzdür. 🎉</div>';
+  document.getElementById('fillScore').textContent=`Uğurlu cəhdlər: ${fillOk} / ${fillTry}`+(fillOk>=3?' · Dərs tamamlandı ✓':' · 3 düzgün cədvəl doldursan, dərs tamamlanır');
+  if(fillOk>=3) markDone(2);
+};
+fillNew();
+
+// ===================== Equivalence checker =====================
+document.getElementById('eqBtn').onclick=()=>{
+  const out=document.getElementById('eqOut');
+  try{
+    const A=parse(document.getElementById('eqA').value), B=parse(document.getElementById('eqB').value);
+    const vs=[...new Set([...vars(A),...vars(B)])].sort(), rs=rows(vs); let diff=null;
+    let h='<div class="scroll"><table class="tt"><tr>'+vs.map(v=>`<th>${v}</th>`).join('')+`<th>${esc(str(A))}</th><th>${esc(str(B))}</th></tr>`;
+    rs.forEach(env=>{ const a=ev(A,env), b=ev(B,env); if(a!==b&&!diff) diff=env;
+      h+=`<tr${a!==b?' style="background:var(--bad-soft)"':''}>`+vs.map(v=>`<td>${DY(env[v])}</td>`).join('')+`<td>${DY(a)}</td><td>${DY(b)}</td></tr>`; });
+    h+='</table></div>';
+    h+= diff?`<div class="msg bad">Ekvivalent deyil. Məsələn: ${vs.map(v=>v+' = '+(diff[v]?'D':'Y')).join(', ')} halında qiymətləri fərqlidir.</div>`
+            :'<div class="msg ok">Ekvivalentdir ≡: bütün hallarda qiymətlər eynidir.</div>';
+    out.innerHTML=h;
+  }catch(e){ out.innerHTML=`<div class="msg bad">Xəta: ${esc(e.message)}</div>`; }
+};
+document.getElementById('eqBtn').click();
+
+// ===================== Argument checker =====================
+document.getElementById('argBtn').onclick=()=>{
+  const out=document.getElementById('argOut');
+  try{
+    const ps=document.getElementById('argP').value.split('\n').map(s=>s.trim()).filter(Boolean).map(parse);
+    const c=parse(document.getElementById('argC').value);
+    const vs=[...new Set([...ps.flatMap(p=>[...vars(p)]),...vars(c)])].sort();
+    const cex=rows(vs).find(env=>ps.every(p=>ev(p,env))&&!ev(c,env));
+    out.innerHTML = cex
+      ? `<div class="msg bad">❌ Arqument yanlışdır. Əks-nümunə: ${vs.map(v=>v+' = '+(cex[v]?'D':'Y')).join(', ')}. Bu halda bütün əsaslar doğrudur, nəticə isə yalandır.</div>`
+      : `<div class="msg ok">✅ Arqument düzgündür: əsaslar doğru olan bütün hallarda nəticə də doğrudur.</div>`;
+  }catch(e){ out.innerHTML=`<div class="msg bad">Xəta: ${esc(e.message)}</div>`; }
+};
+document.getElementById('argBtn').click();
+
+// ===================== Knights & Knaves =====================
+const KK=[
+  {people:['A','B'],text:'<b>A</b> deyir: “B yalançıdır.”<br><b>B</b> deyir: “İkimiz də cəngavərik.”',
+   rules:[(w)=>!w.B,(w)=>w.A&&w.B], hint:'B cəngavər olsaydı, A da cəngavər olardı. Onda A-nın sözü yalan çıxardı.'},
+  {people:['A','B'],text:'<b>A</b> deyir: “İkimiz də yalançıyıq.”<br><b>B</b> heç nə demir.',
+   rules:[(w)=>!w.A&&!w.B,null], hint:'Cəngavər “mən yalançıyam” deyə bilməz.'},
+  {people:['A','B'],text:'<b>A</b> deyir: “Ən azı birimiz yalançıdır.”<br><b>B</b> heç nə demir.',
+   rules:[(w)=>!w.A||!w.B,null], hint:'A yalançı olsaydı, onun sözü doğru çıxardı.'},
+  {people:['A','B'],text:'<b>A</b> deyir: “B ilə mən eyni tipdəyik.”<br><b>B</b> deyir: “A ilə mən fərqli tipdəyik.”',
+   rules:[(w)=>w.A===w.B,(w)=>w.A!==w.B], hint:'İki sözdən yalnız biri doğru ola bilər.'},
+  {people:['A','B','C'],text:'<b>A</b> deyir: “B yalançıdır.”<br><b>B</b> deyir: “C yalançıdır.”<br><b>C</b> deyir: “A da, B də yalançıdır.”',
+   rules:[(w)=>!w.B,(w)=>!w.C,(w)=>!w.A&&!w.B], hint:'Əvvəlcə C-nin cəngavər olduğunu fərz et və ziddiyyətə gəl.'},
+];
+function solveKK(p){
+  const sols=[];
+  for(let m=0;m<(1<<p.people.length);m++){
+    const w={}; p.people.forEach((n,i)=>w[n]=!!((m>>i)&1));
+    if(p.rules.every((r,i)=>r===null||r(w)===w[p.people[i]])) sols.push(w);
+  }
+  return sols;
+}
+let kkI=0, kkSolved={};
+try{ kkSolved=JSON.parse(localStorage.getItem(LS+'-kk'))||{}; }catch(e){}
+function renderKK(){
+  const p=KK[kkI], el=document.getElementById('kk'), sol=solveKK(p);
+  const pick={};
+  el.innerHTML=`<h3>🧩 Tapmaca ${kkI+1} / ${KK.length} ${kkSolved[kkI]?'✓':''}</h3><p>${p.text}</p><div id="kkPeople"></div>
+    <div class="row" style="margin-top:10px"><button class="btn" id="kkCheck">Yoxla</button><button class="btn ghost" id="kkHint">İpucu</button>
+    <button class="btn ghost" id="kkPrev" ${kkI===0?'disabled':''}>←</button><button class="btn ghost" id="kkNext" ${kkI===KK.length-1?'disabled':''}>→</button></div><div id="kkMsg"></div>`;
+  const pp=el.querySelector('#kkPeople');
+  p.people.forEach(n=>{
+    const d=document.createElement('div'); d.className='person';
+    d.innerHTML=`<b>${n}</b>`;
+    [['Cəngavər 🛡️',true],['Yalançı 🎭',false]].forEach(([lbl,val])=>{
+      const b=document.createElement('button'); b.className='toggle'; b.textContent=lbl;
+      b.onclick=()=>{ pick[n]=val; d.querySelectorAll('.toggle').forEach(x=>x.className='toggle'); b.className='toggle '+(val?'on':'off'); };
+      d.appendChild(b);
+    });
+    pp.appendChild(d);
+  });
+  const msg=el.querySelector('#kkMsg');
+  el.querySelector('#kkHint').onclick=()=>msg.innerHTML=`<div class="msg info">💡 ${p.hint}</div>`;
+  el.querySelector('#kkPrev').onclick=()=>{kkI--;renderKK();};
+  el.querySelector('#kkNext').onclick=()=>{kkI++;renderKK();};
+  el.querySelector('#kkCheck').onclick=()=>{
+    if(p.people.some(n=>pick[n]===undefined)){ msg.innerHTML='<div class="msg info">Hər kəs üçün seçim et.</div>'; return; }
+    const ok=sol.length===1 && p.people.every(n=>sol[0][n]===pick[n]);
+    if(ok){
+      kkSolved[kkI]=true; try{localStorage.setItem(LS+'-kk',JSON.stringify(kkSolved));}catch(e){}
+      msg.innerHTML='<div class="msg ok">✅ Düzgün! Bu yeganə ziddiyyətsiz həlldir.</div>';
+      if(Object.keys(kkSolved).length>=KK.length) markDone(7);
+      else msg.innerHTML+=`<div class="score">Həll edilib: ${Object.keys(kkSolved).length} / ${KK.length}</div>`;
+    } else {
+      const bad=p.people.find((n,i)=>p.rules[i]&&p.rules[i](pick)!==pick[n]);
+      msg.innerHTML=`<div class="msg bad">❌ Ziddiyyət var: ${bad?`${bad} ${pick[bad]?'cəngavərdirsə, sözü doğru olmalıdır, amma yalan çıxır.':'yalançıdırsa, sözü yalan olmalıdır, amma doğru çıxır.'}`:'yenidən düşün.'}</div>`;
+    }
+  };
+}
+renderKK();
+
+show(Math.min(state.lesson||0,lessons.length-1));
+</script>
+</body>
+</html>
