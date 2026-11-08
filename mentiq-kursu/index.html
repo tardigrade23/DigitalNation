@@ -81,7 +81,19 @@ textarea{min-height:90px}
 .person b{min-width:24px}
 .pager{display:flex;justify-content:space-between;gap:10px;margin-top:8px}
 .score{font-size:15px;color:var(--muted);margin-top:6px}
-ul{padding-left:22px}
+ul,ol{padding-left:22px}
+nav .part{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:14px 12px 4px;font-weight:700}
+nav .part:first-child{padding-top:0}
+input[type=range]{accent-color:var(--accent);min-width:140px}
+.chart{width:100%;height:220px;display:block;background:var(--bg);border:1px solid var(--line);border-radius:8px;margin:10px 0 4px}
+.stage{display:grid;grid-template-columns:150px 1fr 56px;gap:10px;align-items:center;margin:8px 0}
+.stage .barbox{height:22px;background:var(--line);border-radius:6px;overflow:hidden}
+.stage .bar{height:100%;background:var(--accent);transition:width .3s}
+.stage.neck .bar{background:var(--bad)}
+.card-btn{width:72px;height:100px;border-radius:10px;border:2px solid var(--line);background:var(--panel);color:var(--ink);font:700 28px system-ui;cursor:pointer}
+.card-btn.sel{border-color:var(--accent);background:var(--accent-soft)}
+.run{background:var(--warn);color:#000;border-radius:3px}
+@media (max-width:820px){ nav .part{padding:9px 6px;white-space:nowrap;align-self:center} .stage{grid-template-columns:100px 1fr 50px} }
 @media (max-width:820px){
   .layout{grid-template-columns:1fr;padding:16px}
   nav{position:static;display:flex;overflow-x:auto;gap:6px;padding-bottom:4px}
@@ -109,6 +121,7 @@ ul{padding-left:22px}
   <div class="card">
     <h2>1. Mülahizə nədir?</h2>
     <p class="lead">Məntiq düzgün düşünmənin qaydalarını öyrənən elmdir. Onun “atomu” mülahizədir.</p>
+    <div class="note"><b>Bir az tarix.</b> Orta əsrlərdə təhsil <i>trivium</i> ilə başlayırdı. Bu, üç əsas elmdən ibarət idi: <b>qrammatika</b> (mətni anlamaq), <b>ritorika</b> (inandırmaq) və <b>məntiq</b> (düzgün düşünmək). Digər elmlərə yalnız bundan sonra keçirdilər, çünki məntiq hər bir biliyin təməli sayılırdı. Bu kurs da eyni yolla gedir. <b>I hissədə</b> klassik məntiqin “qrammatikasını” öyrənəcəyik. <b>II hissədə</b> isə qeyri-müəyyənlik, mürəkkəb sistemlər və informasiya küyü şəraitində düşünmək üçün müasir alətlərə keçəcəyik.</div>
     <p><b>Mülahizə</b> ya <span class="T">doğru (D)</span>, ya da <span class="F">yalan (Y)</span> olan nəqli cümlədir. Üçüncü hal yoxdur. Buna <i>üçüncünün istisnası qanunu</i> deyilir.</p>
     <ul>
       <li>“Bakı Azərbaycanın paytaxtıdır.” — mülahizədir (D)</li>
@@ -303,11 +316,384 @@ ul{padding-left:22px}
   <div class="card" id="kk"></div>
 </section>
 
+<!-- ============ II HİSSƏ ============ -->
 <!-- 9 -->
+<section class="lesson" data-title="Dünya mənzərəsi və linza">
+  <div class="card">
+    <h2>9. Dünya mənzərəsi: məntiq hansı “linza” ilə işləyir?</h2>
+    <p class="lead">Çox məntiqli düşünüb yenə də səhv nəticəyə gəlmək olar. Çünki problem çox vaxt nəticə çıxarmaqda deyil, <b>əsaslardadır</b>.</p>
+    <p>Biz dünyanın özü ilə yox, onun <b>modelləri</b> ilə işləyirik: təsəvvürlərlə, sözlərlə, abstraksiyalarla. Polşa-Amerika filosofu Alfred Korzıbski bunu belə ifadə edib: <b>“Xəritə ərazi deyil.”</b> Xəritə faydalıdır, amma bəzi detalları mütləq atır.</p>
+    <p>Hər bir arqumentin üç qatı var:</p>
+    <ol>
+      <li><b>Faktlar</b>: yoxlana bilən müşahidələr (“Əli iclasa 20 dəqiqə gecikdi”).</li>
+      <li><b>İnterpretasiya</b>: faktlara verdiyimiz məna (“Əli məsuliyyətsizdir” və ya “yolda tıxac olub”).</li>
+      <li><b>Nəticə</b>: interpretasiyadan çıxan qərar (“Ona vacib iş tapşırmaq olmaz”).</li>
+    </ol>
+    <p>Məntiq 2-dən 3-ə keçidi yoxlayır. Amma 1-dən 2-yə keçid, yəni “linza seçimi”, çox vaxt şüursuz baş verir. Linza səhv seçilibsə, ən dəqiq məntiq də yanlış yerə aparır.</p>
+    <div class="note"><b>Linzanın parametrləri:</b> <b>miqyas</b> (bir gün, yoxsa on il?), <b>dəqiqlik</b> (dəqiq rəqəm lazımdır, yoxsa təxmin?) və <b>model</b> (bu məsələ iqtisadidir, psixolojidir, yoxsa texniki?). Eyni vəziyyətə bir neçə linza ilə bax və hansının ən çox kömək etdiyini seç.</div>
+    <p><b>Gündəlik məşq:</b> bu gün səni əsəbiləşdirən bir hadisəni götür. Onu üç sütuna ayır: fakt, mənim interpretasiyam, alternativ interpretasiya. Alternativi tapmaq çətin gəlirsə, deməli bir linzaya “ilişib” qalmısan.</p>
+  </div>
+  <div class="card"><h3>✍️ Tapşırıq: fakt, yoxsa interpretasiya?</h3><div class="quiz" data-quiz="lens"></div></div>
+</section>
+
+<!-- 10 -->
+<section class="lesson" data-title="Xaos nəzəriyyəsi">
+  <div class="card">
+    <h2>10. Xaos nəzəriyyəsi: qeyri-müəyyənlik şəraitində düşünmək</h2>
+    <p class="lead">Hər addımı ciddi qaydaya tabe olan sistem də uzunmüddətli perspektivdə proqnozlaşdırılmaz ola bilər.</p>
+    <p><b>Determinizm</b> deyir ki, başlanğıc vəziyyəti və qaydaları bilsək, gələcəyi hesablaya bilərik. Bu, sadə sistemlərdə işləyir. Amma bəzi sistemlər <b>başlanğıc şərtlərə həssasdır</b>: milyonda birlik fərq bir müddətdən sonra tamamilə fərqli nəticəyə çevrilir. 1960-cı illərdə meteoroloq Edvard Lorens bunu kəşf etdi. Fikir sonradan <i>“kəpənək effekti”</i> adı ilə tanındı.</p>
+    <ul>
+      <li><b>Proqnoz üfüqü:</b> hava haqqında bir neçə günlük proqnoz verə bilərik, bir aylıq isə yox. Problem kompüterlərin zəif olmasında deyil, sistemin özündədir.</li>
+      <li><b>Praktik nəticə:</b> mürəkkəb sistemdə (bazar, karyera, münasibətlər) hər şey plana uyğun getmirsə, bu, mütləq sənin “səhvin” deyil. Mükəmməl nəzarət tələb etmək əvəzinə, şərtləri yaxşılaşdır və planı tez-tez yenilə.</li>
+      <li><b>Xətti izahlara şübhə:</b> “Bunun tək səbəbi X-dir” cümləsi mürəkkəb sistemlərdə demək olar ki, həmişə həddən artıq sadələşdirmədir.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>🦋 Laboratoriya: kəpənək effekti</h3>
+    <p class="fb">Logistik xəritə: <span class="sym">xₙ₊₁ = r · xₙ · (1 − xₙ)</span>. Bu, populyasiya artımının ən sadə modelidir. İki trayektoriyanın başlanğıc nöqtəsi cəmi <b>0.000001</b> fərqlənir.</p>
+    <div class="row"><label style="min-width:110px">r = <b id="lgR">3.90</b></label><input type="range" id="lgRin" min="2.5" max="4" step="0.01" value="3.9" style="flex:1"></div>
+    <div class="row"><label style="min-width:110px">x₀ = <b id="lgX">0.200</b></label><input type="range" id="lgXin" min="0.05" max="0.95" step="0.005" value="0.2" style="flex:1"></div>
+    <div id="lgChart"></div>
+    <div class="row fb"><span style="color:var(--accent)">━ x₀</span><span style="color:var(--warn)">━ x₀ + 0.000001</span></div>
+    <div id="lgMsg"></div>
+    <p class="fb">r-i 2.8-ə endir: sistem sabit nöqtəyə gəlir və proqnozlaşdırıla bilir. r = 3.2 olanda iki qiymət arasında rəqs edir. r ≈ 3.57-dən yuxarıda isə xaos başlayır. Eyni düstur, fərqli rejim. Deməli, əvvəlcə sistemin hansı rejimdə olduğunu anlamaq lazımdır.</p>
+  </div>
+  <div class="card"><h3>✍️ Tapşırıq</h3><div class="quiz" data-quiz="chaos"></div></div>
+</section>
+
+<!-- 11 -->
+<section class="lesson" data-title="Elmi metod">
+  <div class="card">
+    <h2>11. Elmi metod və falsifikasiya</h2>
+    <p class="lead">Elmi metod yalnız laboratoriyalar üçün deyil. Bu, gündəlik həyat üçün düşünmə protokoludur.</p>
+    <ol>
+      <li><b>Məsələni düzgün qoy.</b> İnsanlar çox vaxt səhv suala cavab axtarır. “Necə daha çox işləyim?” sualı “Hansı işi ümumiyyətlə etməməliyəm?” sualından daha pis ola bilər.</li>
+      <li><b>Hipotez qur:</b> “Əgər X doğrudursa…”</li>
+      <li><b>Yoxlana bilən proqnoz çıxar:</b> “…onda Y müşahidə etməliyəm.”</li>
+      <li><b>Yoxla</b> və nəticəni qeyd et.</li>
+      <li><b>Modelini yenilə.</b> Uğursuz hipotez faciə deyil, bir məlumatdır.</li>
+    </ol>
+    <div class="note"><b>Falsifikasiya prinsipi (Karl Popper):</b> nəzəriyyə o zaman elmidir ki, onu təkzib edəcək müşahidəni təsəvvür etmək mümkün olsun. “Sabah ya yağış yağacaq, ya da yox” cümləsi heç vaxt səhv çıxmır, amma heç nə də demir. Bir dənə qara qu quşu “bütün qu quşları ağdır” fikrini təkzib edir (6-cı dərsdəki <span class="sym">∃x ¬P(x)</span>).</div>
+    <p><b>Təsdiq meyli</b> (confirmation bias): beyin öz fikrini təsdiqləyən faktları axtarır, təkzib edənləri isə görməzdən gəlir. Bunun dərmanı sadədir: <b>“Səhv olsaydım, nə görərdim?”</b> sualını ver və məhz onu axtar. Mürəkkəb dünyada qalib çox vaxt “mükəmməl nəzəriyyəsi” olan deyil, <b>dürüst yoxlamaları daha sürətlə aparan</b> olur.</p>
+  </div>
+  <div class="card">
+    <h3>🔢 Oyun: 2-4-6 tapmacası</h3>
+    <p>Mən ədəd üçlükləri üçün gizli bir qayda düşünmüşəm. <b>2, 4, 6</b> bu qaydaya uyğundur. Öz üçlüklərini yaz və yoxla. Qaydanı tapdığına əmin olanda cavabını seç.</p>
+    <div class="row"><input type="text" id="w246in" placeholder="məsələn: 8 10 12" style="flex:1;min-width:160px"><button class="btn" id="w246btn">Yoxla</button></div>
+    <div id="w246log" class="fb"></div>
+    <div class="opts" id="w246guess"></div>
+    <div id="w246msg"></div>
+  </div>
+  <div class="card">
+    <h3>🃏 Vason kartları</h3>
+    <p>Hər kartın bir üzündə hərf, o biri üzündə ədəd var. Qayda belədir: <b>“Kartın bir üzündə sait varsa, o biri üzündə cüt ədəd var.”</b> Qaydanı yoxlamaq üçün <b>hansı kartları</b> (və yalnız onları) çevirmək lazımdır?</p>
+    <div class="row" id="wcards"></div>
+    <div class="row" style="margin-top:10px"><button class="btn" id="wcCheck">Yoxla</button></div>
+    <div id="wcMsg"></div>
+  </div>
+  <div class="card"><h3>✍️ Tapşırıq: hansı fikir təkzib oluna bilər?</h3><div class="quiz" data-quiz="sci"></div></div>
+</section>
+
+<!-- 12 -->
+<section class="lesson" data-title="İnkar və inversiya">
+  <div class="card">
+    <h2>12. İnkar və inversiya: mümkün olanda tərsinə çevir!</h2>
+    <p class="lead">Bəzən aydınlığa çatmağın ən qısa yolu yeni şey əlavə etmək yox, artıq olanı çıxarmaqdır.</p>
+    <p>2-ci dərsdə <span class="sym">¬</span> sadə formal əməliyyat idi. Amma inkar həm də <b>seçimin və tənqidin</b> təməlidir: “yox” deyə bilməyən ağıl seçim edə bilmir. <b>İnversiya</b> isə bir addım irəli gedir. O, sualın özünü tərsinə çevirir:</p>
+    <div class="scroll"><table class="tt">
+      <tr><th>Düz sual</th><th>İnvers sual</th></tr>
+      <tr><td>Necə sağlam olum?</td><td>Sağlamlığımı ən tez nə dağıdır?</td></tr>
+      <tr><td>Necə varlanım?</td><td>İnsanlar pulu ən çox necə itirir?</td></tr>
+      <tr><td>Komandam necə uğur qazansın?</td><td>Komandanı hansı vərdişlər mütləq məhv edər?</td></tr>
+    </table></div>
+    <p>Alman riyaziyyatçısı Karl Yakobi tələbələrinə deyirdi: <i>“Tərsinə çevir, həmişə tərsinə çevir.”</i> Riyaziyyatda bunun adı <b>əksini fərz etməklə isbatdır</b>: fərz edirik ki, ¬p doğrudur, ziddiyyətə gəlirik və deməli p doğrudur. 4-cü dərsdəki kontrapozisiya (<span class="sym">p → q ≡ ¬q → ¬p</span>) da inversiyadır.</p>
+    <div class="note"><b>Premeditatio malorum</b> (latınca “bəlaları əvvəlcədən düşünmək”): stoik filosofların məşqi. Burada məqsəd narahat olmaq deyil, ən pis ssenarini əvvəlcədən görüb ona hazırlıq planı qurmaqdır. Müasir variantı <b>“premortem”</b>dir: layihə başlamazdan əvvəl təsəvvür et ki, o artıq uğursuz olub, və “Niyə?” sualına cavab yaz.</div>
+    <p><b>“İkiqat halqa” qaydası:</b> inversiya güzgüyə daxil olmaqdır. Amma güzgüdən mütləq <b>reallığa qayıtmaq</b> lazımdır, yəni hər nəticəni faktlarla yoxlamaq. Əks halda gözəl sxem özünüaldatmaya çevrilir.</p>
+  </div>
+  <div class="card">
+    <h3>🔄 Alət: premortem</h3>
+    <input type="text" id="invGoal" placeholder="Məqsədin: məsələn, ingilis dilini bir ilə öyrənmək">
+    <p class="fb">Təsəvvür et ki, bir il keçib və məqsədə çatmamısan. Bunun səbəbləri nə ola bilər? Hər sətirə bir səbəb yaz:</p>
+    <textarea id="invList" placeholder="hər gün başqa işlərə görə təxirə saldım&#10;tək öyrəndim, heç kimlə danışmadım&#10;mükəmməl metodu axtarmaqla vaxt itirdim"></textarea>
+    <button class="btn" id="invBtn" style="margin-top:8px">Tərsinə çevir</button>
+    <div id="invOut"></div>
+  </div>
+  <div class="card"><h3>✍️ Tapşırıq</h3><div class="quiz" data-quiz="inv"></div></div>
+</section>
+
+<!-- 13 -->
+<section class="lesson" data-title="Entimem və gizli əsaslar">
+  <div class="card">
+    <h2>13. Sillogizm dünən və bu gün: entimem və gizli əsaslar</h2>
+    <p class="lead">Aristotel sillogizmi demaqogiyaya və sofistikaya cavab olaraq yaratdı. Məqsəd arqumentin gücünü səsin gücündən ayırmaq idi.</p>
+    <p>Gündəlik danışıqda sillogizmlər demək olar ki, heç vaxt tam şəkildə söylənmir. Bir əsası “buraxılmış” sillogizmə <b>entimem</b> deyilir. Paradoks budur ki, natamam arqument çox vaxt daha güclü inandırır. Çünki dinləyici buraxılmış əsası özü “tamamlayır” və onu yoxlamır.</p>
+    <div class="note">“Bu siyasətçi milyarderdir, <b>deməli</b> xalqı başa düşməz.”<br>Gizli əsas: <i>“Heç bir milyarder xalqı başa düşmür.”</i> Bu əsası açıq yazanda onun nə qədər şübhəli olduğu dərhal görünür.</div>
+    <h3>Gizli əsası necə tapmaq olar?</h3>
+    <ol>
+      <li>Nəticəni tap (adətən “deməli”, “ona görə”, “buna görə də” sözlərindən sonra gəlir).</li>
+      <li>Açıq deyilmiş əsası tap.</li>
+      <li>Soruş: <b>hansı ümumi qayda olmalıdır ki, nəticə mütləq çıxsın?</b> Həmin qayda gizli əsasdır.</li>
+      <li>Gizli əsası “Bütün…” formasında yaz və yoxla: doğrudurmu?</li>
+    </ol>
+    <h3>İsbat və inandırma</h3>
+    <p><b>İsbat</b> nəticənin doğruluğunu göstərir. <b>İnandırma</b> isə insanı razı salır. İkisi üst-üstə düşə bilər, amma düşməyə də bilər. Reklam və təbliğat çox vaxt faktlara deyil, <b>kimliyə və dəyərlərə</b> söykənir: “Ağıllı valideynlər X seçir.” Gizli əsas belədir: “Sən ağıllı valideynsən, deməli…”</p>
+    <p><b>PAS strukturu</b> (Problem, Agitate, Solution): problemi göstər, onu qabart, sonra həll təklif et. Bu, satış mətnlərinin ən geniş yayılmış şablonudur. Onu tanıyanda manipulyasiyaya daha az uyursan. Öz nitqində isə ondan dürüst istifadə edə bilərsən: problem real olmalı, həll də işləməlidir.</p>
+  </div>
+  <div class="card"><h3>✍️ Tapşırıq: gizli əsası tap</h3><div class="quiz" data-quiz="enth"></div></div>
+</section>
+
+<!-- 14 -->
+<section class="lesson" data-title="Dekompozisiya">
+  <div class="card">
+    <h2>14. Dekompozisiya: tapşırıq siyahısı deyil, sistem</h2>
+    <p class="lead">“Fili” hissələrə bölmək lazımdır. Amma onu tapşırıqlara deyil, <b>sistemlərə</b> böl və onların arasındakı əlaqələrə bax.</p>
+    <p>Xətti siyahı (“1-ci bunu et, 2-ci onu et”) şərtlər dəyişməyəndə işləyir. Sistem yanaşmasında isə hər hissənin girişi, çıxışı və digər hissələrlə əlaqəsi olur.</p>
+    <div class="note"><b>Məhdudiyyətlər nəzəriyyəsi</b> (Eliyahu Qoldratt): zəncirin gücü onun ən zəif halqasının gücünə bərabərdir. Sistemin nəticəsi ən dar yeri, yəni <b>darboğazı</b> ilə müəyyən olunur. Darboğaz olmayan yeri yaxşılaşdırmaq resurs itkisidir.</div>
+    <h3>Hazır model yoxdursa: 3–5 sahə metodu</h3>
+    <ol>
+      <li>Məsələni 3–5 böyük sahəyə böl (məsələn, kafe üçün: məhsul, müştəri axını, komanda, maliyyə).</li>
+      <li>Hər sahə üçün soruş: hazırda nəticəni ən çox nə məhdudlaşdırır? İnversiyadan istifadə et: “Bu sahə hansı yolla hər şeyi məhv edə bilər?”</li>
+      <li>Darboğazla qısa dövrlərlə işlə: bir həftə yaxşılaşdır, ölç və darboğazın başqa yerə keçib-keçmədiyinə bax.</li>
+    </ol>
+  </div>
+  <div class="card">
+    <h3>🏭 Simulyator: darboğazı tap</h3>
+    <p>Onlayn çörək sexi. Hər mərhələnin gündəlik gücü göstərilib. Sənin <b>3 resurs xalın</b> var. Hər xal bir mərhələnin gücünü +5 artırır. Sexin gündəlik nəticəsini maksimuma çatdır.</p>
+    <div id="bnStages"></div>
+    <div id="bnMsg"></div>
+    <button class="btn ghost" id="bnReset" style="margin-top:8px">Yenidən başla</button>
+  </div>
+  <div class="card"><h3>✍️ Tapşırıq</h3><div class="quiz" data-quiz="decomp"></div></div>
+</section>
+
+<!-- 15 -->
+<section class="lesson" data-title="Gödel və Tarski">
+  <div class="card">
+    <h2>15. Gödel və Tarski teoremləri: biliyin sərhədləri</h2>
+    <p class="lead">Təxminən yüz il əvvəl məntiq öz sərhədlərini kəşf etdi. Bundan sonra dünyaya baxış artıq əvvəlki kimi ola bilməzdi.</p>
+    <p>XX əsrin əvvəlində riyaziyyatçılar (David Hilbert başda olmaqla) bütün riyaziyyatı ziddiyyətsiz və tam aksiomlar sistemi üzərində qurmaq istəyirdilər. Bu sistemdə hər doğru mülahizə isbat oluna bilməli idi.</p>
+    <ul>
+      <li><b>Gödelin birinci natamamlıq teoremi (1931):</b> hesabı ifadə edə bilən hər bir ziddiyyətsiz formal sistemdə <b>doğru olub, amma həmin sistem daxilində isbat oluna bilməyən</b> mülahizə var. İdeya “Bu mülahizə isbat oluna bilməz” tipli özünə istinad edən cümlədir.</li>
+      <li><b>İkinci teorem:</b> belə sistem öz ziddiyyətsizliyini öz vasitələri ilə isbat edə bilməz.</li>
+      <li><b>Tarski teoremi (1933):</b> kifayət qədər güclü dil öz “doğruluq” anlayışını özü daxilində müəyyən edə bilməz. Bunun üçün daha yüksək səviyyəli dil, yəni <b>metadil</b> lazımdır.</li>
+    </ul>
+    <div class="note">Hər iki teoremin kökündə 8-ci dərsdəki paradoks durur: <b>“Bu cümlə yalandır.”</b> Problem özünə istinaddadır. Həll yolu səviyyələri ayırmaqdır: obyekt-dil haqqında yalnız <b>metadildə</b> danışmaq.</div>
+    <h3>Bu, gündəlik həyatda nə deməkdir?</h3>
+    <p><i>Diqqət: aşağıdakılar teoremlərin özü yox, onlardan ilhamlanan analogiyalardır. Teoremlər ciddi şəkildə yalnız formal sistemlərə aiddir.</i></p>
+    <ul>
+      <li>Mürəkkəb qaydalar sistemi (qanun, reqlament, texniki tapşırıq) demək olar ki, həmişə boşluqlar və daxili ziddiyyətlər yaradır. “Mükəmməl qayda” axtarmaq əvəzinə, onların necə yoxlanacağını və düzəldiləcəyini planla.</li>
+      <li>Mübahisə sistem daxilində həll olunmursa, <b>bir pillə yuxarı qalx</b>. Soruş: “Biz ümumiyyətlə nəyə görə razılaşmalıyıq? Hansı xarici meyar ilə qərar verək?”</li>
+      <li>Natamam bilik normaldır. “Bilmirəm” demək zəiflik deyil, dürüstlükdür.</li>
+    </ul>
+  </div>
+  <div class="card"><h3>✍️ Tapşırıq</h3><div class="quiz" data-quiz="godel"></div></div>
+</section>
+
+<!-- 16 -->
+<section class="lesson" data-title="Sistem düşüncəsi">
+  <div class="card">
+    <h2>16. Sistem düşüncəsi: bütöv mənzərəni görmək</h2>
+    <p class="lead">Niyə yaxşı niyyətli qərarlar tez-tez yeni problemlər yaradır? Çünki biz hissələri görürük, onların arasındakı əlaqələri isə görmürük.</p>
+    <p><b>Sistem</b> elementlərdən, onların arasındakı əlaqələrdən və bir məqsəddən ibarətdir. Sistemin davranışını əsasən <b>əks-əlaqə halqaları</b> müəyyən edir:</p>
+    <ul>
+      <li><b>Gücləndirici halqa (R):</b> dəyişiklik özünü artırır. Mürəkkəb faiz, viral yayılma, “pul pul gətirir”, panika.</li>
+      <li><b>Balanslaşdırıcı halqa (B):</b> sistem hədəfə qayıdır. Termostat, aclıq və yemək, bazarda qiymət və tələb.</li>
+      <li><b>Gecikmə:</b> səbəb ilə nəticə arasındakı vaxt. Gecikmə balanslaşdırıcı halqanı <b>rəqsə</b> çevirir. Bunu aşağıdakı “duş” simulyatorunda özün görəcəksən.</li>
+    </ul>
+    <div class="note"><b>Aysberq modeli:</b> səthdə <i>hadisələr</i> görünür (“bu ay satış düşdü”). Altında <i>qanunauyğunluqlar</i> (“hər yay düşür”), daha dərində <i>strukturlar</i> (“yayda komandanın yarısı məzuniyyətdə olur”), ən dibində isə <i>zehni modellər</i> durur (“yayda heç kim alış-veriş etmir”). Ən böyük təsiri dərin qatlarda etmək olar.</div>
+    <p><b>“Kobra effekti”</b>: rəvayətə görə, müstəmləkə Hindistanında hakimiyyət ölü kobralar üçün mükafat təyin edir. İnsanlar mükafat almaq üçün kobra yetişdirməyə başlayır. Proqram ləğv olunanda isə kobraları buraxırlar. Nəticədə kobra daha da çox olur. Gizli bir halqanı nəzərə almamaq bu cür nəticə verir.</p>
+  </div>
+  <div class="card">
+    <h3>🚿 Simulyator: gecikməli duş</h3>
+    <p class="fb">Hədəf 38°C-dir. Kranı çevirirsən, amma suyun temperaturu dəyişikliyə bir neçə addım gec reaksiya verir. Gecikməni və reaksiyanın gücünü dəyiş.</p>
+    <div class="row"><label style="min-width:170px">Gecikmə: <b id="shD">3</b> addım</label><input type="range" id="shDin" min="0" max="6" step="1" value="3" style="flex:1"></div>
+    <div class="row"><label style="min-width:170px">Reaksiya gücü: <b id="shK">0.60</b></label><input type="range" id="shKin" min="0.1" max="1" step="0.05" value="0.6" style="flex:1"></div>
+    <div id="shChart"></div>
+    <div class="row fb"><span style="color:var(--accent)">━ suyun temperaturu</span><span style="color:var(--ok)">┄ hədəf 38°C</span></div>
+    <div id="shMsg"></div>
+  </div>
+  <div class="card"><h3>✍️ Tapşırıq</h3><div class="quiz" data-quiz="sys"></div></div>
+</section>
+
+<!-- 17 -->
+<section class="lesson" data-title="Ehtimal məntiqi">
+  <div class="card">
+    <h2>17. Ehtimal məntiqi: qərar bir mərcdir</h2>
+    <p class="lead">Klassik məntiqdə mülahizə ya D, ya Y olur. Real həyatda isə çox vaxt deyə bilərik: “Bu, 70% ehtimalla doğrudur.”</p>
+    <ul>
+      <li><b>“Hə/yox” əvəzinə rəqəmlər.</b> Hipotezləri ehtimallarına görə sırala, ən ehtimallısını əvvəlcə yoxla, sonra ehtimalları yenilə.</li>
+      <li><b>Hər seçim bir mərcdir, hərəkətsizlik də.</b> Özündən soruş: “Nəyi mərcə qoyuram? Bu, nəyə əsaslanır?”</li>
+      <li><b>Qərarı nəticəyə görə qiymətləndirmə.</b> Yaxşı qərar pis nəticə verə bilər, pis qərar da təsadüfən uğurlu ola bilər. Qərarı onu verdiyin anda bildiyin məlumata görə qiymətləndir.</li>
+      <li><b>Retrospektiv determinizm</b> (“mən bunu bilirdim” effekti): hadisə baş verəndən sonra o, qaçılmaz görünür. Amma əvvəlcədən belə görünmürdü. Səhvləri təhlil edəndə bu illüziyaya düşmə.</li>
+    </ul>
+    <h3>Bayes teoremi: yeni məlumatla fikri yeniləmək</h3>
+    <p><span class="sym">P(H | E) = P(E | H) · P(H) / P(E)</span>. Yəni sübutdan (E) sonrakı inam ilkin inamdan (P(H)) və sübutun nə qədər “ayırd edici” olmasından asılıdır.</p>
+    <div class="note"><b>Baza tezliyi tələsi.</b> Test 99% dəqiqdir və nəticən müsbət çıxıb. Xəstə olma ehtimalın neçə faizdir? Çoxları “99%” deyir. Amma xəstəlik nadirdirsə, cavab çox aşağı ola bilər. Aşağıdakı kalkulyatorda özün yoxla.</div>
+  </div>
+  <div class="card">
+    <h3>🧮 Bayes kalkulyatoru</h3>
+    <div class="row"><label style="min-width:240px">Xəstəliyin yayılması: <b id="byP">1.0</b>%</label><input type="range" id="byPin" min="0.1" max="30" step="0.1" value="1" style="flex:1"></div>
+    <div class="row"><label style="min-width:240px">Həssaslıq (xəstədə test +): <b id="byS">99</b>%</label><input type="range" id="bySin" min="50" max="100" step="1" value="99" style="flex:1"></div>
+    <div class="row"><label style="min-width:240px">Yalançı müsbət (sağlamda test +): <b id="byF">5</b>%</label><input type="range" id="byFin" min="0.5" max="30" step="0.5" value="5" style="flex:1"></div>
+    <div id="byOut"></div>
+  </div>
+  <div class="card"><h3>✍️ Tapşırıq</h3><div class="quiz" data-quiz="prob"></div></div>
+</section>
+
+<!-- 18 -->
+<section class="lesson" data-title="Qeyri-səlis məntiq">
+  <div class="card">
+    <h2>18. Qeyri-səlis məntiq: açar deyil, sürüşkən</h2>
+    <p class="lead">“Hava istidir.” 25°C-də bu doğrudurmu? 22°C-də? Klassik məntiq burada məcburən sərhəd çəkir. Qeyri-səlis məntiq isə (Lütfi Zadə, 1965) <b>doğruluq dərəcəsi</b> ilə işləyir: 0-dan 1-ə qədər istənilən qiymətlə.</p>
+    <div class="note">Qeyri-səlis məntiqin banisi <b>Lütfi Zadə</b> 1921-ci ildə Bakıda doğulub. Bu, Azərbaycanla birbaşa bağlı olan məntiq nəzəriyyəsidir.</div>
+    <ul>
+      <li><b>İnkar:</b> ¬a = 1 − a</li>
+      <li><b>“VƏ” (t-norma):</b> bir neçə variant var. min(a, b), a · b, max(0, a + b − 1)</li>
+      <li><b>“VƏ YA” (t-konorma):</b> max(a, b), a + b − a·b, min(1, a + b)</li>
+    </ul>
+    <p>Hansı normanı seçdiyin nəticəni dəyişir. <b>min</b> “ən zəif halqa” prinsipidir: bir zəif cəhət bütün qiyməti aşağı salır. <b>Hasil</b> isə hər zəif cəhəti “cərimələyir”. Əslində norma seçmək <b>dəyər seçimidir</b>: sənin üçün nə daha vacibdir?</p>
+    <h3>“Qeyri-müəyyən” vədlərə immunitet</h3>
+    <p><b>Forer effekti:</b> insanlar ümumi, hamıya uyğun gələn təsvirləri (“Bəzən özünə qarşı çox tələbkarsan”) şəxsən özləri haqqında dəqiq təsvir kimi qəbul edirlər. Ulduz falları belə işləyir. <b>Apofeniya</b> isə təsadüfi məlumatda məna və qanunauyğunluq görmək meylidir.</p>
+  </div>
+  <div class="card">
+    <h3>🌡️ Laboratoriya: “isti” nə qədər istidir?</h3>
+    <div class="row"><label style="min-width:160px">Temperatur: <b id="fzT">24</b>°C</label><input type="range" id="fzTin" min="0" max="40" step="1" value="24" style="flex:1"></div>
+    <div id="fzTout"></div>
+    <h3 style="margin-top:16px">⚖️ Normaları müqayisə et</h3>
+    <p class="fb">Nümunə: namizədi işə götürək? a = “təcrübəlidir”, b = “komandaya uyğundur”.</p>
+    <div class="row"><label style="min-width:160px">a = <b id="fzA">0.80</b></label><input type="range" id="fzAin" min="0" max="1" step="0.05" value="0.8" style="flex:1"></div>
+    <div class="row"><label style="min-width:160px">b = <b id="fzB">0.40</b></label><input type="range" id="fzBin" min="0" max="1" step="0.05" value="0.4" style="flex:1"></div>
+    <div class="scroll" id="fzOut"></div>
+  </div>
+  <div class="card"><h3>✍️ Tapşırıq</h3><div class="quiz" data-quiz="fuzzy"></div></div>
+</section>
+
+<!-- 19 -->
+<section class="lesson" data-title="Siqnal və küy">
+  <div class="card">
+    <h2>19. Siqnal və küy</h2>
+    <p class="lead">Xəbər axını bir okeandır. Məqsəd onu tamamilə izləmək deyil, <b>siqnal/küy nisbətini</b> (SNR) artırmaqdır.</p>
+    <ul>
+      <li><b>Siqnal</b> qərarlarına təsir edən, davamlı və yoxlanıla bilən məlumatdır.</li>
+      <li><b>Küy</b> emosional, qısamüddətli və təsadüfi tərəddüdlərdir. Hər günkü “informasiya tikləri” də buna aiddir.</li>
+    </ul>
+    <h3>Saxta əlaqələr</h3>
+    <p>Yayda həm dondurma satışı, həm də suda boğulma halları artır. Bu o demək deyil ki, dondurma boğulmaya səbəb olur. İkisinə də <b>gizli üçüncü amil</b> təsir edir: isti hava. <b>Korrelyasiya səbəbiyyət deyil.</b></p>
+    <h3>Sıfır hipotezi və iki növ səhv</h3>
+    <p>Elmi yanaşma belə başlayır: “Effekt yoxdur” (sıfır hipotezi, H₀). Onu yalnız güclü sübut olanda rədd edirik.</p>
+    <div class="scroll"><table class="tt">
+      <tr><th></th><th>Reallıqda effekt yoxdur</th><th>Reallıqda effekt var</th></tr>
+      <tr><th>“Effekt var” dedik</th><td class="F">I növ səhv<br>(yalançı həyəcan)</td><td class="T">Düzgün</td></tr>
+      <tr><th>“Effekt yoxdur” dedik</th><td class="T">Düzgün</td><td class="F">II növ səhv<br>(vacib şeyi buraxmaq)</td></tr>
+    </table></div>
+    <p>Bir səhvi azaltmaq adətən o birini artırır. Həssas siqnalizasiya oğrunu buraxmır, amma tez-tez boşuna çalır. Hansı səhvin daha baha başa gəldiyinə özün qərar ver.</p>
+    <h3>Spikerə 6 sual (çek-list)</h3>
+    <ol>
+      <li>Bu adam kimdir və bu mövzuda nə qədər səlahiyyətlidir?</li>
+      <li>Mən onun dediyinə inansam, o nə qazanır?</li>
+      <li>Bu, faktdır, yoxsa interpretasiya? (9-cu dərs)</li>
+      <li>Rəqəm varmı? Müqayisə bazası nədir (“nəyə nisbətən”)?</li>
+      <li>Hansı müşahidə onun fikrini təkzib edərdi? (11-ci dərs)</li>
+      <li>Gizli əsas nədir? (13-cü dərs)</li>
+    </ol>
+  </div>
+  <div class="card">
+    <h3>🪙 Təcrübə: təsadüf necə görünür?</h3>
+    <p class="fb">100 dəfə pul atırıq. Sənə elə gəlir ki, ardıcıl ən uzun eyni nəticə seriyası neçə olar? Fikirləş, sonra düyməni bas.</p>
+    <button class="btn" id="coinBtn">100 dəfə at</button>
+    <div id="coinOut" style="font-family:ui-monospace,Menlo,monospace;word-break:break-all;margin-top:10px"></div>
+    <div id="coinMsg"></div>
+  </div>
+  <div class="card"><h3>✍️ Tapşırıq</h3><div class="quiz" data-quiz="noise"></div></div>
+</section>
+
+<!-- 20 -->
+<section class="lesson" data-title="Məntiq və Süni İntellekt">
+  <div class="card">
+    <h2>20. Məntiq və Süni İntellekt</h2>
+    <p class="lead">Süni intellekt mətn yazır, kod yaradır, məlumatı təhlil edir. Amma bu, daha az düşünmək lazım olduğu demək deyil. Sadəcə düşünmə funksiyalarını onunla <b>bölüşmək</b> mümkün olur.</p>
+    <p>Böyük dil modelləri <b>inandırıcı görünən</b> mətn yaradır. İnandırıcı olmaq isə doğru olmaq demək deyil. Ona görə də cavabı sübut kimi deyil, <b>hipotez</b> kimi qəbul et (11-ci dərs).</p>
+    <div class="scroll"><table class="tt">
+      <tr><th>Süni intellektə həvalə etmək olar</th><th>Özündə saxla</th></tr>
+      <tr><td>Qaralama, variantlar, ideya siyahısı</td><td>Məsələnin qoyuluşu: həqiqətən hansı problemi həll edirik?</td></tr>
+      <tr><td>Əks-arqumentlərin axtarışı</td><td>Məqsədlər, dəyərlər, “norma” seçimi</td></tr>
+      <tr><td>Strukturlaşdırma, xülasə, tərcümə</td><td>Faktların son yoxlanışı</td></tr>
+      <tr><td>Rutin hesablamalar və kod</td><td>Qərar və onun məsuliyyəti</td></tr>
+    </table></div>
+    <h3>İki iş formatı</h3>
+    <ul>
+      <li><b>İcraçı:</b> “Bu mətni qısalt”, “Bu cədvəli düzəlt.” Tapşırıq dəqiqdir, nəticəni asanlıqla yoxlamaq olur.</li>
+      <li><b>Sparrinq-partnyor:</b> “Mənim arqumentimin ən zəif yeri haradadır?”, “Bu plana premortem et.” Burada süni intellekt sənin düşüncəni gücləndirir.</li>
+    </ul>
+    <div class="note"><b>Meta-çərçivə:</b> tapşırıq verməzdən əvvəl kontekst, məqsəd, uğur meyarları və məhdudiyyətləri yaz. Bu, həm süni intellektə, həm də sənə nə istədiyini aydınlaşdırmağa kömək edir. Bunun özü artıq məntiqi məşqdir.</div>
+  </div>
+  <div class="card"><h3>✍️ Tapşırıq</h3><div class="quiz" data-quiz="ai"></div></div>
+</section>
+
+<!-- 21 -->
+<section class="lesson" data-title="Təkamül alqoritmləri">
+  <div class="card">
+    <h2>21. Təkamül alqoritmləri: plan yox, idarə olunan təkamül</h2>
+    <p class="lead">Xətti plan sabit mühitdə yaxşı işləyir. Mühit planından tez dəyişəndə isə ən intizamlılar deyil, ən <b>uyğunlaşa bilənlər</b> qalib gəlir.</p>
+    <p>Təbiətdəki təkamül üç mexanizmlə işləyir və kompüter alqoritmləri də bunu təqlid edir:</p>
+    <ol>
+      <li><b>Variasiya:</b> kiçik, ucuz təcrübələr (mutasiyalar).</li>
+      <li><b>Seçmə:</b> nəyin daha yaxşı işlədiyini <b>fitnes-funksiya</b> ilə ölçmək.</li>
+      <li><b>İrsiyyət:</b> işləyəni saxlayıb onun üzərində növbəti addımı atmaq.</li>
+    </ol>
+    <div class="note"><b>Naviqator prinsipi:</b> GPS sənə bütün yolu əvvəlcədən dəqiq vermir. O, istiqaməti bilir və hər dönüşdən sonra marşrutu yenidən hesablayır. Həyat məqsədləri üçün də sərt plan əvəzinə <b>istiqamət + tez-tez korreksiya</b> daha davamlı nəticə verir. Çox dəqiq, sərt hədəflər (məsələn, SMART) dəyişən mühitdə tələyə çevrilə bilər: şərtlər dəyişib, sən isə hələ də köhnə rəqəmin arxasınca gedirsən.</div>
+    <p><b>Fitnes-siqnalları</b> düzgün istiqamətdə getdiyini göstərən kiçik, tez görünən əlamətlərdir. Məsələn, dil öyrənəndə: “Bu həftə filmi altyazısız daha çox başa düşdüm.” <b>Kimlik məhdudiyyəti:</b> “Mən riyaziyyatçı deyiləm” kimi fikirlər bəzi variasiyaları əvvəlcədən qadağan edir və təkamülü dayandırır.</p>
+  </div>
+  <div class="card">
+    <h3>🧬 Simulyator: təsadüfdən mənaya</h3>
+    <p class="fb">Təsadüfi hərflərdən başlayırıq. Hər nəsildə ən yaxşı variantın 100 mutantı yaranır və hədəfə ən yaxın olanı seçilir. Plan yoxdur, yalnız variasiya və seçmə var.</p>
+    <div class="row"><label style="min-width:190px">Mutasiya sürəti: <b id="evM">5</b>%</label><input type="range" id="evMin" min="1" max="30" step="1" value="5" style="flex:1"></div>
+    <div class="row" style="margin:8px 0"><button class="btn" id="evStart">Başla</button><button class="btn ghost" id="evReset">Sıfırla</button></div>
+    <div id="evBest" style="font:20px ui-monospace,Menlo,monospace;letter-spacing:1px;word-break:break-all"></div>
+    <div id="evInfo" class="fb"></div>
+    <p class="fb">Mutasiyanı 1%-ə endir: təkamül yavaş, amma dayanıqlı gedir. 30%-ə qaldır: hər şeyi birdən dəyişmək tapılmış yaxşı hissələri də dağıdır. Həyatda da belədir: hər şeyi birdən dəyişmək çox vaxt pis strategiyadır.</p>
+  </div>
+  <div class="card"><h3>✍️ Tapşırıq</h3><div class="quiz" data-quiz="evo"></div></div>
+</section>
+
+<!-- 22 -->
+<section class="lesson" data-title="Metaməntiq: alətlər qutusu">
+  <div class="card">
+    <h2>22. Metaməntiq: hansı məsələyə hansı alət?</h2>
+    <p class="lead">Akademik mənada <b>metaməntiq</b> məntiqi sistemlərin özünü öyrənir: onların ziddiyyətsizliyini, tamlığını, sərhədlərini (15-ci dərs). Bu kursda isə “meta-səviyyə” dedikdə bir sualı nəzərdə tuturuq: <b>bu məsələni hansı düşünmə üsulu ilə həll etmək lazımdır?</b></p>
+    <div class="grid2">
+      <div class="note"><b>Dəqiq qoyulmuş (well-defined) məsələ:</b> şərtlər tamdır, qaydalar məlumdur, yeganə düzgün cavab var. Məsələn: tənlik, hüquqi müddəa, proqram xətası, şahmat məsələsi.</div>
+      <div class="note"><b>Qeyri-dəqiq (ill-defined) məsələ:</b> məlumat natamamdır, sərhədlər dumanlıdır, şərtlər dəyişir, “düzgün cavab” olmaya da bilər. Məsələn: peşə dəyişmək, köçmək, biznesi böyütmək, komandanı idarə etmək.</div>
+    </div>
+    <p>Məktəb bizi əsasən birinci növ məsələlərə hazırlayır. Həyatdakı vacib qərarların çoxu isə ikinci növə aiddir. Orada həll hazır cavabla müqayisə edilmir, prosesdə <b>yaradılır</b>.</p>
+    <h3>🧰 Alətlər qutusu</h3>
+    <div class="scroll"><table class="tt" style="font-family:inherit">
+      <tr><th>Vəziyyət</th><th>Alət</th><th>Dərs</th></tr>
+      <tr><td>Arqumentin düzgünlüyünü yoxlamaq</td><td>Doğruluq cədvəli, nəticəçıxarma qaydaları</td><td>3–5</td></tr>
+      <tr><td>“Hamı”, “heç kim”, “bəziləri” iddiaları</td><td>Kvantorlar, sillogizm, əks-nümunə</td><td>6–7</td></tr>
+      <tr><td>Məsələni çox fərqli görürük</td><td>Fakt/interpretasiya ayrımı, linza seçimi</td><td>9</td></tr>
+      <tr><td>Proqnoz tez-tez səhv çıxır</td><td>Proqnoz üfüqü, qısa planlar</td><td>10</td></tr>
+      <tr><td>Fikrin doğru olub-olmadığını bilmirik</td><td>Hipotez → proqnoz → təkzib cəhdi</td><td>11</td></tr>
+      <tr><td>Haradan başlamaq bəlli deyil</td><td>İnversiya, premortem</td><td>12</td></tr>
+      <tr><td>Kimsə bizi nəyəsə inandırır</td><td>Gizli əsası tapmaq, 6 sual</td><td>13, 19</td></tr>
+      <tr><td>Çox iş var, nəticə yoxdur</td><td>Sistemlərə bölmək, darboğaz</td><td>14</td></tr>
+      <tr><td>Qaydalar ziddiyyətə gəlir</td><td>Meta-səviyyəyə qalxmaq, xarici meyar</td><td>15</td></tr>
+      <tr><td>Yaxşı niyyət pis nəticə verir</td><td>Əks-əlaqə halqaları, gecikmələr</td><td>16</td></tr>
+      <tr><td>Natamam məlumatla qərar</td><td>Ehtimallar, Bayes, mərc</td><td>17</td></tr>
+      <tr><td>“Boz zona”, çoxlu meyar</td><td>Doğruluq dərəcələri, t-normalar</td><td>18</td></tr>
+      <tr><td>Məlumat həddən çoxdur</td><td>SNR, sıfır hipotezi</td><td>19</td></tr>
+      <tr><td>Mühit plandan tez dəyişir</td><td>Variasiya, fitnes-siqnallar, naviqator</td><td>21</td></tr>
+    </table></div>
+    <div class="note"><b>Ümumi alqoritm:</b> 1) Məsələni tanı: well-defined, yoxsa ill-defined? 2) Linzanı seç. 3) Aləti seç. 4) Qısa dövrlə tətbiq et və nəticəni yoxla. 5) Lazım olsa, meta-səviyyəyə qalx və başqa alət götür.</div>
+  </div>
+  <div class="card"><h3>✍️ Tapşırıq: məsələni tanı</h3><div class="quiz" data-quiz="meta"></div></div>
+</section>
+
+<!-- 23 -->
 <section class="lesson" data-title="Yekun imtahan">
   <div class="card">
-    <h2>9. Yekun imtahan</h2>
-    <p class="lead">Bütün mövzulardan 10 sual. 8 və daha çox düzgün cavab = kurs tamamlandı 🎓</p>
+    <h2>23. Yekun imtahan</h2>
+    <p class="lead">Hər iki hissədən 18 sual. 80% və daha çox düzgün cavab (15+) = kurs tamamlandı 🎓</p>
     <div class="quiz" data-quiz="final"></div>
   </div>
 </section>
@@ -375,15 +761,25 @@ const DY=b=>`<span class="${b?'T':'F'}">${b?'D':'Y'}</span>`;
 const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 // ===================== Progress =====================
-const LS='mentiq-kursu-v1';
-let state={done:{},lesson:0};
-try{ const s=JSON.parse(localStorage.getItem(LS)); if(s) state=Object.assign(state,s);}catch(e){}
-function save(){ try{localStorage.setItem(LS,JSON.stringify(state));}catch(e){} }
+const LS='mentiq-kursu-v2';
 const lessons=[...document.querySelectorAll('section.lesson')];
+let state={done:{},lesson:0};
+try{
+  const s=JSON.parse(localStorage.getItem(LS));
+  if(s) state=Object.assign(state,s);
+  else { // köhnə versiyadan (9 dərs) irəliləyişi köçür
+    const o=JSON.parse(localStorage.getItem('mentiq-kursu-v1'));
+    if(o&&o.done){ for(const k in o.done){ const i=+k; state.done[i<8?i:lessons.length-1]=true; } }
+  }
+}catch(e){}
+function save(){ try{localStorage.setItem(LS,JSON.stringify(state));}catch(e){} }
+const PARTS={0:'I hissə · Klassik məntiq',8:'II hissə · Müasir düşüncə'};
+PARTS[lessons.length-1]='Yekun';
 function markDone(i){ state.done[i]=true; save(); renderNav(); }
 function renderNav(){
   const nav=document.getElementById('nav'); nav.innerHTML='';
   lessons.forEach((s,i)=>{
+    if(PARTS[i]){ const h=document.createElement('div'); h.className='part'; h.textContent=PARTS[i]; nav.appendChild(h); }
     const b=document.createElement('button');
     b.className=(i===state.lesson?'active ':'')+(state.done[i]?'done':'');
     b.innerHTML=`<span class="num">${state.done[i]?'✓':i+1}</span>${s.dataset.title}`;
@@ -474,6 +870,101 @@ const QUIZ={
     {q:'Bəzi tələbələr idmançıdır. Bəzi idmançılar musiqiçidir. ⇒ Bəzi tələbələr musiqiçidir.',o:['Düzgün','Yanlış'],a:1,e:'İki “bəzi” əsasdan nəticə çıxmır.'},
     {q:'Heç bir sürünən quş deyil. Heç bir quş balıq deyil. ⇒ Heç bir sürünən balıq deyil.',o:['Düzgün','Yanlış'],a:1,e:'İki inkar əsasdan nəticə çıxmır (nəticə bu halda doğru olsa da, arqument düzgün deyil).'},
   ],
+  lens:[
+    {q:'“Termometr 39°C göstərir.”',o:['Fakt','İnterpretasiya'],a:0,e:'Yoxlana bilən müşahidədir.'},
+    {q:'“Müdir mənə qəsdən mesaj yazmadı.”',o:['Fakt','İnterpretasiya'],a:1,e:'Fakt yalnız “mesaj yazmadı” hissəsidir. “Qəsdən” sözü niyyət haqqında fərziyyədir.'},
+    {q:'“Bu şirkətin səhmləri bu il 30% düşüb.”',o:['Fakt','İnterpretasiya'],a:0,e:'Rəqəmi yoxlamaq olar.'},
+    {q:'“Səhmlər düşüb, çünki şirkət batır.”',o:['Fakt','İnterpretasiya'],a:1,e:'Səbəb haqqında izahdır. Bazarın ümumi düşüşü kimi başqa izahlar da ola bilər.'},
+    {q:'“Dostum zəngimə cavab vermədi, deməli məndən incikdir.” Burada əsas problem nədir?',o:['Məntiqi səhv: modus ponens pozulub','Linza problemi: bir interpretasiya fakt kimi qəbul edilib','Heç bir problem yoxdur'],a:1,e:'Nəticə “incikdir” interpretasiyasından çıxır. Amma alternativlər də var: məşğuldur, telefonu yanında deyil…'},
+    {q:'Şəhərin nəqliyyat problemini həll etmək üçün hansı “linza” daha uyğundur?',o:['Bir sürücünün bir günlük təcrübəsi','Bütün şəhər üzrə illik axın məlumatları','Tanışların fikirləri'],a:1,e:'Miqyas məsələyə uyğun olmalıdır. Sistem səviyyəsindəki problem sistem səviyyəsində məlumat tələb edir.'},
+  ],
+  chaos:[
+    {q:'Deterministik sistem həmişə uzunmüddətli perspektivdə proqnozlaşdırıla bilirmi?',o:['Bəli, qaydalar məlumdursa','Xeyr, başlanğıc şərtlərə həssas ola bilər'],a:1,e:'Logistik xəritə tam deterministikdir, amma r = 3.9 olanda bir neçə onluq addımdan sonra proqnoz mümkün olmur.'},
+    {q:'“Kəpənək effekti” nə deməkdir?',o:['Kəpənəklər havaya təsir edir','Kiçik başlanğıc fərqi zamanla böyük fərqə çevrilə bilər','Hər şey təsadüfidir'],a:1,e:'Başlanğıc şərtlərə həssaslıq. Xaos təsadüf deyil.'},
+    {q:'Mürəkkəb layihədə plan pozuldu. Xaos nəzəriyyəsi baxımından ən yaxşı reaksiya hansıdır?',o:['Özünü günahlandırmaq','Daha uzun və daha dəqiq plan yazmaq','Qısa dövrlərlə planlamaq və tez-tez korreksiya etmək'],a:2,e:'Proqnoz üfüqü qısadırsa, plan da qısa və çevik olmalıdır.'},
+    {q:'“İnflyasiyanın yeganə səbəbi X-dir.” Bu tip iddiaya necə yanaşmalı?',o:['Ehtiyatla: mürəkkəb sistemdə tək səbəbli izah adətən həddən artıq sadədir','Dərhal qəbul etmək'],a:0,e:'İqtisadiyyat çoxlu əks-əlaqə halqası olan qeyri-xətti sistemdir.'},
+  ],
+  sci:[
+    {q:'“Bu dərman 2 həftə ərzində təzyiqi ən azı 10 vahid aşağı salır.”',o:['Təkzib oluna bilər','Təkzib oluna bilməz'],a:0,e:'Dəqiq, ölçülə bilən proqnozdur. Yoxlayıb səhv olduğunu göstərmək mümkündür.'},
+    {q:'“Kainatda hər şey görünməz və ölçülməz bir enerji ilə idarə olunur.”',o:['Təkzib oluna bilər','Təkzib oluna bilməz'],a:1,e:'Heç bir müşahidə bu fikri təkzib edə bilməz. Deməli, o, heç nəyi proqnozlaşdırmır.'},
+    {q:'“Əgər işə düşsə, bu, mənim haqlı olduğumu göstərir. İşə düşməsə, demək ki, hələ vaxtı çatmayıb.”',o:['Təkzib oluna bilər','Təkzib oluna bilməz'],a:1,e:'Hər nəticə “təsdiq” sayılır. Bu, özünüaldatmanın tipik formasıdır.'},
+    {q:'Hipotezi yoxlamağın ən güclü yolu hansıdır?',o:['Onu təsdiqləyən nümunələr toplamaq','Onu təkzib edə biləcək nümunə axtarmaq'],a:1,e:'Min təsdiq nümunəsi “bütün” iddiasını isbat etmir, bir əks-nümunə isə təkzib edir.'},
+    {q:'Vason tapşırığında 7 kartını niyə çevirmək lazımdır?',o:['Çünki tək ədəddir və arxasında sait çıxsa, qayda pozulur','Lazım deyil'],a:0,e:'Bu, modus tollensdir: p → q və ¬q. Arxasında p (sait) olmamalıdır.'},
+  ],
+  inv:[
+    {q:'Karyera qurmaq istəyirsən. İnversiya ilə ilk sual hansıdır?',o:['Ən uğurlu insanlar nə edir?','Karyeraları məhv edən tipik səhvlər hansılardır?','Hansı kitabı oxuyum?'],a:1,e:'Uğursuzluğa aparan yolları bilmək və onlardan qaçmaq çox vaxt uğurun resepti axtarmaqdan daha etibarlıdır.'},
+    {q:'Premortem nədir?',o:['Layihə bitəndən sonra səhvləri təhlil etmək','Başlamazdan əvvəl layihənin uğursuz olduğunu təsəvvür edib səbəblərini tapmaq'],a:1,e:'“Ölümdən əvvəl” təhlil. Risklər hələ qarşısını almaq mümkün olanda görünür.'},
+    {q:'“Premeditatio malorum” praktikasının məqsədi nədir?',o:['Daim narahat olmaq','Pis ssenarilərə əvvəlcədən hazırlaşıb sakit qalmaq'],a:1,e:'Stoiklər üçün bu, qorxunu idarə etmək üçün məşq idi.'},
+    {q:'Hipotezin təkzib olunması nədir?',o:['Şəxsi uğursuzluq','Dəyərli məlumat: hansı yolun işləmədiyini artıq bilirsən'],a:1,e:'İnversiyalı düşüncədə hər təkzib axtarış sahəsini daraldır.'},
+    {q:'“İkiqat halqa” qaydasında ikinci halqa nədir?',o:['Fikri bir də tərsinə çevirmək','Güzgüdən reallığa, faktlara qayıtmaq'],a:1,e:'Faktlarla yoxlanmayan sxem gözəl illüziyaya çevrilir.'},
+  ],
+  enth:[
+    {q:'“O, əlaçı olub, deməli yaxşı menecer olacaq.” Gizli əsas:',o:['Bütün əlaçılar yaxşı menecer olur','Bəzi menecerlər əlaçı olub','O, menecer olmaq istəyir'],a:0,e:'Açıq yazanda şübhəli görünür: oxumaq və idarə etmək fərqli bacarıqlardır.'},
+    {q:'“Bu məhsul təbiidir, deməli zərərsizdir.” Gizli əsas:',o:['Bütün zərərsiz şeylər təbiidir','Bütün təbii şeylər zərərsizdir','Bəzi təbii şeylər zərərlidir'],a:1,e:'Bu, yalandır: göbələk zəhəri də təbiidir.'},
+    {q:'“Hamı bu telefonu alır, sən niyə almırsan?” Gizli əsas:',o:['Hamının etdiyi doğrudur','Telefon bahalıdır','Sən hamı kimi deyilsən'],a:0,e:'“Çoxluğa müraciət” (argumentum ad populum) səhvi.'},
+    {q:'“Mütəxəssislər səhv edə bilər, deməli mənim fikrim də onlarınkı qədər doğrudur.” Bu arqumentin problemi nədir?',o:['Heç bir problem yoxdur','“Səhv edə bilər” cümləsindən “eyni dərəcədə etibarlıdır” nəticəsi çıxmır'],a:1,e:'Gizli əsas belədir: “Səhv edə bilən hər kəs eyni dərəcədə etibarlıdır.” Bu yanlışdır, çünki ehtimallar fərqlidir (17-ci dərs).'},
+    {q:'Hansı İSBATDIR, hansı İNANDIRMA?  “Bu körpü 40 ton yükə hesablanıb, sınaqda 60 tonu daşıyıb.”',o:['İsbata yaxındır (faktlara və yoxlamaya əsaslanır)','Saf inandırmadır'],a:0,e:'Ölçülə bilən iddia və müstəqil sınaq var.'},
+  ],
+  decomp:[
+    {q:'Sistemin nəticəsini nə müəyyən edir?',o:['Ən güclü mərhələsi','Mərhələlərin orta gücü','Ən zəif mərhələsi (darboğaz)'],a:2,e:'Zəncir ən zəif halqasından qırılır.'},
+    {q:'Darboğaz olmayan mərhələni iki dəfə gücləndirsən, nə olar?',o:['Nəticə ikiqat artar','Nəticə dəyişməz, sadəcə qarşısında növbə yığılar'],a:1,e:'Simulyatorda özün yoxla.'},
+    {q:'Darboğazı yaxşılaşdırdın. Növbəti addım nədir?',o:['İş bitdi','Darboğazın başqa yerə keçib-keçmədiyini yoxlamaq'],a:1,e:'Darboğaz həmişə sistemdə hardasa olur. Yaxşılaşdırma dövri prosesdir.'},
+    {q:'Dekompozisiya edərkən niyə tapşırıqlara deyil, sistemlərə bölmək daha yaxşıdır?',o:['Sistemlərin əlaqələri və əks-əlaqəsi görünür, şərtlər dəyişəndə də struktur qalır','Çünki tapşırıqlar azdır'],a:0,e:'Siyahı şərtlər dəyişəndə dağılır, sistemin strukturu isə qalır.'},
+  ],
+  godel:[
+    {q:'Kənd bərbəri yalnız və yalnız özünü qırxmayanları qırxır. Bərbər özünü qırxırmı?',o:['Bəli','Xeyr','Hər iki cavab ziddiyyətə gətirir'],a:2,e:'Rasselin paradoksunun populyar formasıdır. Qırxırsa, qırxmamalıdır, qırxmırsa, qırxmalıdır. Özünə istinad problemdir.'},
+    {q:'Gödelin birinci teoremi nəyi iddia edir?',o:['Riyaziyyat ziddiyyətlidir','Hesabı ifadə edən ziddiyyətsiz formal sistemdə isbat oluna bilməyən doğru mülahizələr var','Heç nə bilmək mümkün deyil'],a:1,e:'Bu, natamamlıq haqqındadır. Teorem nə “hər şey nisbidir” deyir, nə də “riyaziyyat səhvdir”.'},
+    {q:'Tarski teoreminə görə dilin doğruluğunu müəyyən etmək üçün nə lazımdır?',o:['Metadil, yəni daha yüksək səviyyəli dil','Daha çox söz'],a:0,e:'Obyekt-dil haqqında metadildə danışırıq.'},
+    {q:'İki şöbənin reqlamentləri bir-biri ilə ziddiyyət təşkil edir. “Meta-səviyyəyə qalxmaq” nə deməkdir?',o:['Reqlamentlərdən birini təsadüfən seçmək','Hər iki reqlamentin hansı məqsədə xidmət etdiyini soruşub o məqsəd əsasında qərar vermək','Mübahisəni sona qədər davam etdirmək'],a:1,e:'Ziddiyyət sistem daxilində həll olunmursa, xarici meyar lazımdır.'},
+    {q:'“Gödel isbat edib ki, həqiqət nisbidir və hər fikir eyni dərəcədə doğrudur.” Bu iddia:',o:['Doğrudur','Teoremin yanlış şərhidir'],a:1,e:'Teorem formal sistemlərin sərhədləri haqqındadır və “hər şey nisbidir” demir. Bu, tipik manipulyasiya nümunəsidir.'},
+  ],
+  sys:[
+    {q:'Bank əmanətində faiz üzərinə faiz hesablanır. Bu, hansı halqadır?',o:['Gücləndirici (R)','Balanslaşdırıcı (B)'],a:0,e:'Böyüdükcə daha sürətlə böyüyür.'},
+    {q:'Bədən istiləşəndə tərləyir və soyuyur. Bu, hansı halqadır?',o:['Gücləndirici (R)','Balanslaşdırıcı (B)'],a:1,e:'Sistem hədəf temperaturuna qayıdır.'},
+    {q:'Duş simulyatorunda niyə temperatur rəqs edir?',o:['Kran xarabdır','Gecikmə: hələ reaksiya görmədən kranı yenidən çeviririk'],a:1,e:'Gecikmə və güclü reaksiya balanslaşdırıcı halqanı rəqsə çevirir. Dərmanı səbir və kiçik addımlardır.'},
+    {q:'Tıxacı azaltmaq üçün yeni yollar çəkildi, bir neçə ildən sonra isə tıxac yenə əvvəlki kimi oldu. Bunun səbəbi nədir?',o:['Təsadüf','Gizli halqa: yol rahatlaşdıqca daha çox insan maşınla getməyə başladı (induksiya olunmuş tələb)'],a:1,e:'Kobra effektinə oxşar haldır: sistem müdaxiləyə “cavab verir”.'},
+    {q:'Aysberq modelində ən böyük təsir hansı qatda edilə bilər?',o:['Hadisələr','Zehni modellər və strukturlar'],a:1,e:'Hadisələrə reaksiya simptomu müalicə edir, struktur dəyişikliyi isə səbəbi aradan qaldırır.'},
+  ],
+  prob:[
+    {q:'Xəstəlik 1000 nəfərdən 1-ində var. Test 100% həssasdır, yalançı müsbət 5%-dir. Nəticə müsbətdir. Xəstə olma ehtimalı təxminən neçədir?',o:['95%','50%','2%'],a:2,e:'1000 nəfərdən 1 xəstə və təxminən 50 yalançı müsbət çıxır. Deməli 1 / 51 ≈ 2%.'},
+    {q:'Dost yaxşı düşünülmüş mərc etdi, amma uduzdu. Bu, nə deməkdir?',o:['Qərar pis idi','Nəticə pisdir, amma qərarın keyfiyyəti ayrıca qiymətləndirilir'],a:1,e:'Nəticəyə görə qərarı qiymətləndirmək tələsinə düşmə.'},
+    {q:'“Mən böhranın olacağını bilirdim!” (hadisədən sonra). Bu, hansı effektdir?',o:['Retrospektiv determinizm (“mən bunu bilirdim” effekti)','Bayes yenilənməsi'],a:0,e:'Hadisədən sonra o, əvvəlcədən göründüyündən daha qaçılmaz görünür.'},
+    {q:'Oyun: 50% ehtimalla 100 ₼ udursan, 50% ehtimalla 40 ₼ uduzursan. Gözlənilən qiymət nədir?',o:['+30 ₼','+60 ₼','−40 ₼'],a:0,e:'0.5·100 − 0.5·40 = 30. Müsbətdir, amma riskə dözə bilib-bilməyəcəyini də nəzərə al.'},
+    {q:'Yeni məlumat sənin fikrinin əksini göstərir. Ehtimal məntiqinə görə nə etməlisən?',o:['Fikrimi qorumaq','Ehtimalları məlumatın gücünə uyğun yeniləmək'],a:1,e:'Bayes yanaşması: nə inadkarlıq, nə də ifrat reaksiya. Fikri proporsional yeniləmək.'},
+  ],
+  fuzzy:[
+    {q:'a = 0.7. ¬a nədir?',o:['0','0.3','0.7'],a:1,e:'1 − 0.7 = 0.3.'},
+    {q:'a = 0.9, b = 0.3. min-norma ilə a ∧ b nədir?',o:['0.3','0.27','0.6'],a:0,e:'min(0.9, 0.3) = 0.3. Ən zəif halqa qərarı müəyyən edir.'},
+    {q:'Eyni a = 0.9, b = 0.3 üçün hasil-norma ilə a ∧ b nədir?',o:['0.3','0.27','1.2'],a:1,e:'0.9 · 0.3 = 0.27. Norma dəyişəndə qərar da dəyişə bilər.'},
+    {q:'“Bu həftə sizi gözlənilməz bir xəbər gözləyir.” Bu, hansı effektə nümunədir?',o:['Forer effekti','Kəpənək effekti'],a:0,e:'Kifayət qədər qeyri-müəyyəndir ki, hər kəs özünə aid edə bilsin.'},
+    {q:'Qeyri-səlis məntiq klassik məntiqi ləğv edirmi?',o:['Bəli','Xeyr, onu ümumiləşdirir: 0 və 1 qiymətlərində klassik məntiq alınır'],a:1,e:'min və max 0/1 qiymətlərində ∧ və ∨ ilə eyni nəticəni verir.'},
+  ],
+  noise:[
+    {q:'Ölkədə şokolad istehlakı ilə Nobel mükafatlarının sayı arasında korrelyasiya var. Nə demək olar?',o:['Şokolad insanı ağıllı edir','Ola bilər ki, hər ikisinə gizli amil, məsələn, rifah təsir edir'],a:1,e:'Korrelyasiya səbəbiyyət deyil.'},
+    {q:'Siqnalizasiya hər dəfə pişikdən çalır, amma bir oğru gəlsə də çalmır. Hansı səhvlər var?',o:['Yalnız I növ','Həm I növ (yalançı həyəcan), həm də II növ (buraxılmış təhlükə)'],a:1,e:'Pişikə görə həyəcan I növ, buraxılmış oğru II növ səhvdir.'},
+    {q:'Xəbərlərdə hər gün “dollar 0.3% bahalaşdı” deyilir. Bu, adətən nədir?',o:['Siqnal','Küy, çünki trendə baxmaq lazımdır'],a:1,e:'Gündəlik tərəddüdlər küydür. Qərar trend və limitlər üzərində qurulmalıdır.'},
+    {q:'Pul atanda ardıcıl 6 dəfə “yazı” gəldi. Növbəti atışda “tura” gəlmə ehtimalı:',o:['Artıq daha çoxdur','Hələ də 50%-dir'],a:1,e:'“Oyunçu səhvi”: pul əvvəlki atışları xatırlamır. 100 atışda 6-7 uzunluqlu seriya normaldır.'},
+    {q:'Sıfır hipotezi nədir?',o:['“Effekt var” fərziyyəsi','Güclü sübut olmayana qədər “effekt yoxdur” fərziyyəsi'],a:1,e:'Bu, saxta əlaqələrə qarşı müdafiədir.'},
+  ],
+  ai:[
+    {q:'Süni intellekt inamla bir statistik rəqəm dedi. Necə yanaşmalı?',o:['Fakt kimi qəbul etmək','Hipotez kimi qəbul edib mənbədən yoxlamaq'],a:1,e:'İnandırıcı mətn doğru mətn demək deyil.'},
+    {q:'Hansını süni intellektə həvalə etmək daha məqsədəuyğundur?',o:['Həyat məqsədlərini seçmək','Planına 10 əks-arqument tapmaq','Qərarın məsuliyyətini daşımaq'],a:1,e:'Bu, “sparrinq-partnyor” formatıdır. Dəyər və məsuliyyət sənin üzərində qalır.'},
+    {q:'Meta-çərçivəyə nə daxildir?',o:['Kontekst, məqsəd, uğur meyarları, məhdudiyyətlər','Yalnız sual'],a:0,e:'Yaxşı qoyulmuş tapşırıq yarı həll olunmuş məsələdir.'},
+    {q:'“Mənim arqumentimin ən zəif yeri haradadır?” sualı hansı formatdır?',o:['İcraçı','Sparrinq-partnyor'],a:1,e:'Süni intellekt burada düşüncəni əvəz etmir, onu gücləndirir.'},
+  ],
+  evo:[
+    {q:'Təkamül alqoritminin üç əsas mexanizmi:',o:['Plan, nəzarət, hesabat','Variasiya, seçmə, irsiyyət'],a:1,e:'Kiçik təcrübələr, ölçmə və işləyəni saxlamaq.'},
+    {q:'Fitnes-funksiya nədir?',o:['İdman proqramı','Hər variantın məqsədə nə qədər yaxın olduğunu ölçən meyar'],a:1,e:'Simulyatorda bu, düzgün yerdə olan hərflərin sayıdır.'},
+    {q:'Simulyatorda mutasiya sürəti 30% olanda nə baş verir?',o:['Ən sürətli nəticə','Yaxşı hissələr də dağılır, irəliləyiş yavaşıyır'],a:1,e:'Həddən artıq dəyişiklik qazanılanı məhv edir.'},
+    {q:'Mühit sürətlə dəyişir. Hansı strategiya daha davamlıdır?',o:['5 illik sərt plan','İstiqamət + qısa təcrübələr + tez-tez korreksiya (naviqator prinsipi)'],a:1,e:'Plan reallıqdan geri qalanda adaptivlik qalib gəlir.'},
+  ],
+  meta:[
+    {q:'“Bu kvadrat tənliyin köklərini tap.”',o:['Well-defined','Ill-defined'],a:0,e:'Şərtlər tamdır, cavab yeganədir.'},
+    {q:'“Başqa ölkəyə köçməliyəmmi?”',o:['Well-defined','Ill-defined'],a:1,e:'Natamam məlumat, dəyişən şərtlər və çoxlu meyar var. Ehtimallar, qeyri-səlis meyarlar, premortem və kiçik təcrübələr lazımdır.'},
+    {q:'Startapın satışları düşür, səbəbi bəlli deyil. İlk addım nədir?',o:['Bir səbəb seçib bütün resursu ona yönəltmək','Sistemi sahələrə bölüb darboğaz haqqında hipotezlər qurmaq və onları ən ucuz yolla yoxlamaq'],a:1,e:'Dekompozisiya, sonra elmi metod və ehtimal ilə sıralama.'},
+    {q:'İki ekspert eyni məlumata əsasən əks nəticələrə gəlir. Hansı alət daha əvvəl lazımdır?',o:['Linza analizi: hər biri hansı model və miqyasla baxır?','Səs çoxluğu'],a:0,e:'Fərq çox vaxt məntiqdə deyil, əsaslarda və linzadadır.'},
+    {q:'“Bu müqavilə maddəsi düzgün tətbiq olunubmu?”',o:['Daha çox well-defined: qaydalar məlumdur, klassik məntiq işləyir','Tam ill-defined'],a:0,e:'Amma maddələr ziddiyyətə gəlsə, meta-səviyyəyə, yəni müqavilənin məqsədinə qalxmaq lazımdır.'},
+  ],
   final:[
     {q:'Hansı mülahizədir?',o:['Pəncərəni aç!','Ay Yerin peykidir.','Necəsən?'],a:1,e:'Yalnız nəqli cümlə mülahizədir.'},
     {q:'p = Y, q = D olduqda p ∧ q nədir?',o:['D','Y'],a:1,e:'∧ üçün hər ikisi doğru olmalıdır.'},
@@ -485,6 +976,14 @@ const QUIZ={
     {q:'(p ∧ q) → p formulu nədir?',o:['Tavtologiya','Ziddiyyət','Nə o, nə bu'],a:0,e:'p ∧ q doğrudursa, p mütləq doğrudur.'},
     {q:'A deyir: “Mən yalançıyam.” Cəngavərlər adasında bu mümkündürmü?',o:['Bəli, A yalançıdır','Bəli, A cəngavərdir','Xeyr, bunu heç kim deyə bilməz'],a:2,e:'Cəngavər bunu desə yalan danışmış olar, yalançı desə doğru danışmış olar. İkisi də mümkün deyil.'},
     {q:'Bəzi S P-dir. Bütün P M-dir. ⇒ Bəzi S M-dir.',o:['Düzgün','Yanlış'],a:0,e:'Orta termin P ikinci əsasda tam həcmdə işlənib. Bu, düzgün formadır (Darii).'},
+    {q:'“Rəqib kimi danışır, deməli bizə düşməndir” cümləsində ilk növbədə nəyi yoxlamaq lazımdır?',o:['Gizli əsası: “Fərqli danışan hər kəs düşməndir”','Doğruluq cədvəlini'],a:0,e:'Entimem. Gizli əsas açılanda arqumentin zəif yeri görünür.'},
+    {q:'Hansı fikir elmi mənada təkzib oluna bilər?',o:['“Hər şeyin bir səbəbi var, sadəcə onu bilmirik”','“Bu gübrə məhsuldarlığı ən azı 10% artırır”'],a:1,e:'Ölçülə bilən proqnoz verir.'},
+    {q:'Sistemin nəticəsini artırmaq üçün resurs hara yönəldilməlidir?',o:['Ən güclü mərhələyə','Darboğaza'],a:1,e:'Məhdudiyyətlər nəzəriyyəsi.'},
+    {q:'Test 99% həssasdır, amma xəstəlik çox nadirdir. Müsbət nəticə:',o:['Demək olar ki, dəqiq xəstəlik deməkdir','Baza tezliyinə görə xəstə olmama ehtimalı yüksək ola bilər'],a:1,e:'Bayes: ilkin ehtimal nəzərə alınmalıdır.'},
+    {q:'Qeyri-səlis məntiqdə a = 0.6, b = 0.5 olanda max-konorma ilə a ∨ b nədir?',o:['0.5','0.6','1.1'],a:1,e:'max(0.6, 0.5) = 0.6.'},
+    {q:'Logistik xəritədə (r = 3.9) iki çox yaxın başlanğıc nöqtə nə edir?',o:['Həmişə yaxın qalır','Bir müddət sonra tamam ayrılır'],a:1,e:'Başlanğıc şərtlərə həssaslıq, yəni xaos.'},
+    {q:'Gecikməli sistemdə (duş) ən yaxşı strategiya:',o:['Hər an güclü reaksiya vermək','Kiçik addımlar atıb nəticəni gözləmək'],a:1,e:'Güclü reaksiya gecikmə ilə birləşəndə rəqs yaradır.'},
+    {q:'“Köçməliyəmmi?” sualı:',o:['Well-defined məsələdir','Ill-defined məsələdir'],a:1,e:'Bunun üçün ehtimal, qeyri-səlis meyarlar və kiçik təcrübələr lazımdır.'},
   ],
 };
 function buildQuiz(el){
@@ -509,7 +1008,7 @@ function buildQuiz(el){
   });
   const res=document.createElement('div'); el.appendChild(res);
   function finish(){
-    const pass = key==='final' ? right>=8 : right>=Math.ceil(qs.length*0.6);
+    const pass = key==='final' ? right>=Math.ceil(qs.length*0.8) : right>=Math.ceil(qs.length*0.6);
     res.className='msg '+(pass?'ok':'bad');
     res.innerHTML=`Nəticə: ${right} / ${qs.length}. `+(pass?(key==='final'?'🎓 Təbriklər! Kursu tamamladın.':'Dərs tamamlandı ✓'):'Mövzunu yenidən oxu və təkrar cəhd et.')+
       ' <button class="btn ghost" style="margin-left:8px;padding:4px 10px">Yenidən</button>';
@@ -673,6 +1172,177 @@ function renderKK(){
   };
 }
 renderKK();
+
+// ===================== Chart helper =====================
+function chart(el,series,ymin,ymax){
+  const W=600,H=220,n=series[0].data.length;
+  const Y=y=>H-6-(Math.max(ymin,Math.min(ymax,y))-ymin)/(ymax-ymin)*(H-12);
+  let g='';
+  for(let k=0;k<=4;k++){ const y=6+k*(H-12)/4; g+=`<line x1="0" x2="${W}" y1="${y}" y2="${y}" style="stroke:var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>`; }
+  const lines=series.map(s=>`<polyline fill="none" style="stroke:${s.color}" stroke-width="2" ${s.dash?'stroke-dasharray="6 5"':''} vector-effect="non-scaling-stroke" points="${s.data.map((y,i)=>`${(i/(n-1)*W).toFixed(1)},${Y(y).toFixed(1)}`).join(' ')}"/>`).join('');
+  el.innerHTML=`<svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${g}${lines}</svg>`;
+}
+
+// ===================== Logistic map =====================
+function logistic(){
+  const r=+lgRin.value, x0=+lgXin.value; lgR.textContent=r.toFixed(2); lgX.textContent=x0.toFixed(3);
+  const a=[x0],b=[x0+1e-6]; for(let i=0;i<60;i++){ a.push(r*a[i]*(1-a[i])); b.push(r*b[i]*(1-b[i])); }
+  chart(lgChart,[{data:a,color:'var(--accent)'},{data:b,color:'var(--warn)'}],0,1);
+  const k=a.findIndex((v,i)=>Math.abs(v-b[i])>0.1);
+  lgMsg.innerHTML = k<0 ? '<div class="msg ok">60 addım ərzində trayektoriyalar ayrılmadı: sistem bu rejimdə proqnozlaşdırıla bilir.</div>'
+    : `<div class="msg bad">${k}-cü addımda trayektoriyalar arasındakı fərq 0.1-dən böyük oldu. Başlanğıcdakı fərq isə 0.000001 idi. Proqnoz üfüqü ≈ ${k} addımdır.</div>`;
+}
+const lgRin=document.getElementById('lgRin'), lgXin=document.getElementById('lgXin'), lgR=document.getElementById('lgR'), lgX=document.getElementById('lgX'), lgChart=document.getElementById('lgChart'), lgMsg=document.getElementById('lgMsg');
+lgRin.oninput=logistic; lgXin.oninput=logistic; logistic();
+
+// ===================== 2-4-6 =====================
+(()=>{
+  const inp=document.getElementById('w246in'), log=document.getElementById('w246log'), msg=document.getElementById('w246msg'), gs=document.getElementById('w246guess');
+  const tests=[];
+  const rule=a=>a[0]<a[1]&&a[1]<a[2];
+  function test(){
+    const a=inp.value.trim().split(/[\s,;]+/).map(Number);
+    if(a.length!==3||a.some(isNaN)){ msg.innerHTML='<div class="msg info">Üç ədəd yaz, məsələn: 1 2 3</div>'; return; }
+    msg.innerHTML=''; tests.push([a,rule(a)]);
+    log.innerHTML=tests.map(([x,ok])=>`${x.join(', ')} → ${ok?'<span class="T">uyğundur ✓</span>':'<span class="F">uyğun deyil ✗</span>'}`).join('<br>');
+    inp.value=''; inp.focus();
+  }
+  document.getElementById('w246btn').onclick=test; inp.onkeydown=e=>{if(e.key==='Enter')test();};
+  const opts=['Hər ədəd əvvəlkindən 2 vahid böyükdür','Cüt ədədlərdir','İstənilən artan ardıcıllıq','Üçüncü ədəd ilk ikisinin cəmidir'];
+  opts.forEach((o,i)=>{ const b=document.createElement('button'); b.textContent=o; b.onclick=()=>{
+    const neg=tests.filter(t=>!t[1]).length;
+    if(i===2){ msg.innerHTML=`<div class="msg ok">✅ Düzdür! Qayda belədir: “ədədlər artan sıradadır”. Sən ${tests.length} test etdin və onlardan ${neg} dənəsi “uyğun deyil” cavabı aldı. ${neg?'Əla, hipotezini təkzib etməyə çalışdın.':'Diqqət: qaydanı pozacağını gözlədiyin üçlüklər (məsələn, 6 4 2) yoxlamaq ən informativ testdir.'}</div>`; }
+    else msg.innerHTML=`<div class="msg bad">❌ Yox. İnsanların çoxu belə səhv edir: öz hipotezlərini <b>təsdiqləyən</b> üçlükləri yoxlayırlar (8 10 12, 20 22 24…). Hipotezinin <b>səhv</b> çıxa biləcəyi üçlüyü yoxla. Məsələn, ${i===0?'1 2 3':i===1?'1 3 5':'1 2 10'}.</div>`;
+  }; gs.appendChild(b); });
+})();
+
+// ===================== Wason cards =====================
+(()=>{
+  const box=document.getElementById('wcards'), sel=new Set(); const cards=['A','K','4','7'];
+  cards.forEach(c=>{ const b=document.createElement('button'); b.className='card-btn'; b.textContent=c;
+    b.onclick=()=>{ sel.has(c)?sel.delete(c):sel.add(c); b.classList.toggle('sel'); }; box.appendChild(b); });
+  document.getElementById('wcCheck').onclick=()=>{
+    const ok=sel.size===2&&sel.has('A')&&sel.has('7'), m=document.getElementById('wcMsg');
+    m.innerHTML = ok ? '<div class="msg ok">✅ Düzdür: <b>A</b> və <b>7</b>. A kartını çevirmək modus ponens yoxlamasıdır: arxasında cüt ədəd olmalıdır. 7 kartını çevirmək isə modus tollens yoxlamasıdır: arxasında sait olmamalıdır. 4 kartını çevirmək mənasızdır. Qayda “cüt ədədin arxasında sait var” demir (nəticənin təsdiqi səhvi).</div>'
+      : `<div class="msg bad">❌ Hələ yox. ${sel.has('4')?'4 kartının arxasında nə olsa da qayda pozulmur. Bu, “nəticənin təsdiqi” tələsidir. ':''}${!sel.has('7')?'Hansı kartın arxasında sait çıxsa, qayda pozular? ':''}${sel.has('K')?'K kartı samitdir, qayda samitlər haqqında heç nə demir. ':''}Bu tapşırıqda insanların yalnız təxminən 10%-i düzgün cavab verir.</div>`;
+  };
+})();
+
+// ===================== Inversion =====================
+document.getElementById('invBtn').onclick=()=>{
+  const goal=document.getElementById('invGoal').value.trim()||'məqsədim';
+  const items=document.getElementById('invList').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  const o=document.getElementById('invOut');
+  if(!items.length){ o.innerHTML='<div class="msg info">Ən azı bir uğursuzluq səbəbi yaz.</div>'; return; }
+  o.innerHTML=`<div class="msg ok"><b>“${esc(goal)}” üçün qoruyucu qaydalar:</b><ol>${items.map(s=>`<li>🚫 Bundan qaç: <i>${esc(s)}</i><br><span class="fb">Bu riskin ilk əlaməti nə olar və onu görəndə nə edəcəksən?</span></li>`).join('')}</ol>
+  İndi <b>ikinci halqanı</b> tamamla: hansı səbəb artıq real faktlarda görünür? Əvvəlcə onunla işlə.</div>`;
+};
+
+// ===================== Bottleneck =====================
+(()=>{
+  const names=['Sifariş qəbulu','Xəmir və bişirmə','Qablaşdırma','Çatdırılma'], base=[30,12,20,25];
+  let cap, pts, history;
+  const box=document.getElementById('bnStages'), msg=document.getElementById('bnMsg');
+  function reset(){ cap=base.slice(); pts=3; history=[]; draw(); }
+  function draw(){
+    const out=Math.min(...cap), max=Math.max(...cap,40);
+    box.innerHTML=`<p><b>Gündəlik nəticə: ${out} sifariş</b> · Qalan xal: ${pts}</p>`+cap.map((c,i)=>`<div class="stage ${c===out?'neck':''}"><span>${names[i]}</span><div class="barbox"><div class="bar" style="width:${c/max*100}%"></div></div><button class="btn" data-i="${i}" ${pts?'':'disabled'} style="padding:4px 8px">+5</button></div><div class="fb" style="margin:-6px 0 0">${c}/gün${c===out?' · <span class="F">darboğaz</span>':''}</div>`).join('');
+    box.querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>{
+      const i=+b.dataset.i, before=Math.min(...cap); cap[i]+=5; pts--; const after=Math.min(...cap);
+      history.push(after>before);
+      msg.innerHTML = after>before ? `<div class="msg ok">“${names[i]}” darboğaz idi və nəticə ${before}-dən ${after}-ə qalxdı. ✓</div>` : `<div class="msg bad">“${names[i]}” darboğaz deyildi, buna görə nəticə dəyişmədi (${after}). Resurs boşa getdi.</div>`;
+      if(!pts){ const best=Math.min(...cap);
+        msg.innerHTML+= best>=22 ? '<div class="msg ok">🎉 Maksimum nəticə: 22/gün (başlanğıcda 12 idi). Hər xalı darboğaza verdin. Diqqət et: iki xaldan sonra darboğaz bişirmədən qablaşdırmaya keçdi. Ona görə də üçüncü xalı ora vermək lazım idi.</div>' : `<div class="msg info">Nəticə: ${best}/gün. Ən yaxşı mümkün nəticə 22/gündür. “Yenidən başla” düyməsini bas və hər dəfə qırmızı mərhələni gücləndir.</div>`;
+        if(best>=22) markDone(13);
+      }
+      draw();
+    });
+  }
+  document.getElementById('bnReset').onclick=()=>{msg.innerHTML='';reset();};
+  reset();
+})();
+
+// ===================== Shower =====================
+function shower(){
+  const d=+shDin.value, k=+shKin.value; shD.textContent=d; shK.textContent=k.toFixed(2);
+  const knob=[20], T=[]; const N=50;
+  for(let t=0;t<N;t++){ const temp=knob[Math.max(0,t-d)]; T.push(temp); knob.push(Math.max(0,Math.min(70,knob[t]+k*(38-temp)))); }
+  chart(shChart,[{data:T,color:'var(--accent)'},{data:T.map(()=>38),color:'var(--ok)',dash:true}],0,70);
+  const tail=T.slice(-15), sw=Math.max(...tail)-Math.min(...tail);
+  shMsg.innerHTML = sw<1 ? '<div class="msg ok">Temperatur sabitləşdi. Gecikmə ilə reaksiya gücü bir-birinə uyğundur.</div>'
+    : sw<15 ? `<div class="msg info">Temperatur rəqs edir (son addımlarda ±${(sw/2).toFixed(1)}°C). Reaksiya gücünü azaltmağı sına.</div>`
+    : '<div class="msg bad">Güclü rəqs: gah qaynar, gah buz kimi su. Gecikmə böyük, reaksiya da güclüdür. Real sistemlərdə (iqtisadiyyat, anbar, komanda) bu, tipik problemdir.</div>';
+}
+const shDin=document.getElementById('shDin'), shKin=document.getElementById('shKin'), shD=document.getElementById('shD'), shK=document.getElementById('shK'), shChart=document.getElementById('shChart'), shMsg=document.getElementById('shMsg');
+shDin.oninput=shower; shKin.oninput=shower; shower();
+
+// ===================== Bayes =====================
+function bayes(){
+  const p=+byPin.value/100, s=+bySin.value/100, f=+byFin.value/100;
+  byP.textContent=(p*100).toFixed(1); byS.textContent=Math.round(s*100); byF.textContent=(f*100).toFixed(1);
+  const N=10000, sick=N*p, tp=sick*s, fp=(N-sick)*f, post=tp/(tp+fp);
+  byOut.innerHTML=`<div class="msg info"><b>10 000 nəfər götürək:</b><br>
+   • xəstə: ${Math.round(sick)}, onlardan test müsbət: <span class="T">${Math.round(tp)}</span><br>
+   • sağlam: ${Math.round(N-sick)}, onlardan test yalançı müsbət: <span class="F">${Math.round(fp)}</span><br>
+   Müsbət nəticə alan ${Math.round(tp+fp)} nəfərdən yalnız ${Math.round(tp)} nəfəri həqiqətən xəstədir.</div>
+   <div class="msg ${post<0.5?'bad':'ok'}" style="font-size:18px">P(xəstə | test +) = <b>${(post*100).toFixed(1)}%</b></div>
+   <p class="fb">Yayılmanı 1%-dən 20%-ə qaldır və nəticənin necə dəyişdiyinə bax. Həkimlər buna görə ikinci, müstəqil test təyin edirlər.</p>`;
+}
+const byPin=document.getElementById('byPin'), bySin=document.getElementById('bySin'), byFin=document.getElementById('byFin'), byP=document.getElementById('byP'), byS=document.getElementById('byS'), byF=document.getElementById('byF'), byOut=document.getElementById('byOut');
+[byPin,bySin,byFin].forEach(x=>x.oninput=bayes); bayes();
+
+// ===================== Fuzzy =====================
+function fuzzy(){
+  const T=+fzTin.value; fzT.textContent=T;
+  const hot=Math.max(0,Math.min(1,(T-18)/10));
+  const crisp=T>=25;
+  fzTout.innerHTML=`<div class="row"><div style="flex:1"><div class="barbox" style="height:22px;background:var(--line);border-radius:6px;overflow:hidden"><div style="height:100%;width:${hot*100}%;background:var(--warn)"></div></div></div><b style="min-width:90px">“isti” = ${hot.toFixed(2)}</b></div>
+   <p class="fb">Klassik məntiq (“25°C-dən yuxarı isti sayılır”): <b>${crisp?'D':'Y'}</b>. ${T===24||T===25?'24°C ilə 25°C arasında “istidən” “isti deyil”ə sıçrayış baş verir. Bu, süni sərhəddir.':'24 və 25-i sına və klassik sərhədin necə kəskin olduğunu gör.'}</p>`;
+  const a=+fzAin.value, b=+fzBin.value; fzA.textContent=a.toFixed(2); fzB.textContent=b.toFixed(2);
+  const f=x=>x.toFixed(2);
+  fzOut.innerHTML=`<table class="tt"><tr><th>Norma</th><th>a ∧ b (VƏ)</th><th>a ∨ b (VƏ YA)</th><th>Xarakter</th></tr>
+   <tr><td>Zadə (min/max)</td><td class="res">${f(Math.min(a,b))}</td><td>${f(Math.max(a,b))}</td><td>ən zəif halqa</td></tr>
+   <tr><td>Hasil</td><td class="res">${f(a*b)}</td><td>${f(a+b-a*b)}</td><td>hər zəifliyi cərimələyir</td></tr>
+   <tr><td>Lukaşeviç</td><td class="res">${f(Math.max(0,a+b-1))}</td><td>${f(Math.min(1,a+b))}</td><td>ən sərt “VƏ”</td></tr>
+   <tr><td>¬a</td><td colspan="3">${f(1-a)}</td></tr></table>
+   <p class="fb">Qərar həddi 0.5 olsa: Zadə normasına görə ${Math.min(a,b)>=0.5?'<span class="T">götür</span>':'<span class="F">götürmə</span>'}, hasil normasına görə ${a*b>=0.5?'<span class="T">götür</span>':'<span class="F">götürmə</span>'}, Lukaşeviç normasına görə ${Math.max(0,a+b-1)>=0.5?'<span class="T">götür</span>':'<span class="F">götürmə</span>'}.</p>`;
+}
+const fzTin=document.getElementById('fzTin'), fzT=document.getElementById('fzT'), fzTout=document.getElementById('fzTout'), fzAin=document.getElementById('fzAin'), fzBin=document.getElementById('fzBin'), fzA=document.getElementById('fzA'), fzB=document.getElementById('fzB'), fzOut=document.getElementById('fzOut');
+[fzTin,fzAin,fzBin].forEach(x=>x.oninput=fuzzy); fuzzy();
+
+// ===================== Coin =====================
+document.getElementById('coinBtn').onclick=()=>{
+  const s=Array.from({length:100},()=>Math.random()<0.5?'Y':'T');
+  let best=1,cur=1,end=0; for(let i=1;i<100;i++){ cur=s[i]===s[i-1]?cur+1:1; if(cur>best){best=cur;end=i;} }
+  const st=end-best+1;
+  document.getElementById('coinOut').innerHTML=s.map((c,i)=>i>=st&&i<=end?`<span class="run">${c}</span>`:c).join('');
+  document.getElementById('coinMsg').innerHTML=`<div class="msg info">Ən uzun seriya: <b>${best}</b> ardıcıl “${s[end]==='Y'?'yazı':'tura'}” (sarı ilə işarələnib). 100 atışda ən uzun seriya adətən 5–8 olur. İnsanlar isə “təsadüfi” ardıcıllıq uydurarkən 3–4-dən uzun seriya yazmırlar. Ona görə də real təsadüf bizə “qanunauyğunluq” kimi görünür. Bu, apofeniyadır.</div>`;
+};
+
+// ===================== Evolution =====================
+(()=>{
+  const TARGET='MƏNTİQ ELMLƏRİN ELMİDİR', AB='ABCÇDEƏFGĞHXIİJKQLMNOÖPRSŞTUÜVYZ ';
+  const rnd=()=>AB[Math.floor(Math.random()*AB.length)];
+  const fit=s=>[...s].filter((c,i)=>c===TARGET[i]).length;
+  let best, gen, timer=null;
+  const bestEl=document.getElementById('evBest'), info=document.getElementById('evInfo'), btn=document.getElementById('evStart'), mIn=document.getElementById('evMin');
+  function reset(){ stop(); best=Array.from(TARGET,rnd).join(''); gen=0; draw(); }
+  function draw(){
+    bestEl.innerHTML=[...best].map((c,i)=>c===TARGET[i]?`<span class="T">${c===' '?'·':c}</span>`:`<span style="color:var(--muted)">${c===' '?'·':c}</span>`).join('');
+    const f=fit(best); info.textContent=`Nəsil: ${gen} · Fitnes: ${f} / ${TARGET.length}`+(f===TARGET.length?' · 🎉 Hədəfə çatdı!':'');
+  }
+  function step(){
+    const m=+mIn.value/100; let cand=best, cf=fit(best);
+    for(let k=0;k<100;k++){ const c=[...best].map(ch=>Math.random()<m?rnd():ch).join(''); const f=fit(c); if(f>=cf){cand=c;cf=f;} }
+    best=cand; gen++; draw();
+    if(cf===TARGET.length){ stop(); markDone(20); }
+  }
+  function stop(){ if(timer){clearInterval(timer);timer=null;} btn.textContent='Başla'; }
+  btn.onclick=()=>{ if(timer) stop(); else { if(fit(best)===TARGET.length) reset(); timer=setInterval(step,60); btn.textContent='Dayandır'; } };
+  mIn.oninput=()=>document.getElementById('evM').textContent=mIn.value;
+  document.getElementById('evReset').onclick=reset;
+  reset();
+})();
 
 show(Math.min(state.lesson||0,lessons.length-1));
 </script>
