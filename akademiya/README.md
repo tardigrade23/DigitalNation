@@ -43,3 +43,12 @@ akademiya/
 
 - Artifact: https://claude.ai/artifact/HmmZdg8oyvjiBU14uva5Kk (yenidən dərc edəndə bu URL-i `url` kimi ver)
 - capabilities: `{ db: {}, user: {} }`
+
+## Telefona quraşdırılan versiya (PWA)
+
+- Ünvan: https://tardigrade23.github.io/DigitalNation/akademiya/ (GitHub Pages, əsas branch-a hər push-dan sonra yenilənir).
+- `.github/workflows/deploy-pages.yml` → `bash akademiya/tools/build_pwa.sh _site/akademiya`: `pwa/head.html` + `index.html` tam sənədə çevrilir, `sw.js`-də `__BUILD__` commit hash ilə əvəz olunur.
+- `sw.js` quraşdırılanda kataloqdakı bütün kursları keşə yükləyir, ona görə dərslər oflayn açılır. Yeni kurs əlavə edəndə SW-də heç nə dəyişmək lazım deyil.
+- PWA-da irəliləyiş cihazda (`localStorage`) saxlanılır; ana səhifədəki “Yedək nüsxə” ilə faylda saxlanılır/bərpa olunur.
+- Səhifə `noindex` ilə axtarış sistemlərindən gizlədilib, amma ünvanı bilən hər kəs dərs məzmununu aça bilər (irəliləyiş və qeydlər yalnız cihazda qalır).
+- İkonlar: `python3 akademiya/tools/make_icons.py`.

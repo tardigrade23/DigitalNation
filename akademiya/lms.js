@@ -169,6 +169,66 @@
         <div class="foot"><span>${doneCount(c.id)} / ${c.lessons} dərs</span><span>${pc}%</span></div></a>`;
     }).join('') + `<div class="course-card add"><div class="top"><div class="mark">+</div><h3>Yeni kurs</h3></div>
         <p>Claude ilə yeni sessiyada yaz: “Akademiyama … kursu əlavə et”. Kurs bu rəfdə görünəcək və irəliləyişin ayrıca saxlanılacaq.</p></div>`;
+    renderAppBox();
+  }
+
+  // ---------- install as app + backup ----------
+  const PWA_URL = 'https://tardigrade23.github.io/DigitalNation/akademiya/';
+  const inClaude = !!(window.claude && typeof window.claude.use === 'function');
+  const standalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  let installEvt = null;
+  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; if (!curCid) renderAppBox(); });
+  window.addEventListener('appinstalled', () => { installEvt = null; toast('Akademiya quraşdırıldı'); if (!curCid) renderAppBox(); });
+  if (!inClaude && 'serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
+
+  function renderAppBox() {
+    const box = $('#appBox'); if (!box) return;
+    let install = '';
+    if (inClaude) {
+      install = `<div class="tool"><h3>📱 Telefona tətbiq kimi quraşdır</h3>
+        <p>Quraşdırıla bilən versiya bu ünvandadır. Telefonda brauzerlə aç və “Ana ekrana əlavə et” seç:</p>
+        <p><a href="${PWA_URL}" target="_blank" rel="noopener">${PWA_URL.replace('https://', '')}</a></p></div>`;
+    } else if (!standalone()) {
+      const how = isIOS
+        ? 'Safari-də aşağıdakı <b>Paylaş</b> düyməsinə (kvadrat və ox) bas, sonra <b>“Ana ekrana əlavə et”</b> (Add to Home Screen) seç.'
+        : 'Brauzer menyusunu (⋮) aç və <b>“Tətbiqi quraşdır”</b> və ya <b>“Ana ekrana əlavə et”</b> seç.';
+      install = `<div class="tool"><h3>📱 Telefona tətbiq kimi quraşdır</h3>
+        ${installEvt ? '<p>Bir kliklə ana ekrana əlavə et. Akademiya ayrıca tətbiq kimi, internetsiz də açılacaq.</p><button class="btn" id="installBtn">Quraşdır</button>' : `<p>${how} Akademiya ayrıca tətbiq kimi açılacaq, dərslər internetsiz də işləyəcək.</p>`}</div>`;
+    }
+    const backup = `<div class="tool"><h3>💾 Yedək nüsxə</h3>
+      <p>İrəliləyiş və qeydlər ${inClaude ? 'hesabında' : 'bu cihazda'} saxlanılır. Başqa cihaza keçirmək və ya qorumaq üçün faylda saxla.</p>
+      <div class="row">${inClaude ? '' : '<button class="btn ghost" id="exportBtn">Faylda saxla</button>'}
+      <label class="btn ghost" for="importFile">Fayldan bərpa et</label><input type="file" id="importFile" accept="application/json,.json" hidden></div></div>`;
+    box.innerHTML = install + backup;
+    const ib = $('#installBtn');
+    if (ib) ib.onclick = async () => { const e = installEvt; installEvt = null; e.prompt(); await e.userChoice.catch(() => {}); renderAppBox(); };
+    const eb = $('#exportBtn');
+    if (eb) eb.onclick = () => {
+      const data = { app: 'akademiya', version: 1, exported: new Date().toISOString(), progress: prog };
+      const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
+      const a = document.createElement('a'); a.href = url; a.download = `akademiya-yedek-${today()}.json`;
+      document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 4000);
+      toast('Yedək fayl hazırlandı');
+    };
+    $('#importFile').onchange = async e => {
+      const f = e.target.files[0]; if (!f) return;
+      try {
+        const data = JSON.parse(await f.text());
+        if (data.app !== 'akademiya' || !data.progress) throw new Error('format');
+        let n = 0;
+        for (const [cid, rec] of Object.entries(data.progress)) {
+          if (!byId[cid] || !rec) continue;
+          prog[cid] = merge(prog[cid], Object.assign(blank(), rec));
+          saveLocal(cid); scheduleRemote(cid); n++;
+        }
+        toast(n ? 'İrəliləyiş bərpa olundu' : 'Faylda bu kurslar üçün məlumat yoxdur');
+        renderHome();
+      } catch (err) { toast('Bu fayl Akademiya yedəyi deyil'); }
+      e.target.value = '';
+    };
   }
 
   // ---------- course mounting ----------

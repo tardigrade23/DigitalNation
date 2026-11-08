@@ -177,3 +177,11 @@ input[type=range]{accent-color:var(--accent);min-width:140px}
   .stat .n{font-size:1.35rem}
   .brand span.name{display:none}
 }
+
+/* ---------- install + backup ---------- */
+.tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.tool{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px}
+.tool h3{font-size:1.02rem;margin:0 0 6px}
+.tool p{margin:0 0 10px;color:var(--muted);font-size:.93rem}
+.tool a{word-break:break-all}
+label.btn{cursor:pointer}
