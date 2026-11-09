@@ -218,6 +218,26 @@ The game is available in 12 languages: English, Azerbaijani, Turkish, Russian, S
   - `node tools/i18n.mjs check` to list missing translations and broken `{placeholders}` per language;
   - `node tools/i18n.mjs build` to regenerate `lang/*.js`.
 
+## SpeakUp: AI English conversation partner (`english/`)
+
+A separate installable app for daily spoken-English practice, published with the game at `https://tardigrade23.github.io/DigitalNation/english/`. It has its own manifest, icon and service worker scope, so it installs next to Digital Nation as its own app (Android: Chrome menu → *Install app*; iPhone: Safari → Share → *Add to Home Screen*). The interface is in Azerbaijani.
+
+- **Talk:** pick a level (A2–C1) and a scenario (free talk, my day, job interview, tech talk, travel, restaurant, small talk, shopping, doctor, storytelling, debate). Tap the mic and speak English; the browser turns speech into text (Web Speech API, `en-US`) and sends it when you stop. You can also type, or use the keyboard's dictation.
+- **Listen:** replies are read aloud with the phone's English voice (speechSynthesis), with a slow replay button. Voice and speed are in Settings.
+- **Corrections:** after each message the app shows up to 3 corrections of what you said, explained in Azerbaijani (or English, Turkish, Russian), a 💡 example of what to say next, and new words, which are saved to the *Sözlər* (words) screen.
+- **Feedback:** *Bitir* (finish) scores fluency, grammar and vocabulary, estimates your CEFR level, and lists strengths, what to work on and phrases to practise. Past conversations are under *Tarixçə* (history).
+- **Daily habit:** a daily goal in minutes (5–30) and a streak of days with at least one minute of practice. Progress is stored on the device only.
+
+The AI runs in the Supabase Edge Function `supabase/functions/english-coach/index.ts`, which calls Claude (`claude-opus-5-5`, low effort for chat turns, structured JSON output, server-side refusal fallback). The API key never reaches the phone.
+
+**One-time setup** (repository → Settings → Secrets and variables → Actions → *New repository secret*):
+
+1. `ANTHROPIC_API_KEY`: an API key from platform.claude.com.
+2. `SUPABASE_ACCESS_TOKEN`: a personal access token from supabase.com/dashboard/account/tokens.
+3. `APP_PASSCODE` (recommended): any code you choose. The function then answers only requests that carry it, so nobody else can spend your API credit. Enter the same code in the app under *Ayarlar → Giriş kodu*.
+
+Then run **Deploy SpeakUp AI function** from the Actions tab (it also runs on every change to the function on the default branch). Without the workflow: `supabase secrets set ANTHROPIC_API_KEY=... APP_PASSCODE=...` and `supabase functions deploy english-coach --project-ref dygrvzxnfsozjaxlbcoz`.
+
 ## Files
 
 - `index.html`: app shell, the SVG icon sprite, and the screens

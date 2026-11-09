@@ -28,7 +28,7 @@ jobs:
         run: |
           mkdir _site
           cp index.html privacy.html terms.html style.css content.js game.js i18n.js sw.js manifest.webmanifest _site/
-          cp -r icons vendor images lang _site/
+          cp -r icons vendor images lang english _site/
 
       # The guide (a static wiki) is generated from the game itself in headless Chromium.
       - uses: actions/setup-node@v4
