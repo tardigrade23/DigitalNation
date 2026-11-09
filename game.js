@@ -1775,6 +1775,17 @@ function pushSupported() { return 'serviceWorker' in navigator && 'PushManager' 
 const b64urlBytes = s => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((s.length + 3) % 4)), c => c.charCodeAt(0));
 const randomSecret = () => Array.from(crypto.getRandomValues(new Uint8Array(24)), b => b.toString(16).padStart(2, '0')).join('');
 
+// Subscribes this browser and registers it with the server under the device's id.
+async function registerPush(info) {
+  const reg = await navigator.serviceWorker.ready;
+  const { data, error } = await cloud.client.functions.invoke('push-send', { body: { action: 'key' } });
+  if (error || !data || !data.publicKey) throw error || new Error('no key');
+  let sub = await reg.pushManager.getSubscription();
+  if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64urlBytes(data.publicKey) });
+  const r = await cloud.client.rpc('push_register', { p_device: info.id, p_secret: info.secret, p_sub: sub.toJSON(), p_lang: I18N.lang });
+  if (r.error) throw r.error;
+}
+
 async function enablePush() {
   if (!pushSupported()) {
     const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
@@ -1785,14 +1796,8 @@ async function enablePush() {
   }
   try {
     if (await Notification.requestPermission() !== 'granted') { toast(t('Notifications are blocked. Allow them in your browser settings.'), 'alert', 'bad'); return; }
-    const reg = await navigator.serviceWorker.ready;
-    const { data, error } = await cloud.client.functions.invoke('push-send', { body: { action: 'key' } });
-    if (error || !data || !data.publicKey) throw error || new Error('no key');
-    let sub = await reg.pushManager.getSubscription();
-    if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64urlBytes(data.publicKey) });
     const info = pushInfo() || { id: crypto.randomUUID(), secret: randomSecret() };
-    const r = await cloud.client.rpc('push_register', { p_device: info.id, p_secret: info.secret, p_sub: sub.toJSON(), p_lang: I18N.lang });
-    if (r.error) throw r.error;
+    await registerPush(info);
     try { localStorage.setItem(PUSH_KEY, JSON.stringify(info)); } catch (e) { /* storage unavailable */ }
     state.settings.push = true; saveGame();
     pushSig = ''; schedulePush();
@@ -1841,7 +1846,33 @@ function schedulePush() {
   const sig = JSON.stringify(items.map(i => [i.kind, Math.round(i.at / 300e3)]));
   if (sig === pushSig) return;
   pushSig = sig;
-  cloud.client.rpc('push_schedule', { p_device: info.id, p_secret: info.secret, p_items: items }).then(r => { if (r.error) pushSig = ''; }, () => { pushSig = ''; });
+  cloud.client.rpc('push_schedule', { p_device: info.id, p_secret: info.secret, p_items: items }).then(r => {
+    if (!r.error) return;
+    pushSig = '';
+    if (/unknown_device/.test(r.error.message || '')) repairPush(info);
+  }, () => { pushSig = ''; });
+}
+// The server forgets a device when its push service reports the subscription gone
+// (for example after the browser removed the app's service worker while the site was
+// offline). Subscribe again once, silently if permission is still granted; otherwise
+// switch reminders off so Settings shows the real state.
+let pushRepairing = false;
+async function repairPush(info) {
+  if (pushRepairing) return;
+  pushRepairing = true;
+  try {
+    if (!pushSupported() || Notification.permission !== 'granted') throw new Error('no permission');
+    const reg = await navigator.serviceWorker.ready;
+    const old = await reg.pushManager.getSubscription();
+    if (old) await old.unsubscribe().catch(() => {});
+    await registerPush(info);
+    track('push_repair', {});
+    pushSig = ''; pushRepairing = false; schedulePush();
+  } catch (e) {
+    state.settings.push = false; saveGame();
+    try { localStorage.removeItem(PUSH_KEY); } catch (err) { /* storage unavailable */ }
+    render();
+  }
 }
 // Offered once, when a research project will take an hour or more.
 function maybeAskPush() {
